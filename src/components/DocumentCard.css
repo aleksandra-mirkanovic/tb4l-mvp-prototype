@@ -1,0 +1,108 @@
+.document-card {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.document-card.is-selected {
+  border-color: var(--tb4l-teal);
+  box-shadow: 0 0 0 1px var(--tb4l-teal), var(--shadow-sm);
+}
+
+.document-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.document-card__select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  position: relative;
+}
+
+.document-card__select input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.document-card__check {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--tb4l-teal);
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-on-dark);
+  background: var(--surface-primary);
+}
+
+.document-card__select input:checked + .document-card__check {
+  background: var(--tb4l-teal);
+}
+
+.document-card__select input:focus-visible + .document-card__check {
+  box-shadow: var(--focus-ring);
+}
+
+.document-card__title {
+  font-size: 17px;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.document-card__desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.document-card__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 12px;
+  margin: 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.document-card__meta div {
+  min-width: 0;
+}
+
+.document-card__meta dt {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.document-card__meta dd {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--text-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.document-card__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .document-card__meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

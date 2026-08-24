@@ -1,0 +1,232 @@
+.section-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.8fr);
+  gap: var(--space-5);
+  align-items: stretch;
+  margin-bottom: var(--space-6);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(16, 56, 79, 0.06), rgba(0, 96, 126, 0.08)),
+    var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.section-page--purple .section-hero {
+  background:
+    linear-gradient(135deg, rgba(98, 73, 99, 0.08), rgba(16, 56, 79, 0.05)),
+    var(--surface-primary);
+}
+
+.section-page--green .section-hero {
+  background:
+    linear-gradient(135deg, rgba(40, 100, 54, 0.08), rgba(16, 56, 79, 0.05)),
+    var(--surface-primary);
+}
+
+.section-page--blue .section-hero {
+  background:
+    linear-gradient(135deg, rgba(16, 56, 79, 0.1), rgba(0, 96, 126, 0.05)),
+    var(--surface-primary);
+}
+
+.section-hero__eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tb4l-teal);
+}
+
+.section-hero__brand {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tb4l-dark-blue);
+}
+
+.section-hero__title {
+  margin: 6px 0 0;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.section-hero__tagline {
+  margin: 12px 0 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--tb4l-dark-blue);
+  max-width: 36ch;
+}
+
+.section-hero__desc {
+  margin: 10px 0 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 52ch;
+}
+
+.section-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: var(--space-5);
+}
+
+.section-hero__panel {
+  border-radius: var(--radius-md);
+  background: var(--tb4l-dark-blue);
+  color: var(--text-on-dark);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 220px;
+}
+
+.section-page--purple .section-hero__panel {
+  background: var(--tb4l-purple);
+}
+
+.section-page--green .section-hero__panel {
+  background: var(--tb4l-green);
+}
+
+.section-page--teal .section-hero__panel {
+  background: var(--tb4l-teal);
+}
+
+.section-hero__panel-label {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.section-hero__panel p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.section-content__head {
+  margin-bottom: var(--space-4);
+}
+
+.section-content__head p {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.section-docs-grid,
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.glossary-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.glossary-item {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.glossary-item h4 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.glossary-item p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-body);
+}
+
+.glossary-item__related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.team-card {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.team-card__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(98, 73, 99, 0.12);
+  color: var(--tb4l-purple);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.team-card h4 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--text-primary);
+}
+
+.team-card__role {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tb4l-purple);
+}
+
+.team-card__focus {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.team-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.team-card__email {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 860px) {
+  .section-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .section-docs-grid,
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+}

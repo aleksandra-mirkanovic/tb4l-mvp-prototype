@@ -1,0 +1,42 @@
+.selected-bar {
+  position: sticky;
+  bottom: 16px;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-primary);
+  border: 1px solid var(--tb4l-teal);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  margin-top: var(--space-5);
+}
+
+.selected-bar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.selected-bar__info strong {
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.selected-bar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.selected-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}

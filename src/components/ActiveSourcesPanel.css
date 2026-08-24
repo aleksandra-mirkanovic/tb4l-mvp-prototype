@@ -1,0 +1,29 @@
+.active-sources {
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.active-sources__head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: flex-start;
+  margin-bottom: var(--space-3);
+}
+
+.active-sources__title {
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.active-sources__hint {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.active-sources__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

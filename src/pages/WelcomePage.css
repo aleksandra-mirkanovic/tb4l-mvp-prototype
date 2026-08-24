@@ -1,0 +1,220 @@
+.welcome-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(240px, 0.85fr);
+  gap: var(--space-5);
+  align-items: stretch;
+  margin-bottom: var(--space-7);
+  padding: clamp(28px, 4vw, 48px);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(0, 96, 126, 0.14), transparent 55%),
+    linear-gradient(160deg, #10384f 0%, #0d2f42 55%, #00607e 140%);
+  color: var(--text-on-dark);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.welcome-about {
+  margin-bottom: var(--space-7);
+}
+
+.welcome-about__stages {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.welcome-about__stages article {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  border-top: 3px solid var(--tb4l-teal);
+}
+
+.welcome-about__stages h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.welcome-about__stages p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.welcome-hero__brand {
+  margin: 0;
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.welcome-hero__title {
+  margin: 10px 0 0;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  max-width: 18ch;
+}
+
+.welcome-hero__support {
+  margin: 14px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+  opacity: 0.9;
+  max-width: 40ch;
+}
+
+.welcome-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.welcome-hero__actions .btn-primary {
+  background: #fff;
+  color: var(--tb4l-dark-blue);
+}
+
+.welcome-hero__actions .btn-primary:hover:not(:disabled) {
+  background: #e8eef1;
+}
+
+.welcome-hero__actions .btn-secondary {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+.welcome-hero__actions .btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.welcome-hero__visual {
+  display: flex;
+  align-items: flex-end;
+}
+
+.welcome-hero__visual-inner {
+  width: 100%;
+  min-height: 180px;
+  border-radius: var(--radius-md);
+  padding: 22px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.welcome-hero__visual-inner span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.welcome-hero__visual-inner strong {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.welcome-sections,
+.welcome-experiences {
+  margin-bottom: var(--space-7);
+}
+
+.welcome-sections__head {
+  margin-bottom: var(--space-4);
+}
+
+.welcome-sections__head p {
+  margin-top: 6px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  max-width: 56ch;
+}
+
+.welcome-sections__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.welcome-page__relation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  background: var(--background-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.welcome-page__relation div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.welcome-page__relation strong {
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.welcome-page__relation span {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.welcome-page__arrow {
+  font-size: 22px;
+  color: var(--tb4l-teal);
+  font-weight: 700;
+}
+
+.welcome-page__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+@media (max-width: 980px) {
+  .welcome-sections__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .welcome-about__stages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .welcome-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .welcome-sections__grid,
+  .welcome-about__stages {
+    grid-template-columns: 1fr;
+  }
+}

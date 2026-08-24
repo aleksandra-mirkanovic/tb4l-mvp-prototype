@@ -1,0 +1,36 @@
+.suggested {
+  margin: var(--space-4) 0;
+}
+
+.suggested__heading {
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: var(--space-3);
+}
+
+.suggested__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.suggested__item {
+  text-align: left;
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--tb4l-purple);
+  cursor: pointer;
+}
+
+.suggested__item:hover:not(:disabled) {
+  border-color: var(--tb4l-purple);
+  background: rgba(98, 73, 99, 0.06);
+}
+
+.suggested__item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
