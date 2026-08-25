@@ -1,109 +1,167 @@
-import { Link } from 'react-router-dom';
-import { ExperienceCard } from '../components/ExperienceCard';
+import { useState, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { GENERAL_SUGGESTIONS } from '../data/chatResponses';
 import './WelcomePage.css';
 
+const CAPABILITIES = [
+  {
+    id: 'chat',
+    title: 'TB4L Chat',
+    description: 'Your guide to the TB4L Framework',
+    to: '/chat',
+    status: 'live' as const,
+  },
+  {
+    id: 'hub',
+    title: 'TB4L Hub',
+    description: 'Discover trusted TB4L content',
+    to: '/knowledge-hub',
+    status: 'live' as const,
+  },
+  {
+    id: 'aissistant',
+    title: 'AIssistant',
+    description: 'AI support is coming soon',
+    status: 'soon' as const,
+  },
+  {
+    id: 'future',
+    title: 'Future releases',
+    description: 'New capabilities on the horizon',
+    status: 'soon' as const,
+  },
+];
+
 export function WelcomePage() {
+  const navigate = useNavigate();
+  const [draft, setDraft] = useState('');
+
+  const goToChat = (question?: string) => {
+    const trimmed = (question ?? draft).trim();
+    if (trimmed) {
+      sessionStorage.setItem(
+        'tb4l-pending-ask',
+        JSON.stringify({ q: trimmed, t: Date.now() }),
+      );
+      navigate('/chat');
+      return;
+    }
+    navigate('/chat');
+  };
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    goToChat();
+  };
+
   return (
     <div className="welcome-page">
       <section className="welcome-hero" aria-labelledby="welcome-heading">
-        <div className="welcome-hero__copy">
-          <p className="welcome-hero__brand">TB4L</p>
-          <h1 id="welcome-heading" className="welcome-hero__title">
-            Trusted Brands for Life
-          </h1>
-          <p className="welcome-hero__support">
-            Bayer Consumer Health’s brand-building framework for the Road to Billions Strategy—
-            combining marketing capability, patient needs, market insights, product science, and HCPs.
-          </p>
-          <div className="welcome-hero__actions">
-            <Link className="btn btn-primary" to="/knowledge-hub">
-              Explore TB4L Hub
-            </Link>
-            <Link className="btn btn-secondary" to="/chat">
-              Open TB4L Chat
-            </Link>
-          </div>
-        </div>
-        <div className="welcome-hero__visual" aria-hidden="true">
-          <div className="welcome-hero__visual-inner">
-            <span>Discover · Define · Design · Deliver</span>
-            <strong>WHERE TO PLAY · HOW TO WIN</strong>
+        <div className="welcome-hero__atmosphere" aria-hidden="true" />
+        <div className="welcome-hero__shell">
+          <div className="welcome-hero__copy">
+            <p className="welcome-hero__greeting welcome-hero__anim">Welcome back, Deniz</p>
+            <h1 id="welcome-heading" className="welcome-hero__brand welcome-hero__anim">
+              TB4L Platform
+            </h1>
+            <p className="welcome-hero__support welcome-hero__anim">
+              AI-powered capabilities supporting the Trusted Brands for Life framework.
+            </p>
+            <div className="welcome-hero__actions welcome-hero__anim">
+              <Link className="btn btn-primary welcome-hero__cta-primary" to="/chat">
+                TB4L Chat
+              </Link>
+              <Link className="btn btn-secondary welcome-hero__cta-secondary" to="/knowledge-hub">
+                TB4L Hub
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="welcome-about" aria-labelledby="about-heading">
-        <div className="welcome-sections__head">
-          <h2 id="about-heading" className="section-title">
-            What is TB4L?
+      <section className="welcome-ask-section" aria-labelledby="ask-heading">
+        <div className="welcome-ask welcome-ask--panel">
+          <h2 id="ask-heading" className="welcome-ask__title">
+            How can I support your brand-building today?
           </h2>
-          <p>
-            TB4L helps Consumer Health teams build trusted brands effectively and consistently. It
-            unites teams around a best-in-class framework that accelerates sustainable growth,
-            creates meaningful consumer engagement, and advocates through credible science.
-          </p>
-        </div>
-        <div className="welcome-about__stages">
-          <article>
-            <h3>Discover</h3>
-            <p>Identify growth opportunities through landscape insights and brand assessments.</p>
-          </article>
-          <article>
-            <h3>Define</h3>
-            <p>Make strategic choices based on insights from Discover.</p>
-          </article>
-          <article>
-            <h3>Design</h3>
-            <p>Translate choices into winning plans.</p>
-          </article>
-          <article>
-            <h3>Deliver</h3>
-            <p>Execute plans with excellence and track outcomes.</p>
-          </article>
+          <div className="welcome-ask__suggestions">
+            {GENERAL_SUGGESTIONS.map((question) => (
+              <button
+                key={question}
+                type="button"
+                className="welcome-ask__chip"
+                onClick={() => goToChat(question)}
+              >
+                {question}
+              </button>
+            ))}
+          </div>
+          <form className="welcome-ask__composer" onSubmit={onSubmit}>
+            <label className="sr-only" htmlFor="welcome-ask-input">
+              Ask TB4L Chat
+            </label>
+            <input
+              id="welcome-ask-input"
+              type="text"
+              value={draft}
+              placeholder="Ask about Trusted Brands for Life…"
+              onChange={(e) => setDraft(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="welcome-ask__send"
+              aria-label="Start chat"
+              disabled={!draft.trim()}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                aria-hidden="true"
+              >
+                <path d="M12 19V5" />
+                <path d="m5 12 7-7 7 7" />
+              </svg>
+            </button>
+          </form>
         </div>
       </section>
 
-      <section className="welcome-experiences" aria-labelledby="experiences-heading">
-        <div className="welcome-sections__head">
-          <h2 id="experiences-heading" className="section-title">
-            Two ways to work
-          </h2>
-          <p>Hub for discovery. Chat for answers. Documents move with you.</p>
+      <nav className="welcome-capabilities" aria-label="Platform capabilities">
+        <div className="welcome-capabilities__inner">
+          <p className="welcome-capabilities__label">Platform capabilities</p>
+          <ul className="welcome-capabilities__list">
+            {CAPABILITIES.map((item) => {
+              const body = (
+                <>
+                  <strong>{item.title}</strong>
+                  <span>{item.description}</span>
+                  {item.status === 'soon' ? (
+                    <em className="welcome-capabilities__badge">Soon</em>
+                  ) : null}
+                </>
+              );
+
+              return (
+                <li key={item.id}>
+                  {item.status === 'live' && item.to ? (
+                    <Link className="welcome-capabilities__link" to={item.to}>
+                      {body}
+                    </Link>
+                  ) : (
+                    <div className="welcome-capabilities__link is-disabled" aria-disabled="true">
+                      {body}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </div>
-        <div className="welcome-page__relation" role="note">
-          <div>
-            <strong>TB4L Hub</strong>
-            <span>Discover trusted TB4L content by section</span>
-          </div>
-          <span className="welcome-page__arrow" aria-hidden="true">
-            →
-          </span>
-          <div>
-            <strong>TB4L Chat</strong>
-            <span>Ask questions with optional Hub or M360 sources</span>
-          </div>
-        </div>
-        <div className="welcome-page__grid">
-          <ExperienceCard
-            accent="hub"
-            badge="Discover"
-            badgeClass="badge-hub"
-            title="TB4L Hub"
-            description="Browse curated sections—Playbooks, Templates, Training, Accelerator Outputs, Glossary, and Team—then select documents as Chat sources."
-            buttonLabel="Explore TB4L Hub"
-            to="/knowledge-hub"
-          />
-          <ExperienceCard
-            accent="chat"
-            badge="Ask"
-            badgeClass="badge-chat"
-            title="TB4L Chat"
-            description="Ask about Trusted Brands for Life, Brand Frames, and the four stages—or add Hub documents and connect M360 for contextual answers."
-            buttonLabel="Open TB4L Chat"
-            to="/chat"
-          />
-        </div>
-      </section>
+      </nav>
     </div>
   );
 }

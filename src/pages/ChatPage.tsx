@@ -18,6 +18,10 @@ import './ChatPage.css';
 
 const GENIE_DELAY_MS = 1800;
 const STREAM_TICK_MS = 22;
+const PENDING_ASK_KEY = 'tb4l-pending-ask';
+
+/** Survives React Strict Mode remounts so home→chat asks are only seeded once. */
+let seededPendingAsk: string | null = null;
 
 function formatLines(content: string) {
   return content.split('\n').map((line, i) => <p key={i}>{line || '\u00A0'}</p>);
@@ -74,7 +78,6 @@ export function ChatPage() {
   const cancelRef = useRef(false);
   const timersRef = useRef<number[]>([]);
   const messagesRef = useRef<HTMLDivElement>(null);
-  const askHandledRef = useRef(false);
 
   const documentSources = activeSources.filter((s) => s.kind === 'document');
   const hasDocuments = documentSources.length > 0;
@@ -112,13 +115,6 @@ export function ChatPage() {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
   }, [chatMessages, streaming, waitingOnGenie, isTyping]);
-
-  useEffect(() => {
-    return () => {
-      timersRef.current.forEach((id) => window.clearTimeout(id));
-      timersRef.current = [];
-    };
-  }, []);
 
   useEffect(() => {
     if (plusMenu === 'closed') return;
@@ -170,7 +166,12 @@ export function ChatPage() {
   };
 
   const streamText = useCallback(
-    (fullText: string, meta: { citations: string[]; isGenie?: boolean; error?: boolean }, regenerateId?: string) => {
+    (
+      fullText: string,
+      meta: { citations: string[]; isGenie?: boolean; error?: boolean },
+      regenerateId?: string,
+      onComplete?: () => void,
+    ) => {
       let i = 0;
       setStreaming('');
       const step = () => {
@@ -208,6 +209,7 @@ export function ChatPage() {
           }
           if (meta.isGenie) setGenieStatus(meta.error ? 'error' : 'success');
           else setGenieStatus('idle');
+          onComplete?.();
         }
       };
       step();
@@ -216,7 +218,11 @@ export function ChatPage() {
   );
 
   const respond = useCallback(
-    (question: string, regenerateMessageId?: string) => {
+    (
+      question: string,
+      regenerateMessageId?: string,
+      options?: { immediate?: boolean; onComplete?: () => void },
+    ) => {
       cancelRef.current = false;
       clearTimers();
       setIsTyping(true);
@@ -229,7 +235,7 @@ export function ChatPage() {
         setWaitingOnGenie(true);
       }
 
-      const delay = useGenie ? GENIE_DELAY_MS : 450;
+      const delay = options?.immediate ? 0 : useGenie ? GENIE_DELAY_MS : 450;
 
       schedule(() => {
         if (cancelRef.current) {
@@ -241,7 +247,12 @@ export function ChatPage() {
         if (question.toLowerCase().includes('source unavailable')) {
           const payload = buildUnavailableSourceResponse();
           setWaitingOnGenie(false);
-          streamText(payload.content, { citations: payload.citations, error: true }, regenerateMessageId);
+          streamText(
+            payload.content,
+            { citations: payload.citations, error: true },
+            regenerateMessageId,
+            options?.onComplete,
+          );
           return;
         }
 
@@ -256,6 +267,7 @@ export function ChatPage() {
             error: true,
             isGenie: true,
           });
+          options?.onComplete?.();
           return;
         }
 
@@ -276,6 +288,7 @@ export function ChatPage() {
           payload.content,
           { citations: payload.citations, isGenie: useGenie },
           regenerateMessageId,
+          options?.onComplete,
         );
       }, delay);
     },
@@ -298,20 +311,57 @@ export function ChatPage() {
   };
 
   useEffect(() => {
-    const ask = searchParams.get('ask');
-    if (!ask) {
-      askHandledRef.current = false;
+    const queryAsk = searchParams.get('ask')?.trim();
+    let ask = queryAsk || '';
+    let askKey = queryAsk || '';
+
+    const raw = sessionStorage.getItem(PENDING_ASK_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as { q?: string; t?: number };
+        if (parsed.q) {
+          ask = parsed.q.trim();
+          askKey = `${parsed.t ?? 0}:${ask}`;
+        } else {
+          ask = raw.trim();
+          askKey = ask;
+        }
+      } catch {
+        ask = raw.trim();
+        askKey = ask;
+      }
+    }
+
+    if (!ask) return;
+
+    const last = chatMessages[chatMessages.length - 1];
+    const prev = chatMessages[chatMessages.length - 2];
+    const answered =
+      last?.role === 'assistant' && prev?.role === 'user' && prev.content === ask;
+    if (answered) {
+      sessionStorage.removeItem(PENDING_ASK_KEY);
+      seededPendingAsk = null;
+      if (queryAsk) setSearchParams({}, { replace: true });
       return;
     }
-    if (askHandledRef.current || isTyping) return;
-    askHandledRef.current = true;
-    setSearchParams({}, { replace: true });
-    const timer = window.setTimeout(() => {
+
+    if (seededPendingAsk === askKey) return;
+    seededPendingAsk = askKey;
+    sessionStorage.removeItem(PENDING_ASK_KEY);
+    if (queryAsk) setSearchParams({}, { replace: true });
+
+    const userAlreadyThere = last?.role === 'user' && last.content === ask;
+    if (!userAlreadyThere) {
       addMessage({ role: 'user', content: ask });
-      respond(ask);
-    }, 120);
-    return () => window.clearTimeout(timer);
-  }, [addMessage, isTyping, respond, searchParams, setSearchParams]);
+    }
+
+    respond(ask, undefined, {
+      immediate: true,
+      onComplete: () => {
+        seededPendingAsk = null;
+      },
+    });
+  }, [addMessage, chatMessages, respond, searchParams, setSearchParams]);
 
   const cancelGenie = () => {
     cancelRef.current = true;
@@ -349,6 +399,8 @@ export function ChatPage() {
   const startNewChat = () => {
     cancelRef.current = true;
     clearTimers();
+    sessionStorage.removeItem(PENDING_ASK_KEY);
+    seededPendingAsk = null;
     startNewSession();
     setInput('');
     setStreaming('');
@@ -562,7 +614,7 @@ export function ChatPage() {
                   + Add context
                 </button>
               </div>
-              <p className="chat-empty__ask">Here are some of the things you can ask me</p>
+              <p className="chat-empty__ask">How can I support your brand-building today?</p>
               <div className="chat-suggestions">
                 {suggestions.map((q) => (
                   <button key={q} type="button" className="chat-suggestion" onClick={() => submit(q)} disabled={isTyping}>
@@ -866,8 +918,7 @@ export function ChatPage() {
             </button>
           </form>
           <p className="chat-disclaimer">
-            Prototype chat · Framework answers use approved TB4L content · M360, Hub, and file attachments are
-            simulated
+            TB4L AI can make mistakes. Verify important information. Do not enter sensitive personal data.
           </p>
         </div>
       </section>

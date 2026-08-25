@@ -1,11 +1,10 @@
 import { getDocumentById } from './documents';
 
 export const GENERAL_SUGGESTIONS = [
-  'What is the TB4L framework?',
-  'How should teams use TB4L?',
-  'What TB4L training materials are available?',
-  'Where can I find templates?',
-  'What are the main stages of TB4L?',
+  'What is the purpose of the Discover phase?',
+  'What does a Landscape Assessment include?',
+  'What\'s new in TB4L 2026?',
+  'What planning tools are available in Design?',
 ];
 
 export const DOCUMENT_SUGGESTIONS = [
@@ -28,6 +27,38 @@ const STAGE_OVERVIEW =
 
 export function buildGeneralResponse(question: string): { content: string; citations: string[] } {
   const q = question.toLowerCase();
+
+  if (q.includes('purpose') && q.includes('discover')) {
+    return {
+      content:
+        'The purpose of Discover is to identify growth opportunities with evidence—not assumptions. Teams gather consumer, market, competitive, and HCP insights; run landscape and brand assessments; and build a shared understanding of WHERE TO PLAY so Define choices rest on solid insight.\n\nTypical Discover outputs feed Brand Frames and later Design plans. Use Discover templates and Hub playbooks to structure insight capture, then move into Define with clear opportunity priorities.',
+      citations: ['General TB4L Knowledge', 'TB4L Global Framework Overview 2026'],
+    };
+  }
+
+  if (q.includes('landscape assessment')) {
+    return {
+      content:
+        'A Landscape Assessment in Discover helps teams understand market dynamics, competitor moves, and brand performance in context. It typically covers category and competitive landscape, consumer and patient needs, HCP influence, and performance signals (including sources such as M360 where connected).\n\nThe goal is a clear picture of opportunity and risk so Define can set WHERE TO PLAY and HOW TO WIN choices with confidence. Pair assessment findings with Hub Discover templates and Accelerator learnings where relevant.',
+      citations: ['General TB4L Knowledge'],
+    };
+  }
+
+  if (q.includes('2026') || q.includes("what's new") || q.includes('whats new')) {
+    return {
+      content:
+        'What’s new in TB4L 2026 centres on sharpening Trusted Brands for Life as the brand-building system for the Road to Billions Strategy—clearer Discover → Define → Design → Deliver rituals, stronger Brand Frame quality across the six principles, and more learning-by-doing capability building.\n\nIn the Hub you’ll find updated framework guidance (including the 2026 overview), refreshed Discover templates, and training that emphasises applying TB4L in day-to-day brand work rather than classroom-only learning.',
+      citations: ['General TB4L Knowledge', 'TB4L Global Framework Overview 2026'],
+    };
+  }
+
+  if ((q.includes('planning tool') || q.includes('tools')) && q.includes('design')) {
+    return {
+      content:
+        'In Design, teams translate Define choices into winning plans. Planning tools and artefacts in the Knowledge Hub include Brand Planning playbooks, Brand Frame examples, campaign and activation planning templates, and workshop guides that help turn strategy into executable initiatives.\n\nBrowse Hub sections such as Playbooks and Templates, then add the most relevant documents as Chat sources for plan-specific guidance.',
+      citations: ['General TB4L Knowledge', 'Brand Planning Playbook'],
+    };
+  }
 
   if (q.includes('what is') && q.includes('tb4l')) {
     return {

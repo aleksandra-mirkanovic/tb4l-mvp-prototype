@@ -8,7 +8,7 @@ interface SuggestedQuestionsProps {
 }
 
 export function SuggestedQuestions({
-  heading = 'Here are some of the things you can ask me',
+  heading = 'How can I support your brand-building today?',
   questions,
   onSelect,
   disabled,
