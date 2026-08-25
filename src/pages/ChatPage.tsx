@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { AddSourcesModal } from '../components/AddSourcesModal';
 import { ErrorState } from '../components/ErrorState';
 import { MessageActionIcons } from '../components/MessageActionIcons';
@@ -62,7 +62,13 @@ export function ChatPage() {
   const [streaming, setStreaming] = useState('');
   const [waitingOnGenie, setWaitingOnGenie] = useState(false);
   const [showAddSources, setShowAddSources] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [copyNotice, setCopyNotice] = useState('');
+  const [plusMenu, setPlusMenu] = useState<'closed' | 'main' | 'data'>('closed');
+  const [attachedFiles, setAttachedFiles] = useState<{ id: string; name: string }[]>([]);
+  const [attachNotice, setAttachNotice] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const plusMenuRef = useRef<HTMLDivElement>(null);
   const [lastPrompt, setLastPrompt] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const cancelRef = useRef(false);
@@ -95,7 +101,7 @@ export function ChatPage() {
 
   const sourceStatus = useMemo(() => {
     const parts: string[] = [];
-    if (hasGenie) parts.push('Genie/M360 connected');
+    if (hasGenie) parts.push('M360 connected');
     if (hasDocuments) parts.push(`${documentSources.length} Hub document${documentSources.length > 1 ? 's' : ''}`);
     if (!parts.length) return 'Using approved TB4L framework content';
     return parts.join(' · ');
@@ -113,6 +119,44 @@ export function ChatPage() {
       timersRef.current = [];
     };
   }, []);
+
+  useEffect(() => {
+    if (plusMenu === 'closed') return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (!plusMenuRef.current?.contains(e.target as Node)) {
+        setPlusMenu('closed');
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPlusMenu('closed');
+    };
+    window.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [plusMenu]);
+
+  const handleAttachFiles = (files: FileList | null) => {
+    if (!files?.length) return;
+    const next = Array.from(files).map((file) => ({
+      id: `file-${file.name}-${file.size}-${file.lastModified}`,
+      name: file.name,
+    }));
+    setAttachedFiles((prev) => {
+      const existing = new Set(prev.map((f) => f.id));
+      return [...prev, ...next.filter((f) => !existing.has(f.id))];
+    });
+    setAttachNotice('File attached for this prototype chat (mocked — not uploaded).');
+    window.setTimeout(() => setAttachNotice(''), 2800);
+    setPlusMenu('closed');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeAttachedFile = (id: string) => {
+    setAttachedFiles((prev) => prev.filter((f) => f.id !== id));
+  };
 
   const clearTimers = () => {
     timersRef.current.forEach((id) => window.clearTimeout(id));
@@ -208,7 +252,7 @@ export function ChatPage() {
           addMessage({
             role: 'assistant',
             content:
-              'Genie request failed while querying M360 data. You can try again or continue with General TB4L Chat.',
+              'M360 request failed while querying data. You can try again or continue with General TB4L Chat.',
             error: true,
             isGenie: true,
           });
@@ -278,7 +322,7 @@ export function ChatPage() {
     setGenieStatus('cancelled');
     addMessage({
       role: 'assistant',
-      content: 'Genie request cancelled. You can ask again or continue with standard TB4L Chat.',
+      content: 'M360 request cancelled. You can ask again or continue with standard TB4L Chat.',
       isGenie: true,
     });
   };
@@ -311,6 +355,8 @@ export function ChatPage() {
     setWaitingOnGenie(false);
     setIsTyping(false);
     setLastPrompt(null);
+    setAttachedFiles([]);
+    setPlusMenu('closed');
   };
 
   const openSession = (sessionId: string) => {
@@ -321,171 +367,147 @@ export function ChatPage() {
     setWaitingOnGenie(false);
     setIsTyping(false);
     setLastPrompt(null);
+    setAttachedFiles([]);
+    setPlusMenu('closed');
+    setSidebarCollapsed(false);
     loadSession(sessionId);
   };
 
   const empty = chatMessages.length === 0 && !streaming && !waitingOnGenie;
 
   return (
-    <div className="chat-layout">
-      <aside className="chat-sidebar" aria-label="Chat sidebar">
-        <div className="chat-sidebar__section">
-          <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={startNewChat}>
-            + New Chat
-          </button>
-        </div>
-
-        <div className="chat-sidebar__section chat-sidebar__section--grow">
-          <div className="chat-sidebar__label">Today’s sessions</div>
-          {todaySessions.length === 0 ? (
-            <p className="chat-sidebar__hint">No chats yet today. Start one below.</p>
-          ) : (
-            todaySessions.map((session) => (
-              <button
-                key={session.id}
-                type="button"
-                className={`chat-recent ${session.id === activeSessionId ? 'is-active' : ''}`}
-                onClick={() => openSession(session.id)}
-                disabled={isTyping}
-              >
-                <span className="chat-recent__title">{session.title}</span>
-                <span className="chat-recent__meta">{formatSessionTime(session.updatedAt)}</span>
-              </button>
-            ))
-          )}
-
-          <div className="chat-sidebar__label" style={{ marginTop: 16 }}>
-            Previous sessions
-          </div>
-          {previousSessions.length === 0 ? (
-            <p className="chat-sidebar__hint">Earlier conversations will appear here.</p>
-          ) : (
-            previousSessions.map((session) => (
-              <button
-                key={session.id}
-                type="button"
-                className={`chat-recent ${session.id === activeSessionId ? 'is-active' : ''}`}
-                onClick={() => openSession(session.id)}
-                disabled={isTyping}
-              >
-                <span className="chat-recent__title">{session.title}</span>
-                <span className="chat-recent__meta">{formatSessionDate(session.updatedAt)}</span>
-              </button>
-            ))
-          )}
-        </div>
-
-        <div className="chat-sidebar__section">
-          <div className="chat-sidebar__label">Direct connections</div>
+    <div className={`chat-layout${sidebarCollapsed ? ' is-sidebar-collapsed' : ''}`}>
+      {sidebarCollapsed ? (
+        <aside className="chat-sidebar-rail" aria-label="Collapsed chat sidebar">
           <button
             type="button"
-            className={`chat-connection ${hasGenie ? 'is-connected' : ''}`}
-            onClick={() => setGenieEnabled(!hasGenie)}
-            aria-pressed={hasGenie}
-            disabled={isTyping}
+            className="chat-sidebar-rail__btn"
+            onClick={() => setSidebarCollapsed(false)}
+            aria-label="Expand history sidebar"
+            title="Show history"
           >
-            <span className={`chat-connection__dot ${hasGenie ? 'is-live' : ''}`} aria-hidden="true" />
-            <span className="chat-connection__body">
-              <strong>Genie / M360</strong>
-              <span>{hasGenie ? 'Connected · data questions' : 'Click to connect'}</span>
-            </span>
-            <span className="chat-connection__badge">{hasGenie ? 'On' : 'Off'}</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="16" rx="2" />
+              <path d="M9 4v16" />
+              <path d="m14 9 3 3-3 3" />
+            </svg>
           </button>
-          <p className="chat-sidebar__hint">
-            Connect M360 explicitly before asking performance or indicator questions. Never auto-triggered.
-          </p>
-        </div>
-
-        <div className="chat-sidebar__section chat-sources-panel">
-          <div className="chat-sidebar__label-row">
-            <div className="chat-sidebar__label">
-              Knowledge sources
-              {documentSources.length > 0 ? (
-                <span className="chat-sources-count" aria-label={`${documentSources.length} documents selected`}>
-                  {documentSources.length}
-                </span>
-              ) : null}
+          <button
+            type="button"
+            className="chat-sidebar-rail__btn chat-sidebar-rail__btn--primary"
+            onClick={() => {
+              setSidebarCollapsed(false);
+              startNewChat();
+            }}
+            aria-label="New chat"
+            title="New chat"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
+          </button>
+        </aside>
+      ) : (
+        <aside className="chat-sidebar" aria-label="Chat sidebar">
+          <div className="chat-sidebar__section chat-sidebar__section--top">
+            <div className="chat-sidebar__top-row">
+              <button type="button" className="btn btn-primary chat-sidebar__new" onClick={startNewChat}>
+                + New Chat
+              </button>
+              <button
+                type="button"
+                className="chat-sidebar-collapse-btn"
+                onClick={() => setSidebarCollapsed(true)}
+                aria-label="Collapse history sidebar"
+                title="Collapse sidebar"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M9 4v16" />
+                  <path d="m15 15-3-3 3-3" />
+                </svg>
+              </button>
             </div>
           </div>
 
-          {documentSources.length ? (
-            <>
-              <p className="chat-sidebar__hint chat-sources-panel__hint">
-                Chat will use these Hub documents as context.
-              </p>
-              <div className="chat-sources-list">
-                {documentSources.map((source) => (
-                  <div key={source.id} className="chat-source-chip">
-                    <span className="chat-source-chip__icon" aria-hidden="true">
-                      DOC
-                    </span>
-                    <span className="chat-source-chip__title" title={source.title}>
-                      {source.title}
-                    </span>
-                    <button
-                      type="button"
-                      aria-label={`Remove ${source.title}`}
-                      onClick={() => removeSource(source.id)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="chat-sources-panel__actions">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowAddSources(true)}>
-                  + Add more
-                </button>
+          <div id="chat-history-list" className="chat-sidebar__section chat-sidebar__section--grow">
+            <div className="chat-sidebar__label">History</div>
+            <div className="chat-sidebar__sublabel">Today</div>
+            {todaySessions.length === 0 ? (
+              <p className="chat-sidebar__hint">No chats yet today. Start one below.</p>
+            ) : (
+              todaySessions.map((session) => (
                 <button
+                  key={session.id}
                   type="button"
-                  className="btn btn-ghost btn-sm"
-                  onClick={() => documentSources.forEach((s) => removeSource(s.id))}
+                  className={`chat-recent ${session.id === activeSessionId ? 'is-active' : ''}`}
+                  onClick={() => openSession(session.id)}
+                  disabled={isTyping}
                 >
-                  Clear all
+                  <span className="chat-recent__title">{session.title}</span>
+                  <span className="chat-recent__meta">{formatSessionTime(session.updatedAt)}</span>
                 </button>
-              </div>
-            </>
-          ) : (
-            <div className="chat-sources-empty">
-              <p>
-                <strong>No Hub documents yet</strong>
-                Framework knowledge is still available. Add documents when you want to talk about specific Hub
-                content.
-              </p>
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddSources(true)}>
-                + Add from Knowledge Hub
-              </button>
-              <Link className="chat-inline-link" to="/knowledge-hub">
-                Or browse the Hub first →
-              </Link>
-            </div>
-          )}
-        </div>
-      </aside>
+              ))
+            )}
+
+            <div className="chat-sidebar__sublabel chat-sidebar__sublabel--spaced">Previous</div>
+            {previousSessions.length === 0 ? (
+              <p className="chat-sidebar__hint">Earlier conversations will appear here.</p>
+            ) : (
+              previousSessions.map((session) => (
+                <button
+                  key={session.id}
+                  type="button"
+                  className={`chat-recent ${session.id === activeSessionId ? 'is-active' : ''}`}
+                  onClick={() => openSession(session.id)}
+                  disabled={isTyping}
+                >
+                  <span className="chat-recent__title">{session.title}</span>
+                  <span className="chat-recent__meta">{formatSessionDate(session.updatedAt)}</span>
+                </button>
+              ))
+            )}
+          </div>
+        </aside>
+      )}
 
       <section className="chat-main" aria-label="Conversation">
         <div className="chat-toolbar">
           <div className="chat-toolbar__left">
+            {sidebarCollapsed ? (
+              <button
+                type="button"
+                className="chat-sidebar-collapse-btn chat-sidebar-collapse-btn--toolbar"
+                onClick={() => setSidebarCollapsed(false)}
+                aria-label="Expand history sidebar"
+                title="Show history"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M9 4v16" />
+                  <path d="m14 9 3 3-3 3" />
+                </svg>
+              </button>
+            ) : null}
             <span className="chat-toolbar__title">TB4L Chat</span>
             <span className="chat-status">
               <span className="chat-status__dot" aria-hidden="true" />
               {sourceStatus}
             </span>
             {copyNotice ? <span className="chat-toolbar__notice">{copyNotice}</span> : null}
+            {attachNotice ? <span className="chat-toolbar__notice">{attachNotice}</span> : null}
           </div>
           <div className="chat-toolbar__right">
             <button type="button" className="btn btn-ghost btn-sm" onClick={startNewChat}>
               Clear
-            </button>
-            <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowAddSources(true)}>
-              + Add Sources
             </button>
           </div>
         </div>
 
         {hasGenie ? (
           <div className="chat-genie-banner" role="status">
-            <strong>Genie / M360</strong>
+            <strong>M360</strong>
             <span>Connected for structured data. Responses may take longer than standard Chat.</span>
             {waitingOnGenie ? (
               <button type="button" className="btn btn-danger btn-sm" onClick={cancelGenie}>
@@ -495,13 +517,21 @@ export function ChatPage() {
           </div>
         ) : null}
 
-        {documentSources.length > 0 ? (
-          <div className="chat-sources-bar" aria-label="Background sources">
+        {documentSources.length > 0 || attachedFiles.length > 0 ? (
+          <div className="chat-sources-bar" aria-label="Active context">
             <span className="chat-sources-bar__label">Talking about</span>
             {documentSources.map((s) => (
               <span key={s.id} className="chip chip-hub chip-removable">
                 {s.title}
                 <button type="button" aria-label={`Remove ${s.title}`} onClick={() => removeSource(s.id)}>
+                  ×
+                </button>
+              </span>
+            ))}
+            {attachedFiles.map((file) => (
+              <span key={file.id} className="chip chip-file chip-removable">
+                {file.name}
+                <button type="button" aria-label={`Remove ${file.name}`} onClick={() => removeAttachedFile(file.id)}>
                   ×
                 </button>
               </span>
@@ -518,19 +548,18 @@ export function ChatPage() {
               <h1>Welcome to TB4L Chat</h1>
               <p>
                 Ask about Trusted Brands for Life—the four stages, Brand Frames, and Road to Billions
-                guidance. Add Knowledge Hub documents for brand or market context, or connect
-                Genie/M360 for data questions.
+                guidance. Use the + button below to attach a file, add Hub documents, or connect a data
+                source like M360.
               </p>
               <div className="chat-empty__actions">
-                <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowAddSources(true)}>
-                  + Add from Knowledge Hub
-                </button>
                 <button
                   type="button"
-                  className={`btn btn-sm ${hasGenie ? 'btn-primary' : 'btn-secondary'}`}
-                  onClick={() => setGenieEnabled(!hasGenie)}
+                  className="btn btn-primary btn-sm"
+                  onClick={() => {
+                    setPlusMenu('main');
+                  }}
                 >
-                  {hasGenie ? 'M360 connected' : 'Connect M360'}
+                  + Add context
                 </button>
               </div>
               <p className="chat-empty__ask">Here are some of the things you can ask me</p>
@@ -591,7 +620,7 @@ export function ChatPage() {
 
               {genieStatus === 'error' ? (
                 <ErrorState
-                  title="Genie request failed"
+                  title="M360 request failed"
                   description="The M360 query could not be completed in this prototype simulation."
                   actions={
                     <>
@@ -654,6 +683,14 @@ export function ChatPage() {
         ) : null}
 
         <div className="chat-composer-area">
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="sr-only"
+            multiple
+            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv"
+            onChange={(e) => handleAttachFiles(e.target.files)}
+          />
           <form
             className="chat-composer-wrap"
             onSubmit={(e) => {
@@ -661,6 +698,142 @@ export function ChatPage() {
               submit();
             }}
           >
+            <div className="chat-composer-plus" ref={plusMenuRef}>
+              <button
+                type="button"
+                className={`chat-plus-btn${plusMenu !== 'closed' ? ' is-open' : ''}`}
+                aria-label="Add context"
+                aria-haspopup="menu"
+                aria-expanded={plusMenu !== 'closed'}
+                disabled={isTyping}
+                onClick={() => setPlusMenu((v) => (v === 'closed' ? 'main' : 'closed'))}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+              </button>
+
+              {plusMenu !== 'closed' ? (
+                <div className="chat-plus-menu" role="menu" aria-label="Add context">
+                  {plusMenu === 'main' ? (
+                    <>
+                      <button
+                        type="button"
+                        className="chat-plus-menu__item"
+                        role="menuitem"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <span className="chat-plus-menu__icon" aria-hidden="true">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <path d="M14 2v6h6" />
+                          </svg>
+                        </span>
+                        <span>
+                          <strong>Attach file</strong>
+                          <em>Upload from your laptop</em>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className="chat-plus-menu__item"
+                        role="menuitem"
+                        onClick={() => {
+                          setPlusMenu('closed');
+                          setShowAddSources(true);
+                        }}
+                      >
+                        <span className="chat-plus-menu__icon" aria-hidden="true">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                          </svg>
+                        </span>
+                        <span>
+                          <strong>From Knowledge Hub</strong>
+                          <em>Choose curated TB4L documents</em>
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        className="chat-plus-menu__item"
+                        role="menuitem"
+                        onClick={() => setPlusMenu('data')}
+                      >
+                        <span className="chat-plus-menu__icon" aria-hidden="true">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <ellipse cx="12" cy="5" rx="9" ry="3" />
+                            <path d="M3 5v6c0 1.7 4 3 9 3s9-1.3 9-3V5" />
+                            <path d="M3 11v6c0 1.7 4 3 9 3s9-1.3 9-3v-6" />
+                          </svg>
+                        </span>
+                        <span>
+                          <strong>Connect to data source</strong>
+                          <em>M360 and more platforms</em>
+                        </span>
+                        <span className="chat-plus-menu__chevron" aria-hidden="true">
+                          ›
+                        </span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="chat-plus-menu__back"
+                        onClick={() => setPlusMenu('main')}
+                      >
+                        ← Back
+                      </button>
+                      <p className="chat-plus-menu__section">Data sources</p>
+                      <button
+                        type="button"
+                        className={`chat-plus-menu__item chat-plus-menu__item--toggle${hasGenie ? ' is-on' : ''}`}
+                        role="menuitemcheckbox"
+                        aria-checked={hasGenie}
+                        disabled={isTyping}
+                        title="M360 data is used as one of the data sources in the Landscape Assessment module within the Discover phase of the TB4L Brand Building Framework. It helps in understanding market dynamics, competitor analysis, and brand performance."
+                        onClick={() => setGenieEnabled(!hasGenie)}
+                      >
+                        <span className={`chat-connection__dot ${hasGenie ? 'is-live' : ''}`} aria-hidden="true" />
+                        <span>
+                          <strong>M360</strong>
+                          <em>
+                            {hasGenie
+                              ? 'Connected · Landscape Assessment / Discover'
+                              : 'Connect for market & brand performance data'}
+                          </em>
+                        </span>
+                        <span className="chat-plus-menu__badge">{hasGenie ? 'On' : 'Off'}</span>
+                      </button>
+                      {[
+                        { id: 'bht', name: 'BHT' },
+                        { id: 'fico', name: 'FICO' },
+                        { id: 'eda', name: 'EDA' },
+                        { id: 'mmm', name: 'MMM' },
+                      ].map((source) => (
+                        <button
+                          key={source.id}
+                          type="button"
+                          className="chat-plus-menu__item is-disabled"
+                          role="menuitem"
+                          disabled
+                        >
+                          <span className="chat-connection__dot" aria-hidden="true" />
+                          <span>
+                            <strong>{source.name}</strong>
+                            <em>Not connected to the platform yet</em>
+                          </span>
+                          <span className="chat-plus-menu__badge chat-plus-menu__badge--soon">Soon</span>
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
+              ) : null}
+            </div>
+
             <label className="sr-only" htmlFor="chat-input">
               Message TB4L Chat
             </label>
@@ -672,9 +845,9 @@ export function ChatPage() {
               disabled={isTyping}
               placeholder={
                 hasGenie
-                  ? 'Ask a Genie/M360 data question…'
-                  : hasDocuments
-                    ? 'Ask about your Hub documents…'
+                  ? 'Ask an M360 data question…'
+                  : hasDocuments || attachedFiles.length
+                    ? 'Ask about your selected files or Hub documents…'
                     : 'Ask about Trusted Brands for Life…'
               }
               onChange={(e) => setInput(e.target.value)}
@@ -693,7 +866,8 @@ export function ChatPage() {
             </button>
           </form>
           <p className="chat-disclaimer">
-            Prototype chat · Framework answers use approved TB4L content · Genie/M360 and Hub sources are simulated
+            Prototype chat · Framework answers use approved TB4L content · M360, Hub, and file attachments are
+            simulated
           </p>
         </div>
       </section>

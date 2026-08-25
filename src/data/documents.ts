@@ -140,7 +140,7 @@ export const DOCUMENTS: KnowledgeDocument[] = [
     fileFormat: 'XLSX',
     lastUpdated: '2026-02-28',
     summary:
-      'Structured worksheets for Discover: insight log, opportunity scorecard, and evidence index. Designed to feed Brand Planning and Genie/M360 questions.',
+      'Structured worksheets for Discover: insight log, opportunity scorecard, and evidence index. Designed to feed Brand Planning and M360 questions.',
     keyTopics: ['Discover', 'Insight log', 'Opportunity map', 'Evidence'],
     whyRelevant:
       'Use at the start of a planning cycle to structure discovery work.',

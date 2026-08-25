@@ -54,13 +54,6 @@ export function KnowledgeHubBrowsePage() {
     navigate('/chat');
   };
 
-  const askTopic = (id: string, topic: string) => {
-    selectDocument(id);
-    addSources([id]);
-    setSummaryId(null);
-    navigate(`/chat?ask=${encodeURIComponent(`Tell me more about “${topic}” in this document.`)}`);
-  };
-
   const askInChat = () => {
     setActiveSourcesFromSelection();
     navigate('/chat');
@@ -149,7 +142,6 @@ export function KnowledgeHubBrowsePage() {
           onClose={() => setSummaryId(null)}
           onSelectForChat={() => selectDocument(summaryDoc.id)}
           onOpenInChat={() => openInChat(summaryDoc.id)}
-          onAskTopic={(topic) => askTopic(summaryDoc.id, topic)}
         />
       ) : null}
     </div>

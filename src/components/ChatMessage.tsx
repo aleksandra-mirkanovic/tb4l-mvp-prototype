@@ -25,7 +25,7 @@ export function ChatMessageView({
     >
       <div className="chat-message__meta">
         <span className={`badge ${message.isGenie ? 'badge-genie' : isUser ? 'badge-hub' : 'badge-chat'}`}>
-          {isUser ? 'You' : message.isGenie ? 'Genie / M360' : 'TB4L Chat'}
+          {isUser ? 'You' : message.isGenie ? 'M360' : 'TB4L Chat'}
         </span>
       </div>
       <div className="chat-message__body">

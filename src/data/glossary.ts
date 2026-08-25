@@ -73,12 +73,12 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
     id: 'g10',
     term: 'Contextual Chat',
     definition:
-      'TB4L Chat grounded in selected Hub documents and/or general framework knowledge, with optional Genie/M360 structured data.',
-    related: ['Sources', 'Genie'],
+      'TB4L Chat grounded in selected Hub documents and/or general framework knowledge, with optional M360 structured data.',
+    related: ['Sources', 'M360'],
   },
   {
     id: 'g11',
-    term: 'Genie / M360',
+    term: 'M360',
     definition:
       'An explicitly selected structured-data path that queries M360 indicators. It is never auto-triggered and may take longer than standard Chat.',
     related: ['Structured data', 'Deliver'],

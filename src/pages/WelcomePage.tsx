@@ -98,7 +98,7 @@ export function WelcomePage() {
             badge="Ask"
             badgeClass="badge-chat"
             title="TB4L Chat"
-            description="Ask about Trusted Brands for Life, Brand Frames, and the four stages—or add Hub documents and connect Genie/M360 for contextual answers."
+            description="Ask about Trusted Brands for Life, Brand Frames, and the four stages—or add Hub documents and connect M360 for contextual answers."
             buttonLabel="Open TB4L Chat"
             to="/chat"
           />

@@ -238,7 +238,7 @@ export function AddSourcesModal({ existingSourceIds, onClose, onAdd }: AddSource
               disabled={picked.length === 0}
               onClick={() => onAdd(picked)}
             >
-              Add {picked.length > 0 ? `${picked.length} ` : ''}to Chat
+              {picked.length === 0 ? 'Add to Chat' : `Add ${picked.length} to Chat`}
             </button>
           </div>
         </footer>

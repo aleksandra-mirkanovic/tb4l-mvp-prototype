@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { KnowledgeDocument } from '../types';
 import './DocumentSummaryPanel.css';
 
@@ -8,7 +8,6 @@ interface DocumentSummaryPanelProps {
   onClose: () => void;
   onSelectForChat: () => void;
   onOpenInChat: () => void;
-  onAskTopic?: (topic: string) => void;
 }
 
 export function DocumentSummaryPanel({
@@ -17,18 +16,11 @@ export function DocumentSummaryPanel({
   onClose,
   onSelectForChat,
   onOpenInChat,
-  onAskTopic,
 }: DocumentSummaryPanelProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [phase, setPhase] = useState<'loading' | 'ready'>('loading');
   const [visibleSummary, setVisibleSummary] = useState('');
   const [copied, setCopied] = useState(false);
-  const [activeTopic, setActiveTopic] = useState<string | null>(null);
-
-  const relevance = useMemo(() => {
-    const base = 72 + (document.keyTopics.length % 5) * 4 + (document.year % 10);
-    return Math.min(96, base);
-  }, [document]);
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -42,7 +34,6 @@ export function DocumentSummaryPanel({
   useEffect(() => {
     setPhase('loading');
     setVisibleSummary('');
-    setActiveTopic(null);
 
     const readyTimer = window.setTimeout(() => setPhase('ready'), 700);
     let i = 0;
@@ -106,28 +97,9 @@ export function DocumentSummaryPanel({
             {document.title}
           </h2>
           <p className="summary-cover__why">{document.whyRelevant}</p>
-          <div className="summary-cover__meta">
-            <span>{document.brand}</span>
-            <span>{document.market}</span>
-            <span>{document.year}</span>
-            <span>{document.documentType}</span>
-          </div>
         </div>
 
         <div className="summary-body">
-          <div className="summary-score" aria-label={`Relevance score ${relevance} percent`}>
-            <div className="summary-score__label">
-              <strong>Why it matters now</strong>
-              <span>{relevance}% fit for TB4L planning</span>
-            </div>
-            <div className="summary-score__track" role="presentation">
-              <div
-                className={`summary-score__fill ${phase === 'ready' ? 'is-animated' : ''}`}
-                style={{ ['--score' as string]: `${relevance}%` }}
-              />
-            </div>
-          </div>
-
           <section className="summary-panel__section">
             <div className="summary-section-head">
               <h3>Summary</h3>
@@ -147,43 +119,18 @@ export function DocumentSummaryPanel({
 
           <section className="summary-panel__section">
             <h3>Key topics</h3>
-            <p className="summary-hint">Click a topic to explore it in Chat.</p>
             <div className="summary-topics">
               {document.keyTopics.map((topic, index) => (
-                <button
+                <span
                   key={topic}
-                  type="button"
-                  className={`summary-topic ${activeTopic === topic ? 'is-active' : ''}`}
+                  className="summary-topic"
                   style={{ animationDelay: `${index * 70}ms` }}
-                  onClick={() => {
-                    setActiveTopic(topic);
-                    onAskTopic?.(topic);
-                  }}
                 >
                   {topic}
-                </button>
+                </span>
               ))}
             </div>
           </section>
-
-          <dl className="summary-panel__meta">
-            <div>
-              <dt>Category</dt>
-              <dd>{document.category}</dd>
-            </div>
-            <div>
-              <dt>Last updated</dt>
-              <dd>{document.lastUpdated}</dd>
-            </div>
-            <div>
-              <dt>Brand</dt>
-              <dd>{document.brand}</dd>
-            </div>
-            <div>
-              <dt>Market</dt>
-              <dd>{document.market}</dd>
-            </div>
-          </dl>
 
           <div className="summary-panel__actions">
             <button type="button" className="btn btn-secondary" onClick={onSelectForChat}>

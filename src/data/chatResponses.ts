@@ -31,7 +31,7 @@ export function buildGeneralResponse(question: string): { content: string; citat
 
   if (q.includes('what is') && q.includes('tb4l')) {
     return {
-      content: `${STAGE_OVERVIEW}\n\nBrand Frames capture the DNA of each brand across six principles: Brand Equity, Brand World, Brand Science, Brand Sustainability, Brand Growth Strategy, and Brand Architecture.\n\nUse the Knowledge Hub for curated guidance, and TB4L Chat to ask questions—optionally grounded in Hub sources or M360 data via Genie.`,
+      content: `${STAGE_OVERVIEW}\n\nBrand Frames capture the DNA of each brand across six principles: Brand Equity, Brand World, Brand Science, Brand Sustainability, Brand Growth Strategy, and Brand Architecture.\n\nUse the Knowledge Hub for curated guidance, and TB4L Chat to ask questions—optionally grounded in Hub sources or M360 data.`,
       citations: ['General TB4L Knowledge'],
     };
   }
@@ -39,7 +39,7 @@ export function buildGeneralResponse(question: string): { content: string; citat
   if ((q.includes('how should teams') || q.includes('how should')) && q.includes('use')) {
     return {
       content:
-        'Teams should use TB4L as a shared brand-building system:\n1. Discover growth opportunities with landscape insights and brand assessments.\n2. Define strategic choices based on those insights.\n3. Design winning plans that translate choices into action.\n4. Deliver with excellence and track outcomes.\n\nStart in the Knowledge Hub for playbooks and templates, then ask focused questions in TB4L Chat. Use Genie/M360 only when you need structured performance data. Capability building is learning-by-doing—supported by Accelerators, feedback, data, automation, AI, and peer-led development.',
+        'Teams should use TB4L as a shared brand-building system:\n1. Discover growth opportunities with landscape insights and brand assessments.\n2. Define strategic choices based on those insights.\n3. Design winning plans that translate choices into action.\n4. Deliver with excellence and track outcomes.\n\nStart in the Knowledge Hub for playbooks and templates, then ask focused questions in TB4L Chat. Use M360 only when you need structured performance data. Capability building is learning-by-doing—supported by Accelerators, feedback, data, automation, AI, and peer-led development.',
       citations: ['General TB4L Knowledge'],
     };
   }
@@ -77,7 +77,7 @@ export function buildGeneralResponse(question: string): { content: string; citat
   }
 
   return {
-    content: `${STAGE_OVERVIEW}\n\nBased on your question (“${question}”), I can help with framework concepts, stages, Brand Frames, training, or templates. For document-specific answers, add Knowledge Hub sources. For M360 metrics, connect Genie before asking.`,
+    content: `${STAGE_OVERVIEW}\n\nBased on your question (“${question}”), I can help with framework concepts, stages, Brand Frames, training, or templates. For document-specific answers, add Knowledge Hub sources. For M360 metrics, connect M360 before asking.`,
     citations: ['General TB4L Knowledge'],
   };
 }
@@ -86,7 +86,7 @@ export function buildDocumentResponse(
   question: string,
   sourceTitles: string[],
 ): { content: string; citations: string[] } {
-  const titles = sourceTitles.filter((t) => t !== 'Genie / M360' && t !== 'General TB4L Knowledge');
+  const titles = sourceTitles.filter((t) => t !== 'M360' && t !== 'General TB4L Knowledge');
   const list = titles.length ? titles.map((t) => `• ${t}`).join('\n') : '• (no Hub documents selected)';
   const q = question.toLowerCase();
 
@@ -123,7 +123,7 @@ export function buildGenieResponse(question: string): { content: string; citatio
     return {
       content:
         'M360 snapshot (mocked): Germany shows stronger HCP engagement reach (+8% QoQ) while Poland leads on access-related dispense indicators (+5% QoQ). Both markets are above brand average on brand preference. Pair these signals with Accelerator Output documents to connect Deliver outcomes back to Define/Design choices.',
-      citations: ['Genie / M360'],
+      citations: ['M360'],
     };
   }
 
@@ -131,7 +131,7 @@ export function buildGenieResponse(question: string): { content: string; citatio
     return {
       content:
         'M360 snapshot for Germany (mocked): Brand A awareness stable, consideration +3 pts vs prior quarter, and activation spend efficiency within target band. Leading indicator watch-out: digital HCP open rates softened in the last 4 weeks—review Deliver tracking against the Design plan.',
-      citations: ['Genie / M360'],
+      citations: ['M360'],
     };
   }
 
@@ -139,7 +139,7 @@ export function buildGenieResponse(question: string): { content: string; citatio
     return {
       content:
         'M360 access indicators for Brand A (mocked): coverage stable in priority accounts; time-to-therapy improved in 2 of 4 focus markets. Poland shows the clearest positive access trend; recommend reviewing Poland Accelerator outputs for associated Design and Deliver initiatives.',
-      citations: ['Genie / M360'],
+      citations: ['M360'],
     };
   }
 
@@ -147,13 +147,13 @@ export function buildGenieResponse(question: string): { content: string; citatio
     return {
       content:
         'M360 growth signals (mocked): strongest momentum in Germany and Brazil; Japan stable; UK mixed with softer retail velocity. Use Hub Best Practices and Campaign Learning Report to interpret qualitative drivers behind these Deliver-stage signals.',
-      citations: ['Genie / M360'],
+      citations: ['M360'],
     };
   }
 
   return {
-    content: `M360 response via Genie (mocked) for: “${question}”.\n\nStructured indicators suggest stable overall brand health with pockets of opportunity in engagement efficiency and access. This is simulated data for the MVP prototype—pair with Knowledge Hub sources to interpret results through the TB4L Discover → Define → Design → Deliver lens.`,
-    citations: ['Genie / M360'],
+    content: `M360 response (mocked) for: “${question}”.\n\nStructured indicators suggest stable overall brand health with pockets of opportunity in engagement efficiency and access. This is simulated data for the MVP prototype—pair with Knowledge Hub sources to interpret results through the TB4L Discover → Define → Design → Deliver lens.`,
+    citations: ['M360'],
   };
 }
 
@@ -168,7 +168,7 @@ export function buildUnavailableSourceResponse(): { content: string; citations: 
 export function titlesFromSourceIds(ids: string[]): string[] {
   return ids
     .map((id) => {
-      if (id === 'genie') return 'Genie / M360';
+      if (id === 'genie') return 'M360';
       if (id === 'general') return 'General TB4L Knowledge';
       return getDocumentById(id)?.title ?? 'Unknown source';
     })

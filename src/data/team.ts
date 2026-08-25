@@ -52,7 +52,7 @@ export const TEAM_MEMBERS: TeamMember[] = [
     id: 't6',
     name: 'Elena Rossi',
     role: 'Chat & Knowledge Experience',
-    focus: 'Contextual Chat sources, Genie guidance, content findability',
+    focus: 'Contextual Chat sources, M360 guidance, content findability',
     region: 'Global',
     emailLabel: 'tb4l.experience@example.com',
   },

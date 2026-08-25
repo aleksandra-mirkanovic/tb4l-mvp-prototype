@@ -154,7 +154,7 @@ function seedSessions(currentId: string): ChatSession[] {
       createdAt: daysAgo(5, 11),
       updatedAt: daysAgo(5, 11),
       genieEnabled: true,
-      sources: [{ id: 'genie', title: 'Genie / M360', kind: 'genie' }],
+      sources: [{ id: 'genie', title: 'M360', kind: 'genie' }],
       messages: [
         {
           id: 'seed-3a',
@@ -167,10 +167,91 @@ function seedSessions(currentId: string): ChatSession[] {
           role: 'assistant',
           content:
             'M360 snapshot for Germany (mocked): consideration +3 pts vs prior quarter; watch digital HCP open rates in Deliver tracking.',
-          citations: ['Genie / M360'],
+          citations: ['M360'],
           timestamp: daysAgo(5, 11) + 2000,
           isGenie: true,
           feedback: null,
+        },
+      ],
+    },
+    {
+      id: 'session-prev-4',
+      title: 'Discover stage checklist',
+      createdAt: daysAgo(7, 10),
+      updatedAt: daysAgo(7, 10),
+      genieEnabled: false,
+      sources: [GENERAL_SOURCE],
+      messages: [
+        {
+          id: 'seed-4a',
+          role: 'user',
+          content: 'What should we complete in Discover?',
+          timestamp: daysAgo(7, 10),
+        },
+        {
+          id: 'seed-4b',
+          role: 'assistant',
+          content:
+            'Discover gathers consumer, market, and competitive insight so Define choices rest on evidence—not assumptions.',
+          citations: ['General TB4L Knowledge'],
+          timestamp: daysAgo(7, 10) + 1000,
+          feedback: null,
+        },
+      ],
+    },
+    {
+      id: 'session-prev-5',
+      title: 'Sustainability Brand Frame',
+      createdAt: daysAgo(9, 16),
+      updatedAt: daysAgo(9, 16),
+      genieEnabled: false,
+      sources: [
+        {
+          id: 'doc-7',
+          title: 'Brand Frame Example',
+          kind: 'document',
+        },
+      ],
+      messages: [
+        {
+          id: 'seed-5a',
+          role: 'user',
+          content: 'How do we write the Sustainability principle?',
+          timestamp: daysAgo(9, 16),
+        },
+        {
+          id: 'seed-5b',
+          role: 'assistant',
+          content:
+            'Anchor Sustainability in credible science and brand-relevant commitments that fit WHERE TO PLAY and HOW TO WIN.',
+          citations: ['Brand Frame Example'],
+          timestamp: daysAgo(9, 16) + 1100,
+          feedback: null,
+        },
+      ],
+    },
+    {
+      id: 'session-prev-6',
+      title: 'Deliver measurement tips',
+      createdAt: daysAgo(12, 8),
+      updatedAt: daysAgo(12, 9),
+      genieEnabled: false,
+      sources: [GENERAL_SOURCE],
+      messages: [
+        {
+          id: 'seed-6a',
+          role: 'user',
+          content: 'How should Deliver track brand excellence?',
+          timestamp: daysAgo(12, 8),
+        },
+        {
+          id: 'seed-6b',
+          role: 'assistant',
+          content:
+            'Deliver ties activation to clear KPIs—equity health, execution quality, and learning loops back into Discover.',
+          citations: ['General TB4L Knowledge'],
+          timestamp: daysAgo(12, 8) + 900,
+          feedback: 'like',
         },
       ],
     },
@@ -275,7 +356,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (!enabled) {
         return without.length ? without : [GENERAL_SOURCE];
       }
-      return [{ id: 'genie', title: 'Genie / M360', kind: 'genie' }, ...without.filter((s) => s.kind !== 'general')];
+      return [{ id: 'genie', title: 'M360', kind: 'genie' }, ...without.filter((s) => s.kind !== 'general')];
     });
     if (!enabled) setGenieStatus('idle');
   }, []);

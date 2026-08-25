@@ -10,7 +10,7 @@ export function SourceChip({ source, onRemove }: SourceChipProps) {
   const chipClass =
     source.kind === 'genie' ? 'chip-genie' : source.kind === 'document' ? 'chip-hub' : 'chip-chat';
   const label =
-    source.kind === 'genie' ? 'Genie' : source.kind === 'document' ? 'Hub' : 'General';
+    source.kind === 'genie' ? 'M360' : source.kind === 'document' ? 'Hub' : 'General';
 
   return (
     <span className={`chip ${chipClass} source-chip ${onRemove ? 'chip-removable' : ''}`}>
