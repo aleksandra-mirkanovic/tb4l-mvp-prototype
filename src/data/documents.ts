@@ -98,7 +98,7 @@ export const DOCUMENTS: KnowledgeDocument[] = [
       'Foundational training module introducing TB4L concepts, language, and team rituals.',
     brand: 'Global',
     market: 'Global',
-    category: 'TB4L Training',
+    category: 'Training',
     year: 2026,
     documentType: 'Training Module',
     fileFormat: 'PPTX',
@@ -116,7 +116,7 @@ export const DOCUMENTS: KnowledgeDocument[] = [
       'Annotated example Brand Frame showing the six brand DNA principles: Brand Equity, Brand World, Brand Science, Brand Sustainability, Brand Growth Strategy, and Brand Architecture.',
     brand: 'Flagship Brand B',
     market: 'United Kingdom',
-    category: 'Templates',
+    category: 'Brand Frames',
     year: 2025,
     documentType: 'Template',
     fileFormat: 'DOCX',
@@ -126,6 +126,24 @@ export const DOCUMENTS: KnowledgeDocument[] = [
     keyTopics: ['Brand Equity', 'Brand World', 'Brand Science', 'Brand Architecture'],
     whyRelevant:
       'Concrete example to elevate quality of local Brand Frames within Define and Design.',
+  },
+  {
+    id: 'doc-7b',
+    title: 'Brand Frames Quality Checklist',
+    description:
+      'Practical checklist for reviewing Brand Frame drafts across Equity, World, Science, Sustainability, Growth Strategy, and Architecture.',
+    brand: 'Global',
+    market: 'Global',
+    category: 'Brand Frames',
+    year: 2026,
+    documentType: 'Template',
+    fileFormat: 'PDF',
+    lastUpdated: '2026-01-18',
+    summary:
+      'Review criteria and facilitation prompts so Brand, Medical, and Insights partners can challenge and strengthen Brand Frame language before Design planning.',
+    keyTopics: ['Brand Frames', 'Quality criteria', 'Facilitation', 'Define'],
+    whyRelevant:
+      'Use in Define workshops to raise consistency and quality of Brand Frames across markets.',
   },
   {
     id: 'doc-8',
@@ -206,7 +224,7 @@ export const DOCUMENTS: KnowledgeDocument[] = [
       'Facilitation guide for market-level brand strategy workshops using TB4L artefacts.',
     brand: 'Global',
     market: 'Multi-Market',
-    category: 'TB4L Training',
+    category: 'Training',
     year: 2025,
     documentType: 'Training Module',
     fileFormat: 'DOCX',

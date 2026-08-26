@@ -1,7 +1,8 @@
 export type DocumentCategory =
   | 'Playbooks'
   | 'Templates'
-  | 'TB4L Training'
+  | 'Training'
+  | 'Brand Frames'
   | 'Brand & Strategy'
   | 'Accelerator Outputs'
   | 'Global Best Practices'

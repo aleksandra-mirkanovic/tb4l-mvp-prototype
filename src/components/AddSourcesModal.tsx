@@ -15,8 +15,9 @@ const TABS: { id: string; label: string; category?: string }[] = [
   { id: 'all', label: 'All' },
   { id: 'playbooks', label: 'Playbooks', category: 'Playbooks' },
   { id: 'templates', label: 'Templates', category: 'Templates' },
-  { id: 'training', label: 'Training', category: 'TB4L Training' },
-  { id: 'accelerator', label: 'Accelerator', category: 'Accelerator Outputs' },
+  { id: 'training', label: 'Training', category: 'Training' },
+  { id: 'accelerator', label: 'Accelerator Outputs', category: 'Accelerator Outputs' },
+  { id: 'brand-frames', label: 'Brand Frames', category: 'Brand Frames' },
   { id: 'strategy', label: 'Brand & Strategy', category: 'Brand & Strategy' },
   { id: 'practices', label: 'Best Practices', category: 'Global Best Practices' },
 ];

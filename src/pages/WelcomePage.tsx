@@ -130,8 +130,8 @@ export function WelcomePage() {
               Curated content for brand managers
             </h2>
             <p className="welcome-hub-spotlight__text">
-              Browse Playbooks, Templates, TB4L Training, and Accelerator Outputs—plus Glossary and
-              Team. Select documents, then use them in TB4L Chat for grounded answers.
+              Browse Playbooks, Templates, Training, and Accelerator Outputs—plus Glossary, Brand
+              Frames, and Teams. Select documents, then use them in TB4L Chat for grounded answers.
             </p>
           </div>
           <Link className="btn btn-primary welcome-hub-spotlight__cta" to="/knowledge-hub">

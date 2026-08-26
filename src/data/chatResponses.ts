@@ -85,7 +85,7 @@ export function buildGeneralResponse(question: string): { content: string; citat
   if (q.includes('training')) {
     return {
       content:
-        'TB4L training is shifting from classroom-style sessions to learning-by-doing. Foundational materials include the TB4L Training Module and the Market Brand Strategy Workshop Guide. They cover TB4L language, the four stages, Brand Frames, and how Hub content supports day-to-day work. Filter the Knowledge Hub by “TB4L Training” to browse them.',
+        'TB4L training is shifting from classroom-style sessions to learning-by-doing. Foundational materials include the TB4L Training Module and the Market Brand Strategy Workshop Guide. They cover TB4L language, the four stages, Brand Frames, and how Hub content supports day-to-day work. Filter the Knowledge Hub by “Training” or open the Training section to browse them.',
       citations: ['General TB4L Knowledge', 'TB4L Training Module'],
     };
   }

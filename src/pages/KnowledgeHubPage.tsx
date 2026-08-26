@@ -34,7 +34,7 @@ export function KnowledgeHubPage() {
           <span className="hub-loop__num">1</span>
           <div>
             <strong>Choose a section</strong>
-            <p>Playbooks, Templates, Training, Accelerator Outputs, Glossary, or Team.</p>
+            <p>Playbooks, Templates, Training, Accelerator Outputs, Glossary, Brand Frames, or Teams.</p>
           </div>
         </li>
         <li className="hub-loop__step">

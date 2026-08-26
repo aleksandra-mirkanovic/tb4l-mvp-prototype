@@ -6,6 +6,7 @@ export type HubSectionSlug =
   | 'tb4l-training'
   | 'accelerator-outputs'
   | 'tb4l-glossary'
+  | 'brand-frames'
   | 'team';
 
 export type HubSectionKind = 'documents' | 'glossary' | 'team';
@@ -43,15 +44,15 @@ export const HUB_SECTIONS: HubSection[] = [
     eyebrow: 'Ready to use',
     tagline: 'Start faster with curated TB4L artefacts',
     description:
-      'Brand Frames and Discover worksheets that keep markets aligned on brand DNA and growth opportunities—without starting from a blank page.',
+      'Discover worksheets and planning templates that keep markets aligned on brand DNA and growth opportunities—without starting from a blank page.',
     ctaLabel: 'Browse templates',
     accent: 'blue',
   },
   {
     slug: 'tb4l-training',
-    title: 'TB4L Training',
+    title: 'Training',
     kind: 'documents',
-    category: 'TB4L Training',
+    category: 'Training',
     eyebrow: 'Build capability',
     tagline: 'Build capability through learning-by-doing',
     description:
@@ -73,7 +74,7 @@ export const HUB_SECTIONS: HubSection[] = [
   },
   {
     slug: 'tb4l-glossary',
-    title: 'TB4L Glossary',
+    title: 'Glossary',
     kind: 'glossary',
     eyebrow: 'Shared language',
     tagline: 'Clear definitions for every TB4L term',
@@ -83,14 +84,26 @@ export const HUB_SECTIONS: HubSection[] = [
     accent: 'teal',
   },
   {
+    slug: 'brand-frames',
+    title: 'Brand Frames',
+    kind: 'documents',
+    category: 'Brand Frames',
+    eyebrow: 'Brand DNA',
+    tagline: 'Define brand equity across the six principles',
+    description:
+      'Examples and guidance for Brand Frames—Brand Equity, Brand World, Brand Science, Brand Sustainability, Brand Growth Strategy, and Brand Architecture—so markets frame brand DNA with shared quality.',
+    ctaLabel: 'Browse Brand Frames',
+    accent: 'blue',
+  },
+  {
     slug: 'team',
-    title: 'Team',
+    title: 'Teams',
     kind: 'team',
     eyebrow: 'People behind TB4L',
     tagline: 'Meet the teams enabling brand excellence',
     description:
       'Connect with the global TB4L enablement, insights, and market excellence partners who support Hub content, Chat guidance, and Accelerator programmes.',
-    ctaLabel: 'Meet the team',
+    ctaLabel: 'Meet the teams',
     accent: 'purple',
   },
 ];

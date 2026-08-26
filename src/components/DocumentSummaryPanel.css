@@ -55,8 +55,12 @@
   background: linear-gradient(145deg, #0d2f42, #245a78);
 }
 
-.summary-cover[data-category='TB4L Training'] {
+.summary-cover[data-category='Training'] {
   background: linear-gradient(145deg, #624963, #10384f);
+}
+
+.summary-cover[data-category='Brand Frames'] {
+  background: linear-gradient(145deg, #245a78, #624963);
 }
 
 .summary-cover[data-category='Accelerator Outputs'] {
