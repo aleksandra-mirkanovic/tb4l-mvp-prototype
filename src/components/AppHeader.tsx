@@ -37,6 +37,7 @@ export function AppHeader() {
           }
         >
           TB4L Hub
+          <span className="main-nav__new-badge">New</span>
         </NavLink>
         <span
           className="main-nav__link main-nav__link--soon main-nav__link--m360"

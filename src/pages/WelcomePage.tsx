@@ -1,8 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { RoadToBillionsMotif } from '../components/RoadToBillionsMotif';
 import { GENERAL_SUGGESTIONS } from '../data/chatResponses';
-import '../components/RoadToBillionsMotif.css';
 import './WelcomePage.css';
 
 const CAPABILITIES = [
@@ -21,6 +19,7 @@ const CAPABILITIES = [
     to: '/knowledge-hub',
     status: 'live' as const,
     accent: 'hub' as const,
+    isNew: true,
   },
   {
     id: 'aissistant',
@@ -65,28 +64,45 @@ export function WelcomePage() {
       <section className="welcome-hero" aria-labelledby="welcome-heading">
         <div className="welcome-hero__atmosphere" aria-hidden="true" />
         <div className="welcome-hero__shell">
-          <div className="welcome-hero__layout">
-            <div className="welcome-hero__copy">
-              <p className="welcome-hero__greeting welcome-hero__anim">Welcome back, Deniz</p>
-              <h1 id="welcome-heading" className="welcome-hero__brand welcome-hero__anim">
-                TB4L Platform
-              </h1>
-              <p className="welcome-hero__support welcome-hero__anim">
-                AI-powered capabilities supporting the Trusted Brands for Life framework.
-              </p>
-              <div className="welcome-hero__actions welcome-hero__anim">
-                <Link className="btn welcome-hero__cta welcome-hero__cta--chat" to="/chat">
-                  TB4L Chat
-                </Link>
-                <Link className="btn welcome-hero__cta welcome-hero__cta--hub" to="/knowledge-hub">
-                  TB4L Hub
-                </Link>
-              </div>
-            </div>
-            <div className="welcome-hero__visual welcome-hero__anim">
-              <RoadToBillionsMotif />
-            </div>
+          <div className="welcome-hero__intro">
+            <p className="welcome-hero__brand-label welcome-hero__anim">TB4L Platform</p>
+            <h1 id="welcome-heading" className="welcome-hero__greeting welcome-hero__anim">
+              Welcome back, Deniz
+            </h1>
+            <p className="welcome-hero__support welcome-hero__anim">
+              AI-powered capabilities for the Trusted Brands for Life framework.
+            </p>
           </div>
+          <div className="welcome-hero__actions welcome-hero__anim">
+            <Link className="btn welcome-hero__cta welcome-hero__cta--hub" to="/knowledge-hub">
+              TB4L Hub
+            </Link>
+            <Link className="btn welcome-hero__cta welcome-hero__cta--chat" to="/chat">
+              TB4L Chat
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="welcome-hub-spotlight" aria-labelledby="hub-spotlight-heading">
+        <div className="welcome-hub-spotlight__inner">
+          <div className="welcome-hub-spotlight__copy">
+            <p className="welcome-hub-spotlight__eyebrow">
+              <span className="welcome-hub-spotlight__badge">New</span>
+              TB4L Hub
+            </p>
+            <h2 id="hub-spotlight-heading" className="welcome-hub-spotlight__title">
+              Curated content for brand managers
+            </h2>
+            <p className="welcome-hub-spotlight__text">
+              Discover playbooks, Templates, Presentations, Training materials, Case studies and
+              other trusted sources. Use any resource directly in TB4L Chat for more relevant,
+              grounded answers.
+            </p>
+          </div>
+          <Link className="btn btn-primary welcome-hub-spotlight__cta" to="/knowledge-hub">
+            Open TB4L Hub
+          </Link>
         </div>
       </section>
 
@@ -157,7 +173,12 @@ export function WelcomePage() {
                   >
                     →
                   </span>
-                  <strong>{item.title}</strong>
+                  <strong>
+                    {item.title}
+                    {'isNew' in item && item.isNew ? (
+                      <em className="welcome-capabilities__badge welcome-capabilities__badge--new">New</em>
+                    ) : null}
+                  </strong>
                   <span>{item.description}</span>
                   {item.status === 'soon' ? (
                     <em className="welcome-capabilities__badge">Soon</em>
@@ -169,7 +190,7 @@ export function WelcomePage() {
                 <li key={item.id}>
                   {item.status === 'live' && item.to ? (
                     <Link
-                      className={`welcome-capabilities__link welcome-capabilities__link--${item.accent}`}
+                      className={`welcome-capabilities__link welcome-capabilities__link--${item.accent}${'isNew' in item && item.isNew ? ' is-new' : ''}`}
                       to={item.to}
                     >
                       {body}

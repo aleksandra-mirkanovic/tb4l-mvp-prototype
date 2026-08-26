@@ -96,8 +96,30 @@
   border-bottom-color: #c4a3c7;
 }
 
+.main-nav__link--hub {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .main-nav__link--hub.is-active {
   border-bottom-color: #5eb3c9;
+}
+
+.main-nav__new-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tb4l-dark-blue);
+  background: #9fd4e4;
+  border-radius: 999px;
+  padding: 2px 6px;
+  line-height: 1.2;
+}
+
+.main-nav__link--hub.is-active .main-nav__new-badge {
+  background: #fff;
 }
 
 .main-nav__link--m360 .main-nav__soon-badge {

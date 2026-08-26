@@ -34,90 +34,85 @@
   z-index: 1;
   width: min(1120px, calc(100% - 40px));
   margin: 0 auto;
-  padding: clamp(36px, 5vh, 56px) 0 clamp(36px, 5vh, 52px);
-}
-
-.welcome-hero__layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(240px, 0.95fr);
-  gap: clamp(24px, 4vw, 48px);
+  padding: 20px 0;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 16px 28px;
+  flex-wrap: wrap;
 }
 
-.welcome-hero__copy {
+.welcome-hero__intro {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  flex: 1 1 280px;
   max-width: 38rem;
 }
 
-.welcome-hero__visual {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 0;
-  animation-delay: 0.2s;
+.welcome-hero__brand-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9fd4e4;
 }
 
 .welcome-hero__greeting {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  opacity: 0.85;
-}
-
-.welcome-hero__brand {
-  margin: 10px 0 0;
-  font-family: var(--welcome-display);
-  font-size: clamp(40px, 6.5vw, 68px);
+  margin: 6px 0 0;
+  font-family: var(--welcome-sans);
+  font-size: clamp(26px, 3.2vw, 36px);
   font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
-  max-width: 11ch;
-  overflow: visible;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #fff;
 }
 
 .welcome-hero__support {
-  margin: 14px 0 0;
-  font-size: clamp(15px, 1.6vw, 17px);
-  line-height: 1.45;
-  max-width: 36ch;
-  opacity: 0.9;
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  max-width: 40ch;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .welcome-hero__actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
-  margin-top: 22px;
+  flex: 0 0 auto;
 }
 
 .welcome-hero__cta {
   border-width: 1px;
   border-style: solid;
-}
-
-.welcome-hero__cta--chat {
-  background: var(--tb4l-purple);
-  color: #fff;
-  border-color: var(--tb4l-purple);
-}
-
-.welcome-hero__cta--chat:hover:not(:disabled) {
-  background: #523d54;
-  border-color: #523d54;
-  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .welcome-hero__cta--hub {
-  background: transparent;
+  background: var(--tb4l-teal);
   color: #fff;
-  border-color: rgba(94, 179, 201, 0.75);
+  border-color: var(--tb4l-teal);
 }
 
 .welcome-hero__cta--hub:hover:not(:disabled) {
-  background: rgba(0, 96, 126, 0.28);
+  background: #004e66;
+  border-color: #004e66;
+  text-decoration: none;
+}
+
+.welcome-hero__cta--chat {
+  background: transparent;
+  color: #fff;
+  border-color: rgba(196, 163, 199, 0.75);
+}
+
+.welcome-hero__cta--chat:hover:not(:disabled) {
+  background: rgba(98, 73, 99, 0.28);
   text-decoration: none;
 }
 
@@ -125,11 +120,11 @@
   animation: welcomeRise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.welcome-hero__greeting.welcome-hero__anim {
+.welcome-hero__brand-label.welcome-hero__anim {
   animation-delay: 0.04s;
 }
 
-.welcome-hero__brand.welcome-hero__anim {
+.welcome-hero__greeting.welcome-hero__anim {
   animation-delay: 0.1s;
 }
 
@@ -138,12 +133,82 @@
 }
 
 .welcome-hero__actions.welcome-hero__anim {
-  animation-delay: 0.22s;
+  animation-delay: 0.2s;
 }
 
 .welcome-ask-section {
   background: var(--tb4l-ice);
   padding: clamp(28px, 4vw, 40px) 20px clamp(24px, 3vw, 32px);
+}
+
+.welcome-hub-spotlight {
+  background: #fff;
+  border-bottom: 1px solid rgba(16, 56, 79, 0.1);
+  padding: 18px 20px;
+}
+
+.welcome-hub-spotlight__inner {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  flex-wrap: wrap;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(0, 96, 126, 0.08), var(--tb4l-ice));
+  border: 1px solid rgba(0, 96, 126, 0.18);
+  border-left: 3px solid var(--tb4l-teal);
+}
+
+.welcome-hub-spotlight__copy {
+  min-width: 0;
+  flex: 1 1 280px;
+}
+
+.welcome-hub-spotlight__eyebrow {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tb4l-teal);
+}
+
+.welcome-hub-spotlight__badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--tb4l-teal);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.welcome-hub-spotlight__title {
+  margin: 6px 0 0;
+  font-family: var(--welcome-display);
+  font-size: clamp(18px, 2.2vw, 22px);
+  font-weight: 600;
+  color: var(--tb4l-dark-blue);
+  letter-spacing: -0.02em;
+}
+
+.welcome-hub-spotlight__text {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  max-width: 52ch;
+}
+
+.welcome-hub-spotlight__cta {
+  flex-shrink: 0;
 }
 
 .welcome-ask {
@@ -347,6 +412,12 @@
 
 .welcome-capabilities__link--hub {
   border-left-color: #5eb3c9;
+  background: rgba(0, 96, 126, 0.16);
+  border-color: rgba(94, 179, 201, 0.35);
+}
+
+.welcome-capabilities__link--hub.is-new {
+  box-shadow: 0 0 0 1px rgba(94, 179, 201, 0.25);
 }
 
 .welcome-capabilities__link--m360 {
@@ -360,6 +431,10 @@
 a.welcome-capabilities__link:hover {
   background: rgba(255, 255, 255, 0.08);
   text-decoration: none;
+}
+
+a.welcome-capabilities__link--hub:hover {
+  background: rgba(0, 96, 126, 0.24);
 }
 
 a.welcome-capabilities__link:hover strong {
@@ -376,6 +451,10 @@ a.welcome-capabilities__link:hover strong {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.25;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .welcome-capabilities__link--chat strong {
@@ -410,7 +489,14 @@ a.welcome-capabilities__link:hover strong {
   padding: 2px 8px;
 }
 
-.welcome-capabilities__link--m360 .welcome-capabilities__badge {
+.welcome-capabilities__badge--new {
+  margin-top: 0;
+  background: #fff;
+  color: var(--tb4l-teal);
+  border-color: #fff;
+}
+
+.welcome-capabilities__link--m360 .welcome-capabilities__badge:not(.welcome-capabilities__badge--new) {
   background: rgba(40, 100, 54, 0.45);
   border-color: rgba(140, 190, 150, 0.45);
 }
@@ -436,19 +522,8 @@ a.welcome-capabilities__link:hover strong {
 }
 
 @media (max-width: 900px) {
-  .welcome-hero__layout {
-    grid-template-columns: 1fr;
-    justify-items: start;
-  }
-
-  .welcome-hero__visual {
-    width: 100%;
-    justify-content: flex-start;
-    margin-top: 8px;
-  }
-
-  .rtb-motif {
-    --rtb-size: min(280px, 72vw);
+  .welcome-hero__shell {
+    align-items: flex-start;
   }
 
   .welcome-capabilities__list {
