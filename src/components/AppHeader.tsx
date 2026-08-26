@@ -24,17 +24,25 @@ export function AppHeader() {
         </NavLink>
         <NavLink
           to="/chat"
-          className={({ isActive }) => (isActive ? 'main-nav__link is-active' : 'main-nav__link')}
+          className={({ isActive }) =>
+            isActive ? 'main-nav__link main-nav__link--chat is-active' : 'main-nav__link main-nav__link--chat'
+          }
         >
           TB4L Chat
         </NavLink>
         <NavLink
           to="/knowledge-hub"
-          className={({ isActive }) => (isActive ? 'main-nav__link is-active' : 'main-nav__link')}
+          className={({ isActive }) =>
+            isActive ? 'main-nav__link main-nav__link--hub is-active' : 'main-nav__link main-nav__link--hub'
+          }
         >
           TB4L Hub
         </NavLink>
-        <span className="main-nav__link main-nav__link--soon" aria-disabled="true" title="Coming soon">
+        <span
+          className="main-nav__link main-nav__link--soon main-nav__link--m360"
+          aria-disabled="true"
+          title="Coming soon"
+        >
           AIssistant
           <span className="main-nav__soon-badge">Coming soon</span>
         </span>

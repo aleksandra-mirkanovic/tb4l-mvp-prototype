@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { RoadToBillionsMotif } from '../components/RoadToBillionsMotif';
 import { GENERAL_SUGGESTIONS } from '../data/chatResponses';
+import '../components/RoadToBillionsMotif.css';
 import './WelcomePage.css';
 
 const CAPABILITIES = [
@@ -10,6 +12,7 @@ const CAPABILITIES = [
     description: 'Your guide to the TB4L Framework',
     to: '/chat',
     status: 'live' as const,
+    accent: 'chat' as const,
   },
   {
     id: 'hub',
@@ -17,18 +20,21 @@ const CAPABILITIES = [
     description: 'Discover trusted TB4L content',
     to: '/knowledge-hub',
     status: 'live' as const,
+    accent: 'hub' as const,
   },
   {
     id: 'aissistant',
     title: 'AIssistant',
     description: 'AI support is coming soon',
     status: 'soon' as const,
+    accent: 'm360' as const,
   },
   {
     id: 'future',
     title: 'Future releases',
     description: 'New capabilities on the horizon',
     status: 'soon' as const,
+    accent: 'future' as const,
   },
 ];
 
@@ -59,21 +65,26 @@ export function WelcomePage() {
       <section className="welcome-hero" aria-labelledby="welcome-heading">
         <div className="welcome-hero__atmosphere" aria-hidden="true" />
         <div className="welcome-hero__shell">
-          <div className="welcome-hero__copy">
-            <p className="welcome-hero__greeting welcome-hero__anim">Welcome back, Deniz</p>
-            <h1 id="welcome-heading" className="welcome-hero__brand welcome-hero__anim">
-              TB4L Platform
-            </h1>
-            <p className="welcome-hero__support welcome-hero__anim">
-              AI-powered capabilities supporting the Trusted Brands for Life framework.
-            </p>
-            <div className="welcome-hero__actions welcome-hero__anim">
-              <Link className="btn btn-primary welcome-hero__cta-primary" to="/chat">
-                TB4L Chat
-              </Link>
-              <Link className="btn btn-secondary welcome-hero__cta-secondary" to="/knowledge-hub">
-                TB4L Hub
-              </Link>
+          <div className="welcome-hero__layout">
+            <div className="welcome-hero__copy">
+              <p className="welcome-hero__greeting welcome-hero__anim">Welcome back, Deniz</p>
+              <h1 id="welcome-heading" className="welcome-hero__brand welcome-hero__anim">
+                TB4L Platform
+              </h1>
+              <p className="welcome-hero__support welcome-hero__anim">
+                AI-powered capabilities supporting the Trusted Brands for Life framework.
+              </p>
+              <div className="welcome-hero__actions welcome-hero__anim">
+                <Link className="btn welcome-hero__cta welcome-hero__cta--chat" to="/chat">
+                  TB4L Chat
+                </Link>
+                <Link className="btn welcome-hero__cta welcome-hero__cta--hub" to="/knowledge-hub">
+                  TB4L Hub
+                </Link>
+              </div>
+            </div>
+            <div className="welcome-hero__visual welcome-hero__anim">
+              <RoadToBillionsMotif />
             </div>
           </div>
         </div>
@@ -81,6 +92,9 @@ export function WelcomePage() {
 
       <section className="welcome-ask-section" aria-labelledby="ask-heading">
         <div className="welcome-ask welcome-ask--panel">
+          <p className="welcome-ask__eyebrow">
+            <span className="badge badge-chat">TB4L Chat</span>
+          </p>
           <h2 id="ask-heading" className="welcome-ask__title">
             How can I support your brand-building today?
           </h2>
@@ -137,6 +151,12 @@ export function WelcomePage() {
             {CAPABILITIES.map((item) => {
               const body = (
                 <>
+                  <span
+                    className={`welcome-capabilities__node welcome-capabilities__node--${item.accent}`}
+                    aria-hidden="true"
+                  >
+                    →
+                  </span>
                   <strong>{item.title}</strong>
                   <span>{item.description}</span>
                   {item.status === 'soon' ? (
@@ -148,11 +168,17 @@ export function WelcomePage() {
               return (
                 <li key={item.id}>
                   {item.status === 'live' && item.to ? (
-                    <Link className="welcome-capabilities__link" to={item.to}>
+                    <Link
+                      className={`welcome-capabilities__link welcome-capabilities__link--${item.accent}`}
+                      to={item.to}
+                    >
                       {body}
                     </Link>
                   ) : (
-                    <div className="welcome-capabilities__link is-disabled" aria-disabled="true">
+                    <div
+                      className={`welcome-capabilities__link welcome-capabilities__link--${item.accent} is-disabled`}
+                      aria-disabled="true"
+                    >
                       {body}
                     </div>
                   )}

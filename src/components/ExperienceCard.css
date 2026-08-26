@@ -46,3 +46,18 @@
 .experience-card .btn {
   margin-top: var(--space-2);
 }
+
+.experience-card--compact {
+  min-height: 0;
+  padding: var(--space-4) var(--space-5);
+  gap: var(--space-2);
+}
+
+.experience-card--compact .experience-card__title {
+  font-size: 20px;
+}
+
+.experience-card--compact .experience-card__desc {
+  font-size: 14px;
+  flex: 0;
+}

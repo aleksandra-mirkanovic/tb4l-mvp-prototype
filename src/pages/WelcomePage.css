@@ -20,23 +20,13 @@
   pointer-events: none;
   background:
     radial-gradient(ellipse 70% 55% at 88% 12%, rgba(0, 96, 126, 0.45), transparent 60%),
+    radial-gradient(ellipse 40% 35% at 72% 70%, rgba(98, 73, 99, 0.22), transparent 55%),
     radial-gradient(ellipse 45% 40% at 8% 88%, rgba(40, 100, 54, 0.16), transparent 55%);
   animation: welcomeAtmosphere 12s ease-in-out infinite alternate;
 }
 
 .welcome-hero__atmosphere::after {
-  content: '';
-  position: absolute;
-  right: -6%;
-  top: 8%;
-  width: min(42vw, 420px);
-  height: min(42vw, 420px);
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 0 0 40px rgba(255, 255, 255, 0.03),
-    0 0 0 80px rgba(255, 255, 255, 0.02);
-  animation: welcomeOrb 18s linear infinite;
+  content: none;
 }
 
 .welcome-hero__shell {
@@ -47,11 +37,26 @@
   padding: clamp(36px, 5vh, 56px) 0 clamp(36px, 5vh, 52px);
 }
 
+.welcome-hero__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(240px, 0.95fr);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: center;
+}
+
 .welcome-hero__copy {
   display: flex;
   flex-direction: column;
   min-width: 0;
   max-width: 38rem;
+}
+
+.welcome-hero__visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  animation-delay: 0.2s;
 }
 
 .welcome-hero__greeting {
@@ -88,24 +93,32 @@
   margin-top: 22px;
 }
 
-.welcome-hero .welcome-hero__cta-primary {
-  background: #fff;
-  color: var(--tb4l-dark-blue);
-  border-color: #fff;
+.welcome-hero__cta {
+  border-width: 1px;
+  border-style: solid;
 }
 
-.welcome-hero .welcome-hero__cta-primary:hover:not(:disabled) {
-  background: #e8eef1;
+.welcome-hero__cta--chat {
+  background: var(--tb4l-purple);
+  color: #fff;
+  border-color: var(--tb4l-purple);
 }
 
-.welcome-hero .welcome-hero__cta-secondary {
+.welcome-hero__cta--chat:hover:not(:disabled) {
+  background: #523d54;
+  border-color: #523d54;
+  text-decoration: none;
+}
+
+.welcome-hero__cta--hub {
   background: transparent;
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.42);
+  border-color: rgba(94, 179, 201, 0.75);
 }
 
-.welcome-hero .welcome-hero__cta-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
+.welcome-hero__cta--hub:hover:not(:disabled) {
+  background: rgba(0, 96, 126, 0.28);
+  text-decoration: none;
 }
 
 .welcome-hero__anim {
@@ -129,7 +142,7 @@
 }
 
 .welcome-ask-section {
-  background: #f3f6f7;
+  background: var(--tb4l-ice);
   padding: clamp(28px, 4vw, 40px) 20px clamp(24px, 3vw, 32px);
 }
 
@@ -143,11 +156,16 @@
 .welcome-ask--panel {
   width: min(1120px, 100%);
   margin: 0 auto;
-  background: #fff;
+  background: var(--surface-primary);
   border-radius: 18px;
   padding: clamp(22px, 3vw, 32px);
-  border: 1px solid rgba(16, 56, 79, 0.1);
+  border: 1px solid rgba(98, 73, 99, 0.18);
   box-shadow: var(--shadow-sm);
+  border-top: 3px solid var(--tb4l-purple);
+}
+
+.welcome-ask__eyebrow {
+  margin: 0 0 10px;
 }
 
 .welcome-ask__title {
@@ -156,7 +174,7 @@
   font-size: clamp(20px, 2.4vw, 26px);
   font-weight: 600;
   letter-spacing: -0.02em;
-  color: var(--tb4l-dark-blue);
+  color: var(--tb4l-purple);
   line-height: 1.2;
 }
 
@@ -168,8 +186,8 @@
 }
 
 .welcome-ask__chip {
-  border: 1px solid rgba(16, 56, 79, 0.16);
-  background: #f7f9fa;
+  border: 1px solid rgba(98, 73, 99, 0.22);
+  background: var(--tb4l-ice);
   color: var(--tb4l-dark-blue);
   border-radius: 12px;
   padding: 12px 14px;
@@ -182,8 +200,8 @@
 }
 
 .welcome-ask__chip:hover {
-  border-color: var(--tb4l-teal);
-  background: rgba(0, 96, 126, 0.07);
+  border-color: var(--tb4l-purple);
+  background: rgba(98, 73, 99, 0.18);
   transform: translateY(-1px);
   text-decoration: none;
 }
@@ -201,8 +219,8 @@
 }
 
 .welcome-ask__composer:focus-within {
-  border-color: var(--tb4l-teal);
-  box-shadow: var(--focus-ring);
+  border-color: var(--tb4l-purple);
+  box-shadow: var(--focus-ring-chat);
 }
 
 .welcome-ask__composer input {
@@ -224,16 +242,17 @@
   height: 40px;
   flex-shrink: 0;
   border: none;
-  border-radius: 11px;
-  background: var(--tb4l-teal);
+  border-radius: 50%;
+  background: var(--tb4l-purple);
   color: #fff;
   display: grid;
   place-items: center;
   cursor: pointer;
+  box-shadow: 0 6px 14px rgba(98, 73, 99, 0.28);
 }
 
 .welcome-ask__send:hover:not(:disabled) {
-  background: #004e66;
+  background: #523d54;
 }
 
 .welcome-ask__send:disabled {
@@ -242,7 +261,7 @@
 }
 
 .welcome-capabilities {
-  background: #0a2435;
+  background: var(--tb4l-dark-blue);
   color: #fff;
   padding: clamp(24px, 3.5vw, 36px) 20px clamp(36px, 4.5vw, 48px);
 }
@@ -253,7 +272,7 @@
 }
 
 .welcome-capabilities__label {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -267,16 +286,11 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0;
+  gap: 12px;
 }
 
 .welcome-capabilities__list > li {
   min-width: 0;
-}
-
-.welcome-capabilities__list > li + li .welcome-capabilities__link {
-  border-left: 1px solid rgba(255, 255, 255, 0.14);
-  padding-left: 16px;
 }
 
 .welcome-capabilities__link {
@@ -285,14 +299,66 @@
   align-items: flex-start;
   gap: 4px;
   min-height: 100%;
-  padding: 4px 12px 4px 0;
+  padding: 14px 14px 14px 16px;
   color: inherit;
   text-decoration: none;
-  transition: opacity 0.15s ease;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left-width: 3px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  position: relative;
+}
+
+.welcome-capabilities__node {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+}
+
+.welcome-capabilities__node--chat {
+  background: var(--tb4l-purple);
+}
+
+.welcome-capabilities__node--hub {
+  background: var(--tb4l-teal);
+}
+
+.welcome-capabilities__node--m360 {
+  background: var(--tb4l-green);
+}
+
+.welcome-capabilities__node--future {
+  background: rgba(216, 229, 235, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.welcome-capabilities__link--chat {
+  border-left-color: #c4a3c7;
+}
+
+.welcome-capabilities__link--hub {
+  border-left-color: #5eb3c9;
+}
+
+.welcome-capabilities__link--m360 {
+  border-left-color: #7eb88a;
+}
+
+.welcome-capabilities__link--future {
+  border-left-color: rgba(217, 217, 217, 0.65);
 }
 
 a.welcome-capabilities__link:hover {
-  opacity: 0.88;
+  background: rgba(255, 255, 255, 0.08);
   text-decoration: none;
 }
 
@@ -312,6 +378,18 @@ a.welcome-capabilities__link:hover strong {
   line-height: 1.25;
 }
 
+.welcome-capabilities__link--chat strong {
+  color: #e7d5ea;
+}
+
+.welcome-capabilities__link--hub strong {
+  color: #b7e0ea;
+}
+
+.welcome-capabilities__link--m360 strong {
+  color: #c5e3cb;
+}
+
 .welcome-capabilities__link span {
   font-size: 12.5px;
   line-height: 1.35;
@@ -319,13 +397,22 @@ a.welcome-capabilities__link:hover strong {
 }
 
 .welcome-capabilities__badge {
-  margin-top: 2px;
+  margin-top: 4px;
   font-style: normal;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  opacity: 0.7;
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.welcome-capabilities__link--m360 .welcome-capabilities__badge {
+  background: rgba(40, 100, 54, 0.45);
+  border-color: rgba(140, 190, 150, 0.45);
 }
 
 @keyframes welcomeRise {
@@ -348,24 +435,25 @@ a.welcome-capabilities__link:hover strong {
   }
 }
 
-@keyframes welcomeOrb {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (max-width: 900px) {
+  .welcome-hero__layout {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .welcome-hero__visual {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+
+  .rtb-motif {
+    --rtb-size: min(280px, 72vw);
+  }
+
   .welcome-capabilities__list {
     grid-template-columns: 1fr 1fr;
-    gap: 12px 16px;
-  }
-
-  .welcome-capabilities__list > li + li .welcome-capabilities__link {
-    border-left: none;
-    padding-left: 0;
+    gap: 12px;
   }
 }
 
@@ -381,8 +469,7 @@ a.welcome-capabilities__link:hover strong {
 
 @media (prefers-reduced-motion: reduce) {
   .welcome-hero__anim,
-  .welcome-hero__atmosphere,
-  .welcome-hero__atmosphere::after {
+  .welcome-hero__atmosphere {
     animation: none;
   }
 }

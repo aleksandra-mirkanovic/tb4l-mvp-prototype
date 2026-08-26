@@ -9,6 +9,7 @@ interface ExperienceCardProps {
   buttonLabel: string;
   to: string;
   accent: 'chat' | 'hub';
+  compact?: boolean;
 }
 
 export function ExperienceCard({
@@ -19,9 +20,12 @@ export function ExperienceCard({
   buttonLabel,
   to,
   accent,
+  compact = false,
 }: ExperienceCardProps) {
   return (
-    <article className={`experience-card experience-card--${accent}`}>
+    <article
+      className={`experience-card experience-card--${accent}${compact ? ' experience-card--compact' : ''}`}
+    >
       <span className={`badge ${badgeClass}`}>{badge}</span>
       <h2 className="experience-card__title">{title}</h2>
       <p className="experience-card__desc">{description}</p>

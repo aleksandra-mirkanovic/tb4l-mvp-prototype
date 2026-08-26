@@ -92,6 +92,19 @@
   border-bottom-color: #fff;
 }
 
+.main-nav__link--chat.is-active {
+  border-bottom-color: #c4a3c7;
+}
+
+.main-nav__link--hub.is-active {
+  border-bottom-color: #5eb3c9;
+}
+
+.main-nav__link--m360 .main-nav__soon-badge {
+  background: rgba(40, 100, 54, 0.45);
+  border-color: rgba(140, 190, 150, 0.45);
+}
+
 .main-nav__link:focus-visible {
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7);
 }

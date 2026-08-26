@@ -1,13 +1,15 @@
 :root {
+  /* TB4L brand palette */
   --tb4l-dark-blue: #10384f;
   --tb4l-teal: #00607e;
   --tb4l-purple: #624963;
   --tb4l-green: #286436;
   --tb4l-magenta: #d30f4b;
   --tb4l-gray: #d9d9d9;
+  --tb4l-ice: #d8e5eb;
 
   --background-primary: #f7f9fa;
-  --background-secondary: #f1f4f5;
+  --background-secondary: #d8e5eb;
   --surface-primary: #ffffff;
 
   --text-primary: #10384f;
@@ -19,6 +21,13 @@
   --shadow-sm: 0 1px 2px rgba(16, 56, 79, 0.06);
   --shadow-md: 0 4px 16px rgba(16, 56, 79, 0.08);
   --shadow-lg: 0 12px 32px rgba(16, 56, 79, 0.12);
+
+  /* Soft tints for product identity (Hub / Chat / M360) */
+  --tint-hub: rgba(0, 96, 126, 0.1);
+  --tint-chat: rgba(98, 73, 99, 0.12);
+  --tint-m360: rgba(40, 100, 54, 0.12);
+  --tint-alert: rgba(211, 15, 75, 0.08);
+  --tint-ice: #d8e5eb;
 
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -38,6 +47,7 @@
   --space-7: 48px;
 
   --focus-ring: 0 0 0 3px rgba(0, 96, 126, 0.35);
+  --focus-ring-chat: 0 0 0 3px rgba(98, 73, 99, 0.35);
 }
 
 *,
@@ -172,7 +182,7 @@ a:hover {
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--background-secondary);
+  background: var(--tb4l-ice);
 }
 
 .btn-ghost {

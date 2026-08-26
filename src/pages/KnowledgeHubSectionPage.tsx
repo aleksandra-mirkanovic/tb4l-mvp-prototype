@@ -75,35 +75,29 @@ export function KnowledgeHubSectionPage() {
       <header className="section-hero">
         <div className="section-hero__copy">
           <p className="section-hero__eyebrow">{section.eyebrow}</p>
-          <h1 className="section-hero__brand">TB4L Hub</h1>
-          <h2 className="section-hero__title">{section.title}</h2>
+          <h1 className="section-hero__title">{section.title}</h1>
           <p className="section-hero__tagline">{section.tagline}</p>
-          <p className="section-hero__desc">{section.description}</p>
-          <div className="section-hero__actions">
-            {section.kind === 'documents' ? (
-              <>
-                <button type="button" className="btn btn-primary" onClick={openBrowseFiltered}>
-                  Open in full library
-                </button>
-                <Link className="btn btn-secondary" to="/chat">
-                  Ask in TB4L Chat
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link className="btn btn-primary" to="/chat">
-                  Ask about this in Chat
-                </Link>
-                <Link className="btn btn-secondary" to="/knowledge-hub/browse">
-                  Browse all documents
-                </Link>
-              </>
-            )}
-          </div>
         </div>
-        <div className="section-hero__panel" aria-hidden="true">
-          <div className="section-hero__panel-label">{section.title}</div>
-          <p>{section.tagline}</p>
+        <div className="section-hero__actions">
+          {section.kind === 'documents' ? (
+            <>
+              <button type="button" className="btn btn-primary btn-sm" onClick={openBrowseFiltered}>
+                Open in full library
+              </button>
+              <Link className="btn btn-secondary btn-sm" to="/chat">
+                Ask in Chat
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="btn btn-primary btn-sm" to="/chat">
+                Ask in Chat
+              </Link>
+              <Link className="btn btn-secondary btn-sm" to="/knowledge-hub/browse">
+                Browse all
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
@@ -136,6 +130,7 @@ export function KnowledgeHubSectionPage() {
                   selected={selectedDocumentIds.includes(doc.id)}
                   onToggle={() => toggleDocumentSelection(doc.id)}
                   onViewSummary={() => setSummaryId(doc.id)}
+                  compact
                 />
               ))}
             </div>

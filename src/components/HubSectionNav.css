@@ -4,8 +4,8 @@
   gap: 6px;
   margin-bottom: var(--space-5);
   padding: 8px;
-  background: var(--background-secondary);
-  border: 1px solid var(--border-subtle);
+  background: var(--tb4l-ice);
+  border: 1px solid rgba(16, 56, 79, 0.1);
   border-radius: var(--radius-md);
 }
 

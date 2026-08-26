@@ -13,12 +13,12 @@ export function SectionTile({ section }: SectionTileProps) {
       className={`section-tile section-tile--${section.accent}`}
       aria-label={`${section.title}: ${section.tagline}`}
     >
-      <span className="section-tile__eyebrow">{section.eyebrow}</span>
-      <span className="section-tile__title">{section.title}</span>
-      <span className="section-tile__tagline">{section.tagline}</span>
-      <span className="section-tile__cta">
-        {section.ctaLabel}
-        <span aria-hidden="true"> →</span>
+      <span className="section-tile__copy">
+        <span className="section-tile__title">{section.title}</span>
+        <span className="section-tile__tagline">{section.tagline}</span>
+      </span>
+      <span className="section-tile__cta" aria-hidden="true">
+        →
       </span>
     </Link>
   );

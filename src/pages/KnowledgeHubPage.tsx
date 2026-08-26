@@ -5,10 +5,11 @@ import { HubSectionNav } from '../components/HubSectionNav';
 import { SectionTile } from '../components/SectionTile';
 import { HUB_SECTIONS } from '../data/sections';
 import './KnowledgeHubPage.css';
+import './SectionPage.css';
 
 export function KnowledgeHubPage() {
   return (
-    <div className="hub-page">
+    <div className="hub-page section-page section-page--teal">
       <Breadcrumbs
         items={[
           { label: 'Welcome', to: '/' },
@@ -16,35 +17,31 @@ export function KnowledgeHubPage() {
         ]}
       />
 
-      <header className="hub-page__header hub-page__header--marketing">
-        <div>
-          <span className="badge badge-hub">TB4L Hub</span>
-          <p className="hub-page__brand">TB4L</p>
-          <h1 className="page-title">TB4L Hub</h1>
-          <p className="page-subtitle">
-            Curated Trusted Brands for Life content organised by section. Explore Playbooks,
-            Templates, Training, Accelerator Outputs, Glossary, and Team—then take documents into
-            Chat as sources.
+      <HubSectionNav />
+
+      <header className="section-hero">
+        <div className="section-hero__copy">
+          <p className="section-hero__eyebrow">Overview</p>
+          <h1 className="section-hero__title">TB4L Hub</h1>
+          <p className="section-hero__tagline">
+            Curated Trusted Brands for Life content—open a section, then take documents into Chat.
           </p>
         </div>
-        <div className="hub-page__header-actions">
-          <Link className="btn btn-secondary" to="/knowledge-hub/browse">
+        <div className="section-hero__actions">
+          <Link className="btn btn-secondary btn-sm" to="/knowledge-hub/browse">
             Browse all documents
           </Link>
-          <Link className="btn btn-primary" to="/chat">
+          <Link className="btn btn-primary btn-sm" to="/chat">
             Ask in Chat
           </Link>
         </div>
       </header>
 
-      <HubSectionNav />
-
       <section className="hub-sections" aria-labelledby="hub-sections-heading">
         <div className="hub-sections__head">
           <h2 id="hub-sections-heading" className="section-title">
-            Hub sections
+            Sections
           </h2>
-          <p>Choose a section to explore curated content for that area.</p>
         </div>
         <div className="hub-sections__grid">
           {HUB_SECTIONS.map((section) => (
@@ -62,6 +59,7 @@ export function KnowledgeHubPage() {
           description="Select documents inside any section, then ask questions with those sources active in TB4L Chat."
           buttonLabel="Open TB4L Chat"
           to="/chat"
+          compact
         />
       </section>
     </div>

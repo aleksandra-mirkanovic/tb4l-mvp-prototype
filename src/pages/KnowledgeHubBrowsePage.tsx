@@ -12,7 +12,7 @@ import { useApp } from '../context/AppContext';
 import { DOCUMENTS } from '../data/documents';
 import { matchesHubCategory } from '../data/sections';
 import type { HubFilters } from '../types';
-import './KnowledgeHubPage.css';
+import './KnowledgeHubBrowsePage.css';
 
 export function KnowledgeHubBrowsePage() {
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ export function KnowledgeHubBrowsePage() {
   };
 
   return (
-    <div className="hub-page">
+    <div className="browse-page">
       <Breadcrumbs
         items={[
           { label: 'Welcome', to: '/' },
@@ -69,71 +69,69 @@ export function KnowledgeHubBrowsePage() {
         ]}
       />
 
-      <header className="hub-page__header">
+      <header className="browse-page__header">
         <div>
           <span className="badge badge-hub">TB4L Hub</span>
-          <h1 className="page-title" style={{ marginTop: 8 }}>
-            Browse all documents
-          </h1>
-          <p className="page-subtitle">
-            Filter across the full Hub library, review AI-generated summaries, and select sources for
-            Chat.
+          <h1 className="browse-page__title">Browse all documents</h1>
+          <p className="browse-page__subtitle">
+            Filter the library, open summaries, and select sources for Chat.
           </p>
         </div>
+        <p className="browse-page__count" aria-live="polite">
+          {filtered.length} result{filtered.length === 1 ? '' : 's'}
+        </p>
       </header>
 
       <HubSectionNav />
 
-      <div className="hub-page__layout">
-        <FilterPanel
-          filters={filters}
-          onChange={setFilters}
-          onReset={resetFilters}
-          resultCount={filtered.length}
-          totalCount={DOCUMENTS.length}
+      <FilterPanel
+        filters={filters}
+        onChange={setFilters}
+        onReset={resetFilters}
+        resultCount={filtered.length}
+        totalCount={DOCUMENTS.length}
+        variant="toolbar"
+      />
+
+      <ActiveFilterChips filters={filters} onClearOne={clearOne} onClearAll={resetFilters} />
+
+      {DOCUMENTS.length === 0 ? (
+        <EmptyState
+          title="No content available"
+          description="There are currently no documents in the Knowledge Hub."
         />
-
-        <div className="hub-page__content">
-          <ActiveFilterChips filters={filters} onClearOne={clearOne} onClearAll={resetFilters} />
-
-          {DOCUMENTS.length === 0 ? (
-            <EmptyState
-              title="No content available"
-              description="There are currently no documents in the Knowledge Hub."
-            />
-          ) : filtered.length === 0 ? (
-            <EmptyState
-              title="No matching documents"
-              description="No documents match the current filters. Try adjusting or resetting filters."
-              actions={
-                <button type="button" className="btn btn-primary" onClick={resetFilters}>
-                  Reset Filters
-                </button>
-              }
-            />
-          ) : (
-            <div className="hub-page__grid" role="list">
-              {filtered.map((doc) => (
-                <div key={doc.id} role="listitem">
-                  <DocumentCard
-                    document={doc}
-                    selected={selectedDocumentIds.includes(doc.id)}
-                    onToggle={() => toggleDocumentSelection(doc.id)}
-                    onViewSummary={() => setSummaryId(doc.id)}
-                  />
-                </div>
-              ))}
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          title="No matching documents"
+          description="No documents match the current filters. Try adjusting or resetting filters."
+          actions={
+            <button type="button" className="btn btn-primary" onClick={resetFilters}>
+              Reset Filters
+            </button>
+          }
+        />
+      ) : (
+        <div className="browse-page__list" role="list">
+          {filtered.map((doc) => (
+            <div key={doc.id} role="listitem">
+              <DocumentCard
+                document={doc}
+                selected={selectedDocumentIds.includes(doc.id)}
+                onToggle={() => toggleDocumentSelection(doc.id)}
+                onViewSummary={() => setSummaryId(doc.id)}
+                compact
+              />
             </div>
-          )}
-
-          <SelectedDocumentsBar
-            selectedIds={selectedDocumentIds}
-            onClear={clearDocumentSelection}
-            onRemove={(id) => toggleDocumentSelection(id)}
-            onAskInChat={askInChat}
-          />
+          ))}
         </div>
-      </div>
+      )}
+
+      <SelectedDocumentsBar
+        selectedIds={selectedDocumentIds}
+        onClear={clearDocumentSelection}
+        onRemove={(id) => toggleDocumentSelection(id)}
+        onAskInChat={askInChat}
+      />
 
       {summaryDoc ? (
         <DocumentSummaryPanel

@@ -29,3 +29,58 @@
   flex-direction: column;
   gap: var(--space-3);
 }
+
+.filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 12px;
+  margin-bottom: var(--space-4);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.filter-toolbar__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 88px;
+  padding-bottom: 2px;
+}
+
+.filter-toolbar__meta strong {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.filter-toolbar__meta span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.filter-toolbar__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex: 1 1 auto;
+}
+
+.filter-toolbar .filter-panel__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 132px;
+  flex: 1 1 132px;
+  max-width: 180px;
+}
+
+.filter-toolbar .field-label {
+  margin-bottom: 0;
+}
+
+.filter-toolbar .field-control {
+  padding: 7px 10px;
+  font-size: 13px;
+}
