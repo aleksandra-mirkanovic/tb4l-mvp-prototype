@@ -5,8 +5,8 @@ import { ErrorState } from '../components/ErrorState';
 import { MessageActionIcons } from '../components/MessageActionIcons';
 import { useApp } from '../context/AppContext';
 import {
+  CHAT_EMPTY_SUGGESTIONS,
   DOCUMENT_SUGGESTIONS,
-  GENERAL_SUGGESTIONS,
   GENIE_SUGGESTIONS,
   buildDocumentResponse,
   buildGeneralResponse,
@@ -86,8 +86,35 @@ export function ChatPage() {
   const suggestions = useMemo(() => {
     if (hasGenie && !hasDocuments) return GENIE_SUGGESTIONS;
     if (hasDocuments) return DOCUMENT_SUGGESTIONS;
-    return GENERAL_SUGGESTIONS;
+    return CHAT_EMPTY_SUGGESTIONS;
   }, [hasDocuments, hasGenie]);
+
+  const emptySuggestions = useMemo(() => {
+    if (hasGenie && !hasDocuments) return GENIE_SUGGESTIONS.slice(0, 3);
+    if (hasDocuments) return DOCUMENT_SUGGESTIONS.slice(0, 3);
+    return CHAT_EMPTY_SUGGESTIONS;
+  }, [hasDocuments, hasGenie]);
+
+  const contextHelp = useMemo(() => {
+    if (hasDocuments && hasGenie) {
+      return 'Answers use your selected Hub documents plus M360 data. This prototype simulates responses—verify before real decisions.';
+    }
+    if (hasDocuments) {
+      return 'Answers are grounded in your selected Hub documents (mocked for this prototype). Citations appear under each reply.';
+    }
+    if (hasGenie) {
+      return 'M360 is connected for structured data. Replies are simulated in this prototype and may take longer.';
+    }
+    return 'Without Hub sources, Chat uses approved TB4L framework guidance. Add documents or M360 via + for grounded context.';
+  }, [hasDocuments, hasGenie]);
+
+  const sourceStatus = useMemo(() => {
+    const parts: string[] = ['Prototype · mocked'];
+    if (hasGenie) parts.push('M360 connected');
+    if (hasDocuments) parts.push(`${documentSources.length} Hub source${documentSources.length > 1 ? 's' : ''}`);
+    if (!hasGenie && !hasDocuments) parts.push('framework knowledge');
+    return parts.join(' · ');
+  }, [documentSources.length, hasDocuments, hasGenie]);
 
   const { todaySessions, previousSessions } = useMemo(() => {
     const todayStart = startOfToday();
@@ -101,14 +128,6 @@ export function ChatPage() {
     }
     return { todaySessions: today, previousSessions: previous };
   }, [activeSessionId, chatSessions]);
-
-  const sourceStatus = useMemo(() => {
-    const parts: string[] = [];
-    if (hasGenie) parts.push('M360 connected');
-    if (hasDocuments) parts.push(`${documentSources.length} Hub document${documentSources.length > 1 ? 's' : ''}`);
-    if (!parts.length) return 'Using approved TB4L framework content';
-    return parts.join(' · ');
-  }, [documentSources.length, hasDocuments, hasGenie]);
 
   useEffect(() => {
     if (messagesRef.current) {
@@ -597,12 +616,15 @@ export function ChatPage() {
               <div className="chat-empty__mark" aria-hidden="true">
                 TB
               </div>
-              <h1>Welcome to TB4L Chat</h1>
-              <p>
-                Ask about Trusted Brands for Life—the four stages, Brand Frames, and Road to Billions
-                guidance. Use the + button below to attach a file, add Hub documents, or connect a data
-                source like M360.
+              <h1>TB4L Chat</h1>
+              <p className="chat-empty__tagline">
+                Build stronger brands with trusted knowledge and AI guidance.
               </p>
+              <p className="chat-empty__trust">
+                Prototype · answers are simulated. With Hub sources selected, replies cite those
+                documents.
+              </p>
+              <p className="chat-empty__context">{contextHelp}</p>
               <div className="chat-empty__actions">
                 <button
                   type="button"
@@ -614,9 +636,9 @@ export function ChatPage() {
                   + Add context
                 </button>
               </div>
-              <p className="chat-empty__ask">How can I support your brand-building today?</p>
+              <p className="chat-empty__ask">Try a framework question</p>
               <div className="chat-suggestions">
-                {suggestions.map((q) => (
+                {emptySuggestions.map((q) => (
                   <button key={q} type="button" className="chat-suggestion" onClick={() => submit(q)} disabled={isTyping}>
                     {q}
                   </button>
@@ -735,6 +757,7 @@ export function ChatPage() {
         ) : null}
 
         <div className="chat-composer-area">
+          {!empty ? <p className="chat-context-help">{contextHelp}</p> : null}
           <input
             ref={fileInputRef}
             type="file"

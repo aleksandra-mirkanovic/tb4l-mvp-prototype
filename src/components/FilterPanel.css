@@ -84,3 +84,20 @@
   padding: 7px 10px;
   font-size: 13px;
 }
+
+@media (max-width: 560px) {
+  .filter-toolbar {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .filter-toolbar__fields {
+    width: 100%;
+  }
+
+  .filter-toolbar .filter-panel__field {
+    min-width: 0;
+    flex: 1 1 100%;
+    max-width: none;
+  }
+}

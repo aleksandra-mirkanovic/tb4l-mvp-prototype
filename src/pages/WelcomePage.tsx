@@ -7,7 +7,7 @@ const CAPABILITIES = [
   {
     id: 'chat',
     title: 'TB4L Chat',
-    description: 'Your guide to the TB4L Framework',
+    description: 'Ask questions grounded in the TB4L framework',
     to: '/chat',
     status: 'live' as const,
     accent: 'chat' as const,
@@ -15,11 +15,10 @@ const CAPABILITIES = [
   {
     id: 'hub',
     title: 'TB4L Hub',
-    description: 'Discover trusted TB4L content',
+    description: 'Browse trusted playbooks, templates, and training',
     to: '/knowledge-hub',
     status: 'live' as const,
     accent: 'hub' as const,
-    isNew: true,
   },
   {
     id: 'aissistant',
@@ -27,13 +26,6 @@ const CAPABILITIES = [
     description: 'AI support is coming soon',
     status: 'soon' as const,
     accent: 'm360' as const,
-  },
-  {
-    id: 'future',
-    title: 'Future releases',
-    description: 'New capabilities on the horizon',
-    status: 'soon' as const,
-    accent: 'future' as const,
   },
 ];
 
@@ -65,36 +57,11 @@ export function WelcomePage() {
         <div className="welcome-hero__atmosphere" aria-hidden="true" />
         <div className="welcome-hero__shell">
           <div className="welcome-hero__intro">
-            <p className="welcome-hero__brand-label welcome-hero__anim">TB4L Platform</p>
-            <h1 id="welcome-heading" className="welcome-hero__greeting welcome-hero__anim">
-              Welcome back, Deniz
+            <p className="welcome-hero__greeting welcome-hero__anim">Welcome back, Deniz</p>
+            <h1 id="welcome-heading" className="welcome-hero__tagline welcome-hero__anim">
+              Build stronger brands with trusted knowledge and AI guidance
             </h1>
-            <p className="welcome-hero__support welcome-hero__anim">
-              AI-powered capabilities for the Trusted Brands for Life framework.
-            </p>
           </div>
-        </div>
-      </section>
-
-      <section className="welcome-hub-spotlight" aria-labelledby="hub-spotlight-heading">
-        <div className="welcome-hub-spotlight__inner">
-          <div className="welcome-hub-spotlight__copy">
-            <p className="welcome-hub-spotlight__eyebrow">
-              <span className="welcome-hub-spotlight__badge">New</span>
-              TB4L Hub
-            </p>
-            <h2 id="hub-spotlight-heading" className="welcome-hub-spotlight__title">
-              Curated content for brand managers
-            </h2>
-            <p className="welcome-hub-spotlight__text">
-              Discover playbooks, Templates, Presentations, Training materials, Case studies and
-              other trusted sources. Use any resource directly in TB4L Chat for more relevant,
-              grounded answers.
-            </p>
-          </div>
-          <Link className="btn btn-primary welcome-hub-spotlight__cta" to="/knowledge-hub">
-            Open TB4L Hub
-          </Link>
         </div>
       </section>
 
@@ -106,6 +73,9 @@ export function WelcomePage() {
           <h2 id="ask-heading" className="welcome-ask__title">
             How can I support your brand-building today?
           </h2>
+          <p className="welcome-ask__lede">
+            Start with a question—Chat is your day-to-day guide for Trusted Brands for Life.
+          </p>
           <div className="welcome-ask__suggestions">
             {GENERAL_SUGGESTIONS.map((question) => (
               <button
@@ -152,6 +122,41 @@ export function WelcomePage() {
         </div>
       </section>
 
+      <section className="welcome-hub-spotlight" aria-labelledby="hub-spotlight-heading">
+        <div className="welcome-hub-spotlight__inner">
+          <div className="welcome-hub-spotlight__copy">
+            <p className="welcome-hub-spotlight__eyebrow">TB4L Hub</p>
+            <h2 id="hub-spotlight-heading" className="welcome-hub-spotlight__title">
+              Curated content for brand managers
+            </h2>
+            <p className="welcome-hub-spotlight__text">
+              Browse Playbooks, Templates, TB4L Training, and Accelerator Outputs—plus Glossary and
+              Team. Select documents, then use them in TB4L Chat for grounded answers.
+            </p>
+          </div>
+          <Link className="btn btn-primary welcome-hub-spotlight__cta" to="/knowledge-hub">
+            Open TB4L Hub
+          </Link>
+        </div>
+      </section>
+
+      <section className="welcome-guide" aria-labelledby="welcome-guide-heading">
+        <div className="welcome-guide__inner">
+          <h2 id="welcome-guide-heading" className="welcome-guide__title">
+            Try Hub → Chat in 3 clicks
+          </h2>
+          <ol className="welcome-guide__steps">
+            <li>
+              <Link to="/knowledge-hub">Open TB4L Hub</Link>
+            </li>
+            <li>
+              <Link to="/knowledge-hub/playbooks">Open Playbooks</Link> and select a document
+            </li>
+            <li>Tap <strong>Use in Chat</strong> on the selection bar</li>
+          </ol>
+        </div>
+      </section>
+
       <nav className="welcome-capabilities" aria-label="Platform capabilities">
         <div className="welcome-capabilities__inner">
           <p className="welcome-capabilities__label">Platform capabilities</p>
@@ -165,12 +170,7 @@ export function WelcomePage() {
                   >
                     →
                   </span>
-                  <strong>
-                    {item.title}
-                    {'isNew' in item && item.isNew ? (
-                      <em className="welcome-capabilities__badge welcome-capabilities__badge--new">New</em>
-                    ) : null}
-                  </strong>
+                  <strong>{item.title}</strong>
                   <span>{item.description}</span>
                   {item.status === 'soon' ? (
                     <em className="welcome-capabilities__badge">Soon</em>
@@ -182,7 +182,7 @@ export function WelcomePage() {
                 <li key={item.id}>
                   {item.status === 'live' && item.to ? (
                     <Link
-                      className={`welcome-capabilities__link welcome-capabilities__link--${item.accent}${'isNew' in item && item.isNew ? ' is-new' : ''}`}
+                      className={`welcome-capabilities__link welcome-capabilities__link--${item.accent}`}
                       to={item.to}
                     >
                       {body}

@@ -1,5 +1,4 @@
 .welcome-page {
-  --welcome-display: 'Fraunces', Georgia, 'Times New Roman', serif;
   --welcome-sans: 'DM Sans', 'Segoe UI', sans-serif;
   font-family: var(--welcome-sans);
   margin: calc(var(--space-5) * -1) calc(var(--space-5) * -1) calc(var(--space-7) * -1);
@@ -41,50 +40,38 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  max-width: 38rem;
-}
-
-.welcome-hero__brand-label {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #9fd4e4;
+  max-width: 42rem;
 }
 
 .welcome-hero__greeting {
-  margin: 6px 0 0;
-  font-family: var(--welcome-sans);
-  font-size: clamp(26px, 3.2vw, 36px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  color: #fff;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #9fd4e4;
 }
 
-.welcome-hero__support {
+.welcome-hero__tagline {
   margin: 6px 0 0;
-  font-size: 14px;
-  line-height: 1.4;
-  max-width: 40ch;
-  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--welcome-sans);
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: #fff;
+  max-width: 28ch;
 }
 
 .welcome-hero__anim {
   animation: welcomeRise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.welcome-hero__brand-label.welcome-hero__anim {
+.welcome-hero__greeting.welcome-hero__anim {
   animation-delay: 0.04s;
 }
 
-.welcome-hero__greeting.welcome-hero__anim {
+.welcome-hero__tagline.welcome-hero__anim {
   animation-delay: 0.1s;
-}
-
-.welcome-hero__support.welcome-hero__anim {
-  animation-delay: 0.16s;
 }
 
 .welcome-ask-section {
@@ -130,22 +117,11 @@
   color: var(--tb4l-teal);
 }
 
-.welcome-hub-spotlight__badge {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #fff;
-  background: var(--tb4l-teal);
-  border-radius: 999px;
-  padding: 2px 7px;
-}
-
 .welcome-hub-spotlight__title {
   margin: 6px 0 0;
-  font-family: var(--welcome-display);
+  font-family: var(--welcome-sans);
   font-size: clamp(18px, 2.2vw, 22px);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--tb4l-dark-blue);
   letter-spacing: -0.02em;
 }
@@ -160,6 +136,66 @@
 
 .welcome-hub-spotlight__cta {
   flex-shrink: 0;
+}
+
+.welcome-guide {
+  background: var(--surface-primary);
+  border-bottom: 1px solid rgba(16, 56, 79, 0.08);
+  padding: 14px 20px;
+}
+
+.welcome-guide__inner {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.welcome-guide__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--tb4l-dark-blue);
+}
+
+.welcome-guide__steps {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 16px;
+  counter-reset: guide;
+}
+
+.welcome-guide__steps li {
+  position: relative;
+  padding-left: 28px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+  counter-increment: guide;
+}
+
+.welcome-guide__steps li::before {
+  content: counter(guide);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  background: var(--tb4l-teal);
+}
+
+.welcome-guide__steps a {
+  font-weight: 600;
+  color: var(--tb4l-teal);
 }
 
 .welcome-ask {
@@ -186,12 +222,20 @@
 
 .welcome-ask__title {
   margin: 0;
-  font-family: var(--welcome-display);
+  font-family: var(--welcome-sans);
   font-size: clamp(20px, 2.4vw, 26px);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--tb4l-purple);
   line-height: 1.2;
+}
+
+.welcome-ask__lede {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  max-width: 48ch;
 }
 
 .welcome-ask__suggestions {
@@ -301,7 +345,7 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -352,40 +396,21 @@
   background: var(--tb4l-green);
 }
 
-.welcome-capabilities__node--future {
-  background: rgba(216, 229, 235, 0.35);
-  color: rgba(255, 255, 255, 0.85);
-}
-
 .welcome-capabilities__link--chat {
   border-left-color: #c4a3c7;
 }
 
 .welcome-capabilities__link--hub {
   border-left-color: #5eb3c9;
-  background: rgba(0, 96, 126, 0.16);
-  border-color: rgba(94, 179, 201, 0.35);
-}
-
-.welcome-capabilities__link--hub.is-new {
-  box-shadow: 0 0 0 1px rgba(94, 179, 201, 0.25);
 }
 
 .welcome-capabilities__link--m360 {
   border-left-color: #7eb88a;
 }
 
-.welcome-capabilities__link--future {
-  border-left-color: rgba(217, 217, 217, 0.65);
-}
-
 a.welcome-capabilities__link:hover {
   background: rgba(255, 255, 255, 0.08);
   text-decoration: none;
-}
-
-a.welcome-capabilities__link--hub:hover {
-  background: rgba(0, 96, 126, 0.24);
 }
 
 a.welcome-capabilities__link:hover strong {
@@ -402,10 +427,6 @@ a.welcome-capabilities__link:hover strong {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.25;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 .welcome-capabilities__link--chat strong {
@@ -440,14 +461,7 @@ a.welcome-capabilities__link:hover strong {
   padding: 2px 8px;
 }
 
-.welcome-capabilities__badge--new {
-  margin-top: 0;
-  background: #fff;
-  color: var(--tb4l-teal);
-  border-color: #fff;
-}
-
-.welcome-capabilities__link--m360 .welcome-capabilities__badge:not(.welcome-capabilities__badge--new) {
+.welcome-capabilities__link--m360 .welcome-capabilities__badge {
   background: rgba(40, 100, 54, 0.45);
   border-color: rgba(140, 190, 150, 0.45);
 }
@@ -477,6 +491,10 @@ a.welcome-capabilities__link:hover strong {
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
+
+  .welcome-guide__steps {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -486,6 +504,16 @@ a.welcome-capabilities__link:hover strong {
 
   .welcome-capabilities__list {
     grid-template-columns: 1fr;
+  }
+
+  .welcome-hub-spotlight__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .welcome-hub-spotlight__cta {
+    width: 100%;
+    text-align: center;
   }
 }
 

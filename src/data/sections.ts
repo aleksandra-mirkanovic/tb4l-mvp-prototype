@@ -55,7 +55,7 @@ export const HUB_SECTIONS: HubSection[] = [
     eyebrow: 'Build capability',
     tagline: 'Build capability through learning-by-doing',
     description:
-      'Foundational modules and facilitation guides so teams share TB4L language—stages, Brand Frames, and Road to Billions expectations—supported by Accelerators and peer-led development.',
+      'Foundational modules and facilitation guides so teams share TB4L language—stages, Brand Frames, Must Win Battles, and the Road to Billions strategy—supported by Accelerators and peer-led development.',
     ctaLabel: 'Browse training',
     accent: 'purple',
   },

@@ -19,7 +19,12 @@ export function SelectedDocumentsBar({
   return (
     <div className="selected-bar" role="region" aria-label="Selected documents">
       <div className="selected-bar__info">
-        <strong>{selectedIds.length} selected</strong>
+        <strong>
+          {selectedIds.length} document{selectedIds.length === 1 ? '' : 's'} ready for Chat
+        </strong>
+        <p className="selected-bar__hint">
+          Selected Hub documents become active sources so answers stay grounded.
+        </p>
         <div className="selected-bar__chips">
           {selectedIds.map((id) => {
             const doc = getDocumentById(id);
@@ -36,10 +41,10 @@ export function SelectedDocumentsBar({
       </div>
       <div className="selected-bar__actions">
         <button type="button" className="btn btn-ghost btn-sm" onClick={onClear}>
-          Clear selection
+          Clear
         </button>
-        <button type="button" className="btn btn-primary" onClick={onAskInChat}>
-          Ask Questions in Chat
+        <button type="button" className="btn btn-primary selected-bar__cta" onClick={onAskInChat}>
+          Use in Chat
         </button>
       </div>
     </div>

@@ -5,7 +5,7 @@ export function AppHeader() {
   return (
     <header className="app-header" role="banner">
       <div className="app-header__inner">
-        <NavLink to="/" className="app-header__brand" end>
+        <NavLink to="/" className="app-header__brand" end aria-label="TB4L home">
           <span className="app-header__mark" aria-hidden="true">
             TB
           </span>
@@ -19,9 +19,6 @@ export function AppHeader() {
         </p>
       </div>
       <nav className="main-nav" aria-label="Primary">
-        <NavLink to="/" end className={({ isActive }) => (isActive ? 'main-nav__link is-active' : 'main-nav__link')}>
-          Welcome
-        </NavLink>
         <NavLink
           to="/chat"
           className={({ isActive }) =>
@@ -37,16 +34,7 @@ export function AppHeader() {
           }
         >
           TB4L Hub
-          <span className="main-nav__new-badge">New</span>
         </NavLink>
-        <span
-          className="main-nav__link main-nav__link--soon main-nav__link--m360"
-          aria-disabled="true"
-          title="Coming soon"
-        >
-          AIssistant
-          <span className="main-nav__soon-badge">Coming soon</span>
-        </span>
       </nav>
     </header>
   );

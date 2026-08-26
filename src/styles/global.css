@@ -36,7 +36,7 @@
   --header-height: 56px;
   --nav-height: 48px;
 
-  --font-sans: 'Segoe UI', Aptos, Inter, Arial, sans-serif;
+  --font-sans: 'DM Sans', 'Segoe UI', Aptos, sans-serif;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -379,4 +379,15 @@ a:hover {
   height: 1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

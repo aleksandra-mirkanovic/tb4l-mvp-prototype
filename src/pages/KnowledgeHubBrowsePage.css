@@ -53,3 +53,19 @@
 .browse-page .active-filters {
   margin-bottom: var(--space-3);
 }
+
+@media (max-width: 560px) {
+  .browse-page__header {
+    padding: 12px 14px;
+    align-items: flex-start;
+  }
+
+  .browse-page__title {
+    font-size: 22px;
+  }
+
+  .browse-page__count {
+    width: 100%;
+    text-align: center;
+  }
+}

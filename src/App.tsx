@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { AppFooter } from './components/AppFooter';
 import { AppHeader } from './components/AppHeader';
 import { AppProvider } from './context/AppContext';
 import { ChatPage } from './pages/ChatPage';
@@ -30,6 +31,7 @@ function AppRoutes() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      {!isChat ? <AppFooter /> : null}
     </>
   );
 }

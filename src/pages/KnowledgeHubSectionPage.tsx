@@ -64,7 +64,7 @@ export function KnowledgeHubSectionPage() {
     <div className={`section-page section-page--${section.accent}`}>
       <Breadcrumbs
         items={[
-          { label: 'Welcome', to: '/' },
+          { label: 'Home', to: '/' },
           { label: 'TB4L Hub', to: '/knowledge-hub' },
           { label: section.title },
         ]}
@@ -80,23 +80,13 @@ export function KnowledgeHubSectionPage() {
         </div>
         <div className="section-hero__actions">
           {section.kind === 'documents' ? (
-            <>
-              <button type="button" className="btn btn-primary btn-sm" onClick={openBrowseFiltered}>
-                Open in full library
-              </button>
-              <Link className="btn btn-secondary btn-sm" to="/chat">
-                Ask in Chat
-              </Link>
-            </>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={openBrowseFiltered}>
+              Open in full library
+            </button>
           ) : (
-            <>
-              <Link className="btn btn-primary btn-sm" to="/chat">
-                Ask in Chat
-              </Link>
-              <Link className="btn btn-secondary btn-sm" to="/knowledge-hub/browse">
-                Browse all
-              </Link>
-            </>
+            <Link className="btn btn-secondary btn-sm" to="/knowledge-hub/browse">
+              Browse all documents
+            </Link>
           )}
         </div>
       </header>
@@ -108,7 +98,8 @@ export function KnowledgeHubSectionPage() {
               Documents in {section.title}
             </h3>
             <p>
-              {docs.length} curated document{docs.length === 1 ? '' : 's'} · select any to use in Chat
+              {docs.length} curated document{docs.length === 1 ? '' : 's'} · select any, then{' '}
+              <strong>Use in Chat</strong>
             </p>
           </div>
           {docs.length === 0 ? (

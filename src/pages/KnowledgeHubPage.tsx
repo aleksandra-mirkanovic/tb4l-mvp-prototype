@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { ExperienceCard } from '../components/ExperienceCard';
 import { HubSectionNav } from '../components/HubSectionNav';
 import { SectionTile } from '../components/SectionTile';
 import { HUB_SECTIONS } from '../data/sections';
@@ -12,7 +11,7 @@ export function KnowledgeHubPage() {
     <div className="hub-page section-page section-page--teal">
       <Breadcrumbs
         items={[
-          { label: 'Welcome', to: '/' },
+          { label: 'Home', to: '/' },
           { label: 'TB4L Hub' },
         ]}
       />
@@ -24,43 +23,50 @@ export function KnowledgeHubPage() {
           <p className="section-hero__eyebrow">Overview</p>
           <h1 className="section-hero__title">TB4L Hub</h1>
           <p className="section-hero__tagline">
-            Curated Trusted Brands for Life content—open a section, then take documents into Chat.
+            Trusted knowledge to build stronger brands—open a section, select documents, then ask in
+            Chat.
           </p>
         </div>
-        <div className="section-hero__actions">
-          <Link className="btn btn-secondary btn-sm" to="/knowledge-hub/browse">
-            Browse all documents
-          </Link>
-          <Link className="btn btn-primary btn-sm" to="/chat">
-            Ask in Chat
-          </Link>
-        </div>
       </header>
+
+      <ol className="hub-loop" aria-label="How Hub works with Chat">
+        <li className="hub-loop__step">
+          <span className="hub-loop__num">1</span>
+          <div>
+            <strong>Choose a section</strong>
+            <p>Playbooks, Templates, Training, Accelerator Outputs, Glossary, or Team.</p>
+          </div>
+        </li>
+        <li className="hub-loop__step">
+          <span className="hub-loop__num">2</span>
+          <div>
+            <strong>Filter &amp; select</strong>
+            <p>Narrow by brand or market, then select the documents you need.</p>
+          </div>
+        </li>
+        <li className="hub-loop__step">
+          <span className="hub-loop__num">3</span>
+          <div>
+            <strong>Use in Chat</strong>
+            <p>Send selections into TB4L Chat for grounded, source-backed answers.</p>
+          </div>
+        </li>
+      </ol>
 
       <section className="hub-sections" aria-labelledby="hub-sections-heading">
         <div className="hub-sections__head">
           <h2 id="hub-sections-heading" className="section-title">
             Sections
           </h2>
+          <Link className="hub-sections__browse" to="/knowledge-hub/browse">
+            Browse all documents
+          </Link>
         </div>
         <div className="hub-sections__grid">
           {HUB_SECTIONS.map((section) => (
             <SectionTile key={section.slug} section={section} />
           ))}
         </div>
-      </section>
-
-      <section className="hub-page__cta-band" aria-label="Continue to Chat">
-        <ExperienceCard
-          accent="chat"
-          badge="Next step"
-          badgeClass="badge-chat"
-          title="Take Hub content into Chat"
-          description="Select documents inside any section, then ask questions with those sources active in TB4L Chat."
-          buttonLabel="Open TB4L Chat"
-          to="/chat"
-          compact
-        />
       </section>
     </div>
   );

@@ -7,6 +7,13 @@ export const GENERAL_SUGGESTIONS = [
   'What planning tools are available in Design?',
 ];
 
+/** Chat empty-state starters — distinct from Home chips. */
+export const CHAT_EMPTY_SUGGESTIONS = [
+  'Explain WHERE TO PLAY vs HOW TO WIN.',
+  'How do Must Win Battles work in TB4L?',
+  'What happens in a 90-day Deliver cycle?',
+];
+
 export const DOCUMENT_SUGGESTIONS = [
   'What are the main learnings across these documents?',
   'Summarize key recommendations.',

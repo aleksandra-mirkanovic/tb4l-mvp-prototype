@@ -63,7 +63,7 @@ export function KnowledgeHubBrowsePage() {
     <div className="browse-page">
       <Breadcrumbs
         items={[
-          { label: 'Welcome', to: '/' },
+          { label: 'Home', to: '/' },
           { label: 'TB4L Hub', to: '/knowledge-hub' },
           { label: 'Browse all' },
         ]}
@@ -74,7 +74,7 @@ export function KnowledgeHubBrowsePage() {
           <span className="badge badge-hub">TB4L Hub</span>
           <h1 className="browse-page__title">Browse all documents</h1>
           <p className="browse-page__subtitle">
-            Filter the library, open summaries, and select sources for Chat.
+            Filter by brand or market, select documents, then use them in Chat for grounded answers.
           </p>
         </div>
         <p className="browse-page__count" aria-live="polite">
