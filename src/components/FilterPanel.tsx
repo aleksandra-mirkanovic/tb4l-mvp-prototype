@@ -75,40 +75,6 @@ export function FilterPanel({
           ))}
         </select>
       </label>
-
-      <label className="filter-panel__field">
-        <span className="field-label">Type</span>
-        <select
-          className="field-control"
-          value={filters.documentType}
-          onChange={(e) => update('documentType', e.target.value)}
-          aria-label="Filter by document type"
-        >
-          <option value="">All types</option>
-          {FILTER_OPTIONS.documentTypes.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label className="filter-panel__field">
-        <span className="field-label">Year</span>
-        <select
-          className="field-control"
-          value={filters.year}
-          onChange={(e) => update('year', e.target.value)}
-          aria-label="Filter by year"
-        >
-          <option value="">All years</option>
-          {FILTER_OPTIONS.years.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
-        </select>
-      </label>
     </>
   );
 

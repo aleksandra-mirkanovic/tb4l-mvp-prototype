@@ -35,8 +35,6 @@ export function KnowledgeHubBrowsePage() {
       if (filters.brand && doc.brand !== filters.brand) return false;
       if (filters.market && doc.market !== filters.market) return false;
       if (filters.category && !matchesHubCategory(doc.category, filters.category)) return false;
-      if (filters.documentType && doc.documentType !== filters.documentType) return false;
-      if (filters.year && String(doc.year) !== filters.year) return false;
       return true;
     });
   }, [filters]);

@@ -7,16 +7,16 @@ interface ActiveFilterChipsProps {
   onClearAll: () => void;
 }
 
-const LABELS: Record<keyof HubFilters, string> = {
+const LABELS: Partial<Record<keyof HubFilters, string>> = {
   brand: 'Brand',
   market: 'Market',
   category: 'Category',
-  documentType: 'Type',
-  year: 'Year',
 };
 
+const VISIBLE_FILTERS: (keyof HubFilters)[] = ['brand', 'market', 'category'];
+
 export function ActiveFilterChips({ filters, onClearOne, onClearAll }: ActiveFilterChipsProps) {
-  const active = (Object.keys(filters) as (keyof HubFilters)[]).filter((k) => filters[k]);
+  const active = VISIBLE_FILTERS.filter((k) => filters[k]);
 
   if (active.length === 0) return null;
 
