@@ -35,18 +35,12 @@
   width: min(1120px, calc(100% - 40px));
   margin: 0 auto;
   padding: 20px 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 28px;
-  flex-wrap: wrap;
 }
 
 .welcome-hero__intro {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  flex: 1 1 280px;
   max-width: 38rem;
 }
 
@@ -77,45 +71,6 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
-.welcome-hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-  flex: 0 0 auto;
-}
-
-.welcome-hero__cta {
-  border-width: 1px;
-  border-style: solid;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.welcome-hero__cta--hub {
-  background: var(--tb4l-teal);
-  color: #fff;
-  border-color: var(--tb4l-teal);
-}
-
-.welcome-hero__cta--hub:hover:not(:disabled) {
-  background: #004e66;
-  border-color: #004e66;
-  text-decoration: none;
-}
-
-.welcome-hero__cta--chat {
-  background: transparent;
-  color: #fff;
-  border-color: rgba(196, 163, 199, 0.75);
-}
-
-.welcome-hero__cta--chat:hover:not(:disabled) {
-  background: rgba(98, 73, 99, 0.28);
-  text-decoration: none;
-}
-
 .welcome-hero__anim {
   animation: welcomeRise 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -130,10 +85,6 @@
 
 .welcome-hero__support.welcome-hero__anim {
   animation-delay: 0.16s;
-}
-
-.welcome-hero__actions.welcome-hero__anim {
-  animation-delay: 0.2s;
 }
 
 .welcome-ask-section {
@@ -522,10 +473,6 @@ a.welcome-capabilities__link:hover strong {
 }
 
 @media (max-width: 900px) {
-  .welcome-hero__shell {
-    align-items: flex-start;
-  }
-
   .welcome-capabilities__list {
     grid-template-columns: 1fr 1fr;
     gap: 12px;

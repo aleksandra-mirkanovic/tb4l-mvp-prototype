@@ -73,14 +73,6 @@ export function WelcomePage() {
               AI-powered capabilities for the Trusted Brands for Life framework.
             </p>
           </div>
-          <div className="welcome-hero__actions welcome-hero__anim">
-            <Link className="btn welcome-hero__cta welcome-hero__cta--hub" to="/knowledge-hub">
-              TB4L Hub
-            </Link>
-            <Link className="btn welcome-hero__cta welcome-hero__cta--chat" to="/chat">
-              TB4L Chat
-            </Link>
-          </div>
         </div>
       </section>
 
