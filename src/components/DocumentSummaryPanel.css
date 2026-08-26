@@ -156,9 +156,9 @@
 }
 
 .summary-topic {
-  border: 1px solid rgba(0, 96, 126, 0.25);
-  background: rgba(0, 96, 126, 0.06);
-  color: var(--tb4l-dark-blue);
+  border: 1px solid var(--chip-hub-border);
+  background: var(--chip-hub-bg);
+  color: var(--chip-hub-text);
   border-radius: 999px;
   padding: 7px 12px;
   font-size: 12px;

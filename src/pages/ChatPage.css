@@ -56,7 +56,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
   background: var(--surface-primary);
-  color: var(--tb4l-dark-blue);
+  color: var(--text-primary);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -108,7 +108,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
   background: var(--surface-primary);
-  color: var(--tb4l-dark-blue);
+  color: var(--text-primary);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -583,9 +583,9 @@
   border-radius: 999px;
   font-size: 12px !important;
   font-weight: 600;
-  color: var(--tb4l-dark-blue) !important;
+  color: var(--text-primary) !important;
   background: var(--tb4l-ice);
-  border: 1px solid rgba(16, 56, 79, 0.12);
+  border: 1px solid var(--border-subtle);
 }
 
 .chat-empty__context {
@@ -638,19 +638,20 @@
 }
 
 .chat-suggestion {
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-primary);
-  color: var(--tb4l-purple);
+  border: 1px solid var(--chip-chat-border);
+  background: var(--chip-chat-bg);
+  color: var(--chip-chat-text);
   border-radius: 999px;
   padding: 8px 14px;
   font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .chat-suggestion:hover:not(:disabled) {
   border-color: var(--tb4l-purple);
-  background: rgba(98, 73, 99, 0.06);
+  background: var(--tint-chat);
 }
 
 .chat-suggestion:disabled {
@@ -692,7 +693,7 @@
 }
 
 .is-user .chat-avatar {
-  background: var(--tb4l-dark-blue);
+  background: var(--tb4l-teal);
   color: #fff;
 }
 
@@ -707,8 +708,8 @@
 }
 
 .is-user .chat-bubble {
-  background: rgba(16, 56, 79, 0.06);
-  border-color: rgba(16, 56, 79, 0.15);
+  background: var(--tint-hub);
+  border-color: var(--border-subtle);
 }
 
 .is-genie .chat-bubble {
@@ -832,7 +833,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
   background: var(--surface-primary);
-  color: var(--tb4l-dark-blue);
+  color: var(--text-primary);
   cursor: pointer;
   display: grid;
   place-items: center;
@@ -968,9 +969,9 @@
 }
 
 .chip-file {
-  background: rgba(16, 56, 79, 0.08);
-  color: var(--tb4l-dark-blue);
-  border: 1px solid rgba(16, 56, 79, 0.18);
+  background: var(--chip-hub-bg);
+  color: var(--chip-hub-text);
+  border: 1px solid var(--chip-hub-border);
 }
 
 .chat-input {
@@ -983,6 +984,11 @@
   padding: 6px 4px;
   color: var(--text-body);
   line-height: 1.45;
+}
+
+.chat-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.9;
 }
 
 .chat-input:focus-visible {

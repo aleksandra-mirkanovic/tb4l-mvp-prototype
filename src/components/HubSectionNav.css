@@ -5,7 +5,7 @@
   margin-bottom: var(--space-5);
   padding: 8px;
   background: var(--tb4l-ice);
-  border: 1px solid rgba(16, 56, 79, 0.1);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
 }
 
@@ -21,14 +21,14 @@
 
 .hub-section-nav__link:hover {
   text-decoration: none;
-  color: var(--tb4l-dark-blue);
+  color: var(--text-primary);
   background: var(--surface-primary);
 }
 
 .hub-section-nav__link.is-active {
   color: var(--text-on-dark);
-  background: var(--tb4l-dark-blue);
-  border-color: var(--tb4l-dark-blue);
+  background: var(--tb4l-teal);
+  border-color: var(--tb4l-teal);
 }
 
 .hub-section-nav__link:focus-visible {

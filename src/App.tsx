@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-do
 import { AppFooter } from './components/AppFooter';
 import { AppHeader } from './components/AppHeader';
 import { AppProvider } from './context/AppContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { ChatPage } from './pages/ChatPage';
 import { KnowledgeHubBrowsePage } from './pages/KnowledgeHubBrowsePage';
 import { KnowledgeHubPage } from './pages/KnowledgeHubPage';
@@ -38,13 +39,15 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <div className="app-shell">
-        <a className="visually-hidden-focusable btn btn-secondary" href="#main-content">
-          Skip to content
-        </a>
-        <AppRoutes />
-      </div>
-    </AppProvider>
+    <ThemeProvider>
+      <AppProvider>
+        <div className="app-shell">
+          <a className="visually-hidden-focusable btn btn-secondary" href="#main-content">
+            Skip to content
+          </a>
+          <AppRoutes />
+        </div>
+      </AppProvider>
+    </ThemeProvider>
   );
 }

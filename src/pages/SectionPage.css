@@ -8,7 +8,7 @@
   padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-lg);
   background: var(--tb4l-ice);
-  border: 1px solid rgba(16, 56, 79, 0.1);
+  border: 1px solid var(--border-subtle);
   border-left: 3px solid var(--tb4l-teal);
 }
 

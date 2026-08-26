@@ -1,5 +1,5 @@
 .app-footer {
-  background: var(--tb4l-dark-blue);
+  background: var(--tb4l-header);
   color: rgba(255, 255, 255, 0.78);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   margin-top: auto;

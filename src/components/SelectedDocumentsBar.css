@@ -14,7 +14,7 @@
   gap: var(--space-3);
   align-items: center;
   padding: 14px 16px;
-  background: #ffffff;
+  background: var(--surface-elevated);
   border: 2px solid var(--tb4l-teal);
   border-radius: var(--radius-md);
   box-shadow:

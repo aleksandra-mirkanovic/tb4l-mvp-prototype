@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { ThemeToggle } from './ThemeToggle';
 import './AppHeader.css';
 
 export function AppHeader() {
@@ -14,9 +15,12 @@ export function AppHeader() {
             <div className="app-header__subtitle">Trusted Brands for Life</div>
           </div>
         </NavLink>
-        <p className="app-header__prototype" aria-label="Prototype label">
-          MVP Prototype · Mocked data
-        </p>
+        <div className="app-header__tools">
+          <p className="app-header__prototype" aria-label="Prototype label">
+            MVP Prototype · Mocked data
+          </p>
+          <ThemeToggle />
+        </div>
       </div>
       <nav className="main-nav" aria-label="Primary">
         <NavLink

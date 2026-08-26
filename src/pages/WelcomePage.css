@@ -80,8 +80,8 @@
 }
 
 .welcome-hub-spotlight {
-  background: #fff;
-  border-bottom: 1px solid rgba(16, 56, 79, 0.1);
+  background: var(--surface-primary);
+  border-bottom: 1px solid var(--border-subtle);
   padding: 18px 20px;
 }
 
@@ -122,7 +122,7 @@
   font-family: var(--welcome-sans);
   font-size: clamp(18px, 2.2vw, 22px);
   font-weight: 700;
-  color: var(--tb4l-dark-blue);
+  color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
@@ -140,7 +140,7 @@
 
 .welcome-guide {
   background: var(--surface-primary);
-  border-bottom: 1px solid rgba(16, 56, 79, 0.08);
+  border-bottom: 1px solid var(--border-subtle);
   padding: 14px 20px;
 }
 
@@ -155,7 +155,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--tb4l-dark-blue);
+  color: var(--text-primary);
 }
 
 .welcome-guide__steps {
@@ -246,9 +246,9 @@
 }
 
 .welcome-ask__chip {
-  border: 1px solid rgba(98, 73, 99, 0.22);
-  background: var(--tb4l-ice);
-  color: var(--tb4l-dark-blue);
+  border: 1px solid var(--chip-chat-border);
+  background: var(--chip-chat-bg);
+  color: var(--chip-chat-text);
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 13px;
@@ -261,7 +261,7 @@
 
 .welcome-ask__chip:hover {
   border-color: var(--tb4l-purple);
-  background: rgba(98, 73, 99, 0.18);
+  background: var(--tint-chat);
   transform: translateY(-1px);
   text-decoration: none;
 }
@@ -274,7 +274,7 @@
   padding: 10px 12px 10px 16px;
   border-radius: 14px;
   border: 1px solid var(--border-subtle);
-  background: #fff;
+  background: var(--surface-primary);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -290,6 +290,11 @@
   background: transparent;
   padding: 8px 0;
   color: var(--text-body);
+}
+
+.welcome-ask__composer input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.9;
 }
 
 .welcome-ask__composer input:focus-visible {
@@ -321,7 +326,7 @@
 }
 
 .welcome-capabilities {
-  background: var(--tb4l-dark-blue);
+  background: var(--tb4l-header);
   color: #fff;
   padding: clamp(24px, 3.5vw, 36px) 20px clamp(36px, 4.5vw, 48px);
 }

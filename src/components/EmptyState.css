@@ -20,8 +20,8 @@
 }
 
 .empty-state__icon {
-  background: rgba(16, 56, 79, 0.08);
-  color: var(--tb4l-dark-blue);
+  background: var(--tint-hub);
+  color: var(--text-primary);
 }
 
 .error-state__icon {
