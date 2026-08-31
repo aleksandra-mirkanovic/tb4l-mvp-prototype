@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AddSourcesModal } from '../components/AddSourcesModal';
 import { ErrorState } from '../components/ErrorState';
 import { MessageActionIcons } from '../components/MessageActionIcons';
@@ -41,6 +41,19 @@ function formatSessionDate(ts: number) {
   return new Date(ts).toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
+/** CHANGE B: short source hint under history items */
+function sessionSourceHint(session: ChatSession) {
+  const docs = session.sources.filter((s) => s.kind === 'document');
+  if (session.genieEnabled && docs.length === 0) return ' · M360';
+  if (session.genieEnabled && docs.length > 0) {
+    return ` · ${docs.length} Hub + M360`;
+  }
+  if (docs.length > 0) {
+    return ` · ${docs.length} Hub source${docs.length > 1 ? 's' : ''}`;
+  }
+  return ' · Framework';
+}
+
 export function ChatPage() {
   const {
     activeSources,
@@ -59,6 +72,7 @@ export function ChatPage() {
     setMessageFeedback,
     startNewSession,
     loadSession,
+    deleteSession,
   } = useApp();
 
   const [input, setInput] = useState('');
@@ -447,6 +461,59 @@ export function ChatPage() {
     }, 0);
   };
 
+  const removeSession = (sessionId: string, title: string) => {
+    const ok = window.confirm(`Delete this conversation?\n\n“${title}”\n\nThis cannot be undone.`);
+    if (!ok) return;
+    cancelRef.current = true;
+    clearTimers();
+    setStreaming('');
+    setWaitingOnGenie(false);
+    setIsTyping(false);
+    setLastPrompt(null);
+    setAttachedFiles([]);
+    setPlusMenu('closed');
+    deleteSession(sessionId);
+  };
+
+  const renderSessionRow = (session: ChatSession, timeLabel: string) => (
+    <div
+      key={session.id}
+      className={`chat-recent-row${session.id === activeSessionId ? ' is-active' : ''}`}
+    >
+      <button
+        type="button"
+        className="chat-recent"
+        onClick={() => openSession(session.id)}
+        aria-current={session.id === activeSessionId ? 'true' : undefined}
+        title="Resume this chat with its sources"
+      >
+        <span className="chat-recent__title">{session.title}</span>
+        <span className="chat-recent__meta">
+          {timeLabel}
+          {sessionSourceHint(session)}
+        </span>
+      </button>
+      <button
+        type="button"
+        className="chat-recent__delete"
+        onClick={(e) => {
+          e.stopPropagation();
+          removeSession(session.id, session.title);
+        }}
+        aria-label={`Delete conversation: ${session.title}`}
+        title="Delete conversation"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <path d="M3 6h18" />
+          <path d="M8 6V4h8v2" />
+          <path d="M19 6l-1 14H6L5 6" />
+          <path d="M10 11v6" />
+          <path d="M14 11v6" />
+        </svg>
+      </button>
+    </div>
+  );
+
   const empty = chatMessages.length === 0 && !streaming && !waitingOnGenie;
 
   return (
@@ -486,7 +553,7 @@ export function ChatPage() {
         <aside className="chat-sidebar" aria-label="Chat sidebar">
           <div className="chat-sidebar__section chat-sidebar__section--top">
             <div className="chat-sidebar__top-row">
-              <button type="button" className="btn btn-primary chat-sidebar__new" onClick={startNewChat}>
+              <button type="button" className="btn btn-chat chat-sidebar__new" onClick={startNewChat}>
                 + New Chat
               </button>
               <button
@@ -505,44 +572,28 @@ export function ChatPage() {
             </div>
           </div>
 
+          {/* CHANGE B: history framed as continue-working + source hints + delete */}
           <div id="chat-history-list" className="chat-sidebar__section chat-sidebar__section--grow">
-            <div className="chat-sidebar__label">History</div>
-            <div className="chat-sidebar__sublabel">Today</div>
+            <div className="chat-sidebar__label">Continue working</div>
+            <p className="chat-sidebar__hint chat-sidebar__hint--tight">
+              Resume a chat, or delete a whole conversation.
+            </p>
+            <div className="chat-sidebar__sublabel">Active today</div>
             {todaySessions.length === 0 ? (
               <p className="chat-sidebar__hint">No chats yet today. Start one below.</p>
             ) : (
-              todaySessions.map((session) => (
-                <button
-                  key={session.id}
-                  type="button"
-                  className={`chat-recent ${session.id === activeSessionId ? 'is-active' : ''}`}
-                  onClick={() => openSession(session.id)}
-                  aria-current={session.id === activeSessionId ? 'true' : undefined}
-                  title="Open conversation and continue chatting"
-                >
-                  <span className="chat-recent__title">{session.title}</span>
-                  <span className="chat-recent__meta">{formatSessionTime(session.updatedAt)}</span>
-                </button>
-              ))
+              todaySessions.map((session) =>
+                renderSessionRow(session, formatSessionTime(session.updatedAt)),
+              )
             )}
 
-            <div className="chat-sidebar__sublabel chat-sidebar__sublabel--spaced">Previous</div>
+            <div className="chat-sidebar__sublabel chat-sidebar__sublabel--spaced">Earlier</div>
             {previousSessions.length === 0 ? (
               <p className="chat-sidebar__hint">Earlier conversations will appear here.</p>
             ) : (
-              previousSessions.map((session) => (
-                <button
-                  key={session.id}
-                  type="button"
-                  className={`chat-recent ${session.id === activeSessionId ? 'is-active' : ''}`}
-                  onClick={() => openSession(session.id)}
-                  aria-current={session.id === activeSessionId ? 'true' : undefined}
-                  title="Open conversation and continue chatting"
-                >
-                  <span className="chat-recent__title">{session.title}</span>
-                  <span className="chat-recent__meta">{formatSessionDate(session.updatedAt)}</span>
-                </button>
-              ))
+              previousSessions.map((session) =>
+                renderSessionRow(session, formatSessionDate(session.updatedAt)),
+              )
             )}
           </div>
         </aside>
@@ -581,15 +632,27 @@ export function ChatPage() {
           </div>
         </div>
 
+        {/* CHANGE D: M360 framed as deliberate structured-data mode */}
         {hasGenie ? (
           <div className="chat-genie-banner" role="status">
-            <strong>M360</strong>
-            <span>Connected for structured data. Responses may take longer than standard Chat.</span>
+            <strong>M360 mode</strong>
+            <span>
+              Structured market/brand data only—not for general TB4L strategy questions. May take
+              longer than standard Chat.
+            </span>
             {waitingOnGenie ? (
               <button type="button" className="btn btn-danger btn-sm" onClick={cancelGenie}>
                 Cancel
               </button>
-            ) : null}
+            ) : (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setGenieEnabled(false)}
+              >
+                Exit M360
+              </button>
+            )}
           </div>
         ) : null}
 
@@ -623,25 +686,29 @@ export function ChatPage() {
               </div>
               <h1>TB4L Chat</h1>
               <p className="chat-empty__tagline">
-                Build stronger brands with trusted knowledge and AI guidance.
+                Ask with Hub sources for the highest-trust answers.
               </p>
+              {/* CHANGE C: Hub-first empty state */}
               <p className="chat-empty__trust">
-                Prototype · answers are simulated. With Hub sources selected, replies cite those
-                documents.
+                Without Hub documents, Chat uses general TB4L framework guidance. Add Hub sources to
+                get citations you can verify.
               </p>
               <p className="chat-empty__context">{contextHelp}</p>
               <div className="chat-empty__actions">
+                <Link className="btn btn-primary btn-sm" to="/knowledge-hub/playbooks">
+                  Pick Hub sources
+                </Link>
                 <button
                   type="button"
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-chat btn-sm"
                   onClick={() => {
                     setPlusMenu('main');
                   }}
                 >
-                  + Add context
+                  + Add context here
                 </button>
               </div>
-              <p className="chat-empty__ask">Try a framework question</p>
+              <p className="chat-empty__ask">Or try a framework question</p>
               <div className="chat-suggestions">
                 {emptySuggestions.map((q) => (
                   <button key={q} type="button" className="chat-suggestion" onClick={() => submit(q)} disabled={isTyping}>
@@ -665,7 +732,8 @@ export function ChatPage() {
                     <div className="chat-bubble-wrap">
                       <div className="chat-bubble">{formatLines(message.content)}</div>
                       {!isUser && message.citations && message.citations.length > 0 ? (
-                        <div className="chat-citations">
+                        <div className="chat-citations" aria-label="Sources used">
+                          <span className="chat-citations__label">Based on</span>
                           {message.citations.map((c) => (
                             <span key={c} className="chip chip-hub">
                               {c}

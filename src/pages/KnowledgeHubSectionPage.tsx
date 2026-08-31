@@ -99,7 +99,7 @@ export function KnowledgeHubSectionPage() {
             </h3>
             <p>
               {docs.length} curated document{docs.length === 1 ? '' : 's'} · select any, then{' '}
-              <strong>Use in Chat</strong>
+              <strong>Ask with these sources</strong>
             </p>
           </div>
           {docs.length === 0 ? (

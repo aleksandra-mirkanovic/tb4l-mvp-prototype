@@ -101,11 +101,20 @@ export function KnowledgeHubBrowsePage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           title="No matching documents"
-          description="No documents match the current filters. Try adjusting or resetting filters."
+          description="No documents match the current filters. Reset filters, or continue with general TB4L Chat if you only need framework guidance."
           actions={
-            <button type="button" className="btn btn-primary" onClick={resetFilters}>
-              Reset Filters
-            </button>
+            <>
+              <button type="button" className="btn btn-primary" onClick={resetFilters}>
+                Reset Filters
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => navigate('/chat')}
+              >
+                Continue with General TB4L Chat
+              </button>
+            </>
           }
         />
       ) : (

@@ -59,7 +59,15 @@
   letter-spacing: -0.025em;
   line-height: 1.25;
   color: #fff;
-  max-width: 28ch;
+  max-width: 32ch;
+}
+
+.welcome-hero__job {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.82);
+  max-width: 46ch;
 }
 
 .welcome-hero__anim {
@@ -74,69 +82,16 @@
   animation-delay: 0.1s;
 }
 
+.welcome-hero__job.welcome-hero__anim {
+  animation-delay: 0.16s;
+}
+
 .welcome-ask-section {
   background: var(--tb4l-ice);
   padding: clamp(28px, 4vw, 40px) 20px clamp(24px, 3vw, 32px);
 }
 
-.welcome-hub-spotlight {
-  background: var(--surface-primary);
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 18px 20px;
-}
-
-.welcome-hub-spotlight__inner {
-  width: min(1120px, 100%);
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px 24px;
-  flex-wrap: wrap;
-  padding: 16px 18px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(0, 96, 126, 0.08), var(--tb4l-ice));
-  border: 1px solid rgba(0, 96, 126, 0.18);
-  border-left: 3px solid var(--tb4l-teal);
-}
-
-.welcome-hub-spotlight__copy {
-  min-width: 0;
-  flex: 1 1 280px;
-}
-
-.welcome-hub-spotlight__eyebrow {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--tb4l-teal);
-}
-
-.welcome-hub-spotlight__title {
-  margin: 6px 0 0;
-  font-family: var(--welcome-sans);
-  font-size: clamp(18px, 2.2vw, 22px);
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-}
-
-.welcome-hub-spotlight__text {
-  margin: 6px 0 0;
-  font-size: 14px;
-  line-height: 1.4;
-  color: var(--text-secondary);
-  max-width: 52ch;
-}
-
-.welcome-hub-spotlight__cta {
-  flex-shrink: 0;
-}
+/* CHANGE A: Hub spotlight removed — journey section is primary Hub entry */
 
 .welcome-guide {
   background: var(--background-primary);
@@ -212,15 +167,16 @@
   font-size: 13px;
   font-weight: 800;
   color: #fff;
-  background: var(--tb4l-teal);
+  background: var(--color-hub);
 }
 
+/* Steps 1–2 = Hub (teal); step 3 = Chat (purple) */
 .welcome-guide__step:nth-child(2) .welcome-guide__num {
-  background: #0a4f66;
+  background: var(--color-hub);
 }
 
 .welcome-guide__step:nth-child(3) .welcome-guide__num {
-  background: var(--tb4l-purple);
+  background: var(--color-chat);
 }
 
 .welcome-guide__step-body {
@@ -247,7 +203,7 @@
   margin-top: 10px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--tb4l-teal);
+  color: var(--color-hub);
   text-decoration: none;
 }
 
@@ -257,7 +213,7 @@
 }
 
 .welcome-guide__step:nth-child(3) .welcome-guide__step-link {
-  color: var(--tb4l-purple);
+  color: var(--color-chat);
 }
 
 .welcome-guide__example {
@@ -332,7 +288,18 @@
   font-size: 14px;
   line-height: 1.45;
   color: var(--text-secondary);
-  max-width: 48ch;
+  max-width: 54ch;
+}
+
+.welcome-ask__alt {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.welcome-ask__alt a {
+  font-weight: 700;
+  color: var(--tb4l-teal);
 }
 
 .welcome-ask__suggestions {
@@ -606,16 +573,6 @@ a.welcome-capabilities__link:hover strong {
 
   .welcome-capabilities__list {
     grid-template-columns: 1fr;
-  }
-
-  .welcome-hub-spotlight__inner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .welcome-hub-spotlight__cta {
-    width: 100%;
-    text-align: center;
   }
 }
 

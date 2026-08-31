@@ -7,7 +7,7 @@ const CAPABILITIES = [
   {
     id: 'chat',
     title: 'TB4L Chat',
-    description: 'Ask questions grounded in the TB4L framework',
+    description: 'Ask questions grounded in the TB4L framework or Hub sources',
     to: '/chat',
     status: 'live' as const,
     accent: 'chat' as const,
@@ -53,14 +53,19 @@ export function WelcomePage() {
 
   return (
     <div className="welcome-page">
+      {/* CHANGE A: clearer job-to-be-done in hero */}
       <section className="welcome-hero" aria-labelledby="welcome-heading">
         <div className="welcome-hero__atmosphere" aria-hidden="true" />
         <div className="welcome-hero__shell">
           <div className="welcome-hero__intro">
             <p className="welcome-hero__greeting welcome-hero__anim">Welcome back, Aleksandra</p>
             <h1 id="welcome-heading" className="welcome-hero__tagline welcome-hero__anim">
-              Build stronger brands with trusted knowledge and AI guidance
+              Get trustworthy TB4L answers, grounded in approved Hub content
             </h1>
+            <p className="welcome-hero__job welcome-hero__anim">
+              Hub holds curated documents. Chat uses those sources so Brand Managers get faster,
+              more reliable guidance—without leaving TB4L.
+            </p>
           </div>
         </div>
       </section>
@@ -73,8 +78,10 @@ export function WelcomePage() {
           <h2 id="ask-heading" className="welcome-ask__title">
             How can I support your brand-building today?
           </h2>
+          {/* CHANGE A: trust difference called out next to quick ask */}
           <p className="welcome-ask__lede">
-            Start with a question—Chat is your day-to-day guide for Trusted Brands for Life.
+            Quick questions use general TB4L framework knowledge. For document-grounded answers,
+            pick sources in the Hub first—or add them inside Chat.
           </p>
           <div className="welcome-ask__suggestions">
             {GENERAL_SUGGESTIONS.map((question) => (
@@ -119,37 +126,24 @@ export function WelcomePage() {
               </svg>
             </button>
           </form>
+          <p className="welcome-ask__alt">
+            Prefer grounded answers?{' '}
+            <Link to="/knowledge-hub/playbooks">Select Playbooks in Hub</Link>
+          </p>
         </div>
       </section>
 
-      <section className="welcome-hub-spotlight" aria-labelledby="hub-spotlight-heading">
-        <div className="welcome-hub-spotlight__inner">
-          <div className="welcome-hub-spotlight__copy">
-            <p className="welcome-hub-spotlight__eyebrow">TB4L Hub</p>
-            <h2 id="hub-spotlight-heading" className="welcome-hub-spotlight__title">
-              Curated content for brand managers
-            </h2>
-            <p className="welcome-hub-spotlight__text">
-              Browse Playbooks, Templates, Training, and Accelerator Outputs—plus Glossary, Brand
-              Frames, and Teams. Select documents, then use them in TB4L Chat for grounded answers.
-            </p>
-          </div>
-          <Link className="btn btn-primary welcome-hub-spotlight__cta" to="/knowledge-hub">
-            Open TB4L Hub
-          </Link>
-        </div>
-      </section>
-
+      {/* CHANGE A: removed separate Hub spotlight strip; journey is the Hub entry */}
       <section className="welcome-guide" aria-labelledby="welcome-guide-heading">
         <div className="welcome-guide__inner">
           <div className="welcome-guide__intro">
-            <p className="welcome-guide__eyebrow">Hub + Chat</p>
+            <p className="welcome-guide__eyebrow">Recommended path</p>
             <h2 id="welcome-guide-heading" className="welcome-guide__title">
-              Ground your questions in trusted TB4L content
+              Hub → Chat: the highest-trust way to work
             </h2>
             <p className="welcome-guide__lede">
-              Hub holds curated documents. Chat answers from those sources—so replies stay aligned
-              to approved playbooks, templates, and training.
+              Select approved documents once, then ask. Replies cite those sources so you can
+              verify before acting.
             </p>
           </div>
 
@@ -190,8 +184,8 @@ export function WelcomePage() {
               <div className="welcome-guide__step-body">
                 <h3 className="welcome-guide__step-title">Ask in Chat</h3>
                 <p className="welcome-guide__step-text">
-                  Tap <strong>Use in Chat</strong>, then ask about recommendations, comparisons, or
-                  what a Brand Manager should focus on.
+                  Tap <strong>Ask with these sources</strong>, then request recommendations,
+                  comparisons, or Brand Manager focus areas.
                 </p>
                 <Link className="welcome-guide__step-link" to="/chat">
                   Go to TB4L Chat
@@ -213,9 +207,10 @@ export function WelcomePage() {
         </div>
       </section>
 
+      {/* CHANGE A: capabilities demoted to quieter footer links */}
       <nav className="welcome-capabilities" aria-label="Platform capabilities">
         <div className="welcome-capabilities__inner">
-          <p className="welcome-capabilities__label">Platform capabilities</p>
+          <p className="welcome-capabilities__label">Also available</p>
           <ul className="welcome-capabilities__list">
             {CAPABILITIES.map((item) => {
               const body = (

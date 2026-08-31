@@ -2,7 +2,18 @@
 [data-theme='light'] {
   color-scheme: light;
 
-  /* TB4L brand palette */
+  /*
+   * TB4L Super template palette
+   * ---------------------------
+   * #10384F  Dark blue  → brand shell / header / strong text
+   * #00607E  Teal       → Hub identity + system primary actions
+   * #624963  Purple     → Chat identity (Chat chrome & Chat CTAs)
+   * #286436  Green      → M360 / Genie + success
+   * #D30F4B  Magenta    → attention / error / destructive
+   * #D9D9D9  Gray       → borders / dividers
+   * #FFFFFF  White      → surfaces
+   */
+
   --tb4l-dark-blue: #10384f;
   --tb4l-header: #10384f;
   --tb4l-teal: #00607e;
@@ -12,8 +23,18 @@
   --tb4l-gray: #d9d9d9;
   --tb4l-ice: #d8e5eb;
 
+  /* Semantic roles (use these in UI, not raw palette names) */
+  --color-shell: var(--tb4l-dark-blue);
+  --color-hub: var(--tb4l-teal);
+  --color-chat: var(--tb4l-purple);
+  --color-m360: var(--tb4l-green);
+  --color-success: var(--tb4l-green);
+  --color-danger: var(--tb4l-magenta);
+  --color-border: var(--tb4l-gray);
+  --color-action: var(--tb4l-teal); /* system primary = Hub/teal per Super template */
+
   --background-primary: #f7f9fa;
-  --background-secondary: #d8e5eb;
+  --background-secondary: #f1f4f5;
   --surface-primary: #ffffff;
   --surface-elevated: #ffffff;
 
@@ -27,7 +48,6 @@
   --shadow-md: 0 4px 16px rgba(16, 56, 79, 0.08);
   --shadow-lg: 0 12px 32px rgba(16, 56, 79, 0.12);
 
-  /* Soft tints for product identity (Hub / Chat / M360) */
   --tint-hub: rgba(0, 96, 126, 0.1);
   --tint-chat: rgba(98, 73, 99, 0.12);
   --tint-m360: rgba(40, 100, 54, 0.12);
@@ -53,6 +73,7 @@
 
   --focus-ring: 0 0 0 3px rgba(0, 96, 126, 0.35);
   --focus-ring-chat: 0 0 0 3px rgba(98, 73, 99, 0.35);
+  --focus-ring-m360: 0 0 0 3px rgba(40, 100, 54, 0.35);
 
   --chip-hub-bg: rgba(0, 96, 126, 0.08);
   --chip-hub-border: rgba(0, 96, 126, 0.35);
@@ -60,6 +81,9 @@
   --chip-chat-bg: rgba(98, 73, 99, 0.1);
   --chip-chat-border: rgba(98, 73, 99, 0.35);
   --chip-chat-text: #624963;
+  --chip-m360-bg: rgba(40, 100, 54, 0.1);
+  --chip-m360-border: rgba(40, 100, 54, 0.4);
+  --chip-m360-text: #286436;
   --overlay-scrim: rgba(16, 56, 79, 0.45);
 }
 
@@ -74,6 +98,15 @@
   --tb4l-magenta: #f05a84;
   --tb4l-gray: #3a5160;
   --tb4l-ice: #152a38;
+
+  --color-shell: var(--tb4l-dark-blue);
+  --color-hub: var(--tb4l-teal);
+  --color-chat: var(--tb4l-purple);
+  --color-m360: var(--tb4l-green);
+  --color-success: var(--tb4l-green);
+  --color-danger: var(--tb4l-magenta);
+  --color-border: var(--tb4l-gray);
+  --color-action: var(--tb4l-teal);
 
   --background-primary: #0b1a22;
   --background-secondary: #122633;
@@ -98,6 +131,7 @@
 
   --focus-ring: 0 0 0 3px rgba(58, 168, 199, 0.45);
   --focus-ring-chat: 0 0 0 3px rgba(184, 155, 192, 0.4);
+  --focus-ring-m360: 0 0 0 3px rgba(111, 191, 127, 0.4);
 
   --chip-hub-bg: rgba(58, 168, 199, 0.18);
   --chip-hub-border: rgba(58, 168, 199, 0.4);
@@ -105,6 +139,9 @@
   --chip-chat-bg: rgba(184, 155, 192, 0.18);
   --chip-chat-border: rgba(184, 155, 192, 0.4);
   --chip-chat-text: #e7d5ea;
+  --chip-m360-bg: rgba(111, 191, 127, 0.16);
+  --chip-m360-border: rgba(111, 191, 127, 0.4);
+  --chip-m360-text: #c5e3cb;
   --overlay-scrim: rgba(0, 0, 0, 0.65);
 }
 
@@ -226,12 +263,31 @@ a:hover {
 }
 
 .btn-primary {
-  background: var(--tb4l-teal);
+  background: var(--color-action);
   color: var(--text-on-dark);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: #004e66;
+}
+
+[data-theme='dark'] .btn-primary:hover:not(:disabled) {
+  background: #2b92b0;
+}
+
+/* CHANGE F: Chat-identity primary (purple), not system teal */
+.btn-chat {
+  background: var(--color-chat);
+  color: var(--text-on-dark);
+  border-color: transparent;
+}
+
+.btn-chat:hover:not(:disabled) {
+  background: #523d54;
+}
+
+[data-theme='dark'] .btn-chat:hover:not(:disabled) {
+  background: #a888b0;
 }
 
 .btn-secondary {
@@ -246,23 +302,34 @@ a:hover {
 
 .btn-ghost {
   background: transparent;
-  color: var(--tb4l-teal);
+  color: var(--color-hub);
   border-color: transparent;
   padding-inline: 10px;
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: rgba(0, 96, 126, 0.08);
+  background: var(--tint-hub);
+}
+
+.btn-ghost-chat {
+  background: transparent;
+  color: var(--color-chat);
+  border-color: transparent;
+  padding-inline: 10px;
+}
+
+.btn-ghost-chat:hover:not(:disabled) {
+  background: var(--tint-chat);
 }
 
 .btn-danger {
   background: var(--surface-primary);
-  color: var(--tb4l-magenta);
-  border-color: var(--tb4l-magenta);
+  color: var(--color-danger);
+  border-color: var(--color-danger);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: rgba(211, 15, 75, 0.06);
+  background: var(--tint-alert);
 }
 
 .btn-sm {
@@ -296,9 +363,9 @@ a:hover {
 }
 
 .chip-genie {
-  border-color: rgba(40, 100, 54, 0.4);
-  background: rgba(40, 100, 54, 0.1);
-  color: var(--tb4l-green);
+  border-color: var(--chip-m360-border);
+  background: var(--chip-m360-bg);
+  color: var(--chip-m360-text);
 }
 
 .chip-removable button {
@@ -334,13 +401,13 @@ a:hover {
 }
 
 .badge-genie {
-  background: rgba(40, 100, 54, 0.12);
-  color: var(--tb4l-green);
+  background: var(--chip-m360-bg);
+  color: var(--chip-m360-text);
 }
 
 .badge-ai {
-  background: rgba(0, 96, 126, 0.1);
-  color: var(--tb4l-teal);
+  background: var(--tint-hub);
+  color: var(--color-hub);
 }
 
 .card {

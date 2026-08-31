@@ -47,7 +47,7 @@ export function KnowledgeHubPage() {
         <li className="hub-loop__step">
           <span className="hub-loop__num">3</span>
           <div>
-            <strong>Use in Chat</strong>
+            <strong>Ask with these sources</strong>
             <p>Send selections into TB4L Chat for grounded, source-backed answers.</p>
           </div>
         </li>

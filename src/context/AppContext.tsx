@@ -45,6 +45,7 @@ interface AppContextValue extends AppState {
   replaceMessages: (messages: ChatMessage[]) => void;
   startNewSession: () => void;
   loadSession: (sessionId: string) => void;
+  deleteSession: (sessionId: string) => void;
 }
 
 function persistSessionsSnapshot(sessions: ChatSession[], activeId: string) {
@@ -535,6 +536,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [activeSessionId, activeSources, chatMessages, chatSessions, genieEnabled],
   );
 
+  const deleteSession = useCallback(
+    (sessionId: string) => {
+      const deletingActive = sessionId === activeSessionId;
+      const remaining = chatSessions.filter((s) => s.id !== sessionId);
+
+      if (!deletingActive) {
+        setChatSessions(() => {
+          persistSessionsSnapshot(remaining, activeSessionId);
+          return remaining;
+        });
+        return;
+      }
+
+      const fallback =
+        remaining.find((s) => s.messages.length > 0) ?? remaining[0] ?? createEmptySession();
+      const nextSessions = remaining.some((s) => s.id === fallback.id)
+        ? remaining
+        : [fallback, ...remaining];
+
+      setChatSessions(() => {
+        persistSessionsSnapshot(nextSessions, fallback.id);
+        return nextSessions;
+      });
+      setActiveSessionId(fallback.id);
+      setChatMessages(fallback.messages.map((m) => ({ ...m })));
+      setActiveSources(
+        fallback.sources.length ? fallback.sources.map((s) => ({ ...s })) : [GENERAL_SOURCE],
+      );
+      setGenieEnabled(fallback.genieEnabled);
+      setGenieStatus('idle');
+    },
+    [activeSessionId, chatSessions],
+  );
+
   const value = useMemo<AppContextValue>(
     () => ({
       selectedDocumentIds,
@@ -563,6 +598,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       replaceMessages,
       startNewSession,
       loadSession,
+      deleteSession,
     }),
     [
       selectedDocumentIds,
@@ -589,6 +625,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       replaceMessages,
       startNewSession,
       loadSession,
+      deleteSession,
     ],
   );
 
