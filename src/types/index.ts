@@ -17,7 +17,7 @@ export type DocumentType =
   | 'Case Study'
   | 'Plan';
 
-export type FileFormat = 'PDF' | 'PPTX' | 'DOCX' | 'XLSX';
+export type FileFormat = 'PDF' | 'PPTX' | 'DOCX' | 'MD';
 
 export interface KnowledgeDocument {
   id: string;

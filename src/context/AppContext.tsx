@@ -24,6 +24,8 @@ const GENERAL_SOURCE: ChatSource = {
   kind: 'general',
 };
 
+const SESSIONS_STORAGE_KEY = 'tb4l-chat-sessions-v1';
+
 interface AppContextValue extends AppState {
   setFilters: (filters: HubFilters | ((prev: HubFilters) => HubFilters)) => void;
   resetFilters: () => void;
@@ -43,6 +45,36 @@ interface AppContextValue extends AppState {
   replaceMessages: (messages: ChatMessage[]) => void;
   startNewSession: () => void;
   loadSession: (sessionId: string) => void;
+}
+
+function persistSessionsSnapshot(sessions: ChatSession[], activeId: string) {
+  try {
+    const meaningful = sessions.filter(
+      (s) => s.messages.length > 0 || s.id === activeId,
+    );
+    localStorage.setItem(
+      SESSIONS_STORAGE_KEY,
+      JSON.stringify({ activeSessionId: activeId, sessions: meaningful }),
+    );
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+function readPersistedSessions(): { sessions: ChatSession[]; activeSessionId: string } | null {
+  try {
+    const raw = localStorage.getItem(SESSIONS_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as {
+      activeSessionId?: string;
+      sessions?: ChatSession[];
+    };
+    if (!parsed?.sessions?.length || !parsed.activeSessionId) return null;
+    if (!parsed.sessions.some((s) => s.id === parsed.activeSessionId)) return null;
+    return { sessions: parsed.sessions, activeSessionId: parsed.activeSessionId };
+  } catch {
+    return null;
+  }
 }
 
 function documentSource(id: string): ChatSource {
@@ -82,6 +114,27 @@ function createEmptySession(): ChatSession {
     genieEnabled: false,
     createdAt: now,
     updatedAt: now,
+  };
+}
+
+function withActiveSessionSnapshot(
+  session: ChatSession,
+  snapshot: {
+    messages: ChatMessage[];
+    sources: ChatSource[];
+    genieEnabled: boolean;
+  },
+): ChatSession {
+  const wroteAgain = snapshot.messages.some(
+    (m) => m.role === 'user' && !session.messages.some((s) => s.id === m.id),
+  );
+  return {
+    ...session,
+    title: snapshot.messages.length ? titleFromMessages(snapshot.messages) : session.title,
+    messages: snapshot.messages,
+    sources: snapshot.sources,
+    genieEnabled: snapshot.genieEnabled,
+    updatedAt: wroteAgain ? Date.now() : session.updatedAt,
   };
 }
 
@@ -263,30 +316,52 @@ function seedSessions(currentId: string): ChatSession[] {
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const initialSessionId = useMemo(() => uid('session'), []);
+  const boot = useMemo(() => {
+    const persisted = readPersistedSessions();
+    if (persisted) {
+      const active =
+        persisted.sessions.find((s) => s.id === persisted.activeSessionId) ??
+        persisted.sessions[0];
+      return {
+        sessions: persisted.sessions,
+        activeSessionId: active.id,
+        messages: active.messages,
+        sources: active.sources.length ? active.sources : [GENERAL_SOURCE],
+        genieEnabled: active.genieEnabled,
+      };
+    }
+    const id = uid('session');
+    return {
+      sessions: seedSessions(id),
+      activeSessionId: id,
+      messages: [] as ChatMessage[],
+      sources: [GENERAL_SOURCE],
+      genieEnabled: false,
+    };
+  }, []);
+
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
-  const [activeSources, setActiveSources] = useState<ChatSource[]>([GENERAL_SOURCE]);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>(() => seedSessions(initialSessionId));
-  const [activeSessionId, setActiveSessionId] = useState(initialSessionId);
+  const [activeSources, setActiveSources] = useState<ChatSource[]>(boot.sources);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(boot.messages);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>(boot.sessions);
+  const [activeSessionId, setActiveSessionId] = useState(boot.activeSessionId);
   const [filters, setFilters] = useState<HubFilters>(EMPTY_FILTERS);
-  const [genieEnabled, setGenieEnabled] = useState(false);
+  const [genieEnabled, setGenieEnabled] = useState(boot.genieEnabled);
   const [genieStatus, setGenieStatus] = useState<GenieStatus>('idle');
 
   useEffect(() => {
-    setChatSessions((prev) =>
-      prev.map((session) => {
+    setChatSessions((prev) => {
+      const next = prev.map((session) => {
         if (session.id !== activeSessionId) return session;
-        return {
-          ...session,
-          title: chatMessages.length ? titleFromMessages(chatMessages) : session.title === 'New chat' ? 'New chat' : session.title,
+        return withActiveSessionSnapshot(session, {
           messages: chatMessages,
           sources: activeSources,
           genieEnabled,
-          updatedAt: Date.now(),
-        };
-      }),
-    );
+        });
+      });
+      persistSessionsSnapshot(next, activeSessionId);
+      return next;
+    });
   }, [activeSessionId, activeSources, chatMessages, genieEnabled]);
 
   const resetFilters = useCallback(() => setFilters(EMPTY_FILTERS), []);
@@ -404,18 +479,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setChatSessions((prev) => {
       const persisted = prev.map((session) =>
         session.id === activeSessionId
-          ? {
-              ...session,
-              title: chatMessages.length ? titleFromMessages(chatMessages) : session.title,
+          ? withActiveSessionSnapshot(session, {
               messages: chatMessages,
               sources: activeSources,
               genieEnabled,
-              updatedAt: Date.now(),
-            }
+            })
           : session,
       );
       const cleaned = persisted.filter((s) => s.id !== activeSessionId || s.messages.length > 0);
-      return [next, ...cleaned];
+      const merged = [next, ...cleaned];
+      persistSessionsSnapshot(merged, next.id);
+      return merged;
     });
     setActiveSessionId(next.id);
     setChatMessages([]);
@@ -428,32 +502,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     (sessionId: string) => {
       if (sessionId === activeSessionId) return;
 
-      let target: ChatSession | undefined;
+      const target = chatSessions.find((s) => s.id === sessionId);
+      if (!target) return;
+
+      // Snapshot before any state updates so history can't be wiped by sync races.
+      const nextMessages = target.messages.map((m) => ({ ...m }));
+      const nextSources = target.sources.length
+        ? target.sources.map((s) => ({ ...s }))
+        : [GENERAL_SOURCE];
+      const nextGenie = target.genieEnabled;
+
       setChatSessions((prev) => {
-        const persisted = prev.map((session) =>
+        const merged = prev.map((session) =>
           session.id === activeSessionId
-            ? {
-                ...session,
-                title: chatMessages.length ? titleFromMessages(chatMessages) : session.title,
+            ? withActiveSessionSnapshot(session, {
                 messages: chatMessages,
                 sources: activeSources,
                 genieEnabled,
-                updatedAt: Date.now(),
-              }
+              })
             : session,
         );
-        target = persisted.find((s) => s.id === sessionId);
-        return persisted;
+        persistSessionsSnapshot(merged, sessionId);
+        return merged;
       });
 
-      if (!target) return;
       setActiveSessionId(sessionId);
-      setChatMessages(target.messages);
-      setActiveSources(target.sources.length ? target.sources : [GENERAL_SOURCE]);
-      setGenieEnabled(target.genieEnabled);
+      setChatMessages(nextMessages);
+      setActiveSources(nextSources);
+      setGenieEnabled(nextGenie);
       setGenieStatus('idle');
     },
-    [activeSessionId, activeSources, chatMessages, genieEnabled],
+    [activeSessionId, activeSources, chatMessages, chatSessions, genieEnabled],
   );
 
   const value = useMemo<AppContextValue>(

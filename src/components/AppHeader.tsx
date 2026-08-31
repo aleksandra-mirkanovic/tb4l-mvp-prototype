@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
+import { UserProfileMenu } from './UserProfileMenu';
 import './AppHeader.css';
 
 export function AppHeader() {
@@ -20,6 +21,7 @@ export function AppHeader() {
             MVP Prototype · Mocked data
           </p>
           <ThemeToggle />
+          <UserProfileMenu />
         </div>
       </div>
       <nav className="main-nav" aria-label="Primary">

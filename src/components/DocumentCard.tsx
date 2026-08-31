@@ -1,4 +1,5 @@
 import type { KnowledgeDocument } from '../types';
+import { formatExtension } from '../data/documents';
 import './DocumentCard.css';
 
 interface DocumentCardProps {
@@ -46,7 +47,7 @@ export function DocumentCard({
             <span aria-hidden="true">·</span>
             <span>{document.year}</span>
             <span aria-hidden="true">·</span>
-            <span>{document.fileFormat}</span>
+            <span>{formatExtension(document.fileFormat)}</span>
           </p>
         </div>
 
@@ -97,7 +98,7 @@ export function DocumentCard({
         </div>
         <div>
           <dt>Format</dt>
-          <dd>{document.fileFormat}</dd>
+          <dd>{formatExtension(document.fileFormat)}</dd>
         </div>
         <div>
           <dt>Updated</dt>

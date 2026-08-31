@@ -149,16 +149,16 @@ export const DOCUMENTS: KnowledgeDocument[] = [
     id: 'doc-8',
     title: 'Discover Template 2027',
     description:
-      'Updated Discover-stage template for insight capture, opportunity mapping, and source documentation.',
+      'Updated Discover-stage markdown template for insight capture, opportunity mapping, and source documentation.',
     brand: 'Global',
     market: 'Global',
     category: 'Discover Templates',
     year: 2027,
     documentType: 'Template',
-    fileFormat: 'XLSX',
+    fileFormat: 'MD',
     lastUpdated: '2026-02-28',
     summary:
-      'Structured worksheets for Discover: insight log, opportunity scorecard, and evidence index. Designed to feed Brand Planning and M360 questions.',
+      'Structured Discover template in Markdown: insight log, opportunity scorecard, and evidence index. Designed to feed Brand Planning and M360 questions.',
     keyTopics: ['Discover', 'Insight log', 'Opportunity map', 'Evidence'],
     whyRelevant:
       'Use at the start of a planning cycle to structure discovery work.',
@@ -255,4 +255,9 @@ export const EMPTY_FILTERS = {
 
 export function getDocumentById(id: string): KnowledgeDocument | undefined {
   return DOCUMENTS.find((d) => d.id === id);
+}
+
+/** Display label for in-scope Hub formats (Excel is out of MVP scope). */
+export function formatExtension(fileFormat: KnowledgeDocument['fileFormat']): string {
+  return `.${fileFormat.toLowerCase()}`;
 }

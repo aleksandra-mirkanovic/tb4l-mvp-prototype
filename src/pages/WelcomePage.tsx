@@ -57,7 +57,7 @@ export function WelcomePage() {
         <div className="welcome-hero__atmosphere" aria-hidden="true" />
         <div className="welcome-hero__shell">
           <div className="welcome-hero__intro">
-            <p className="welcome-hero__greeting welcome-hero__anim">Welcome back, Deniz</p>
+            <p className="welcome-hero__greeting welcome-hero__anim">Welcome back, Aleksandra</p>
             <h1 id="welcome-heading" className="welcome-hero__tagline welcome-hero__anim">
               Build stronger brands with trusted knowledge and AI guidance
             </h1>
@@ -142,18 +142,74 @@ export function WelcomePage() {
 
       <section className="welcome-guide" aria-labelledby="welcome-guide-heading">
         <div className="welcome-guide__inner">
-          <h2 id="welcome-guide-heading" className="welcome-guide__title">
-            Try Hub → Chat in 3 clicks
-          </h2>
+          <div className="welcome-guide__intro">
+            <p className="welcome-guide__eyebrow">Hub + Chat</p>
+            <h2 id="welcome-guide-heading" className="welcome-guide__title">
+              Ground your questions in trusted TB4L content
+            </h2>
+            <p className="welcome-guide__lede">
+              Hub holds curated documents. Chat answers from those sources—so replies stay aligned
+              to approved playbooks, templates, and training.
+            </p>
+          </div>
+
           <ol className="welcome-guide__steps">
-            <li>
-              <Link to="/knowledge-hub">Open TB4L Hub</Link>
+            <li className="welcome-guide__step">
+              <span className="welcome-guide__num" aria-hidden="true">
+                1
+              </span>
+              <div className="welcome-guide__step-body">
+                <h3 className="welcome-guide__step-title">Browse the Hub</h3>
+                <p className="welcome-guide__step-text">
+                  Open Playbooks, Templates, Training, or Brand Frames and find the documents you
+                  need.
+                </p>
+                <Link className="welcome-guide__step-link" to="/knowledge-hub">
+                  Open TB4L Hub
+                </Link>
+              </div>
             </li>
-            <li>
-              <Link to="/knowledge-hub/playbooks">Open Playbooks</Link> and select a document
+            <li className="welcome-guide__step">
+              <span className="welcome-guide__num" aria-hidden="true">
+                2
+              </span>
+              <div className="welcome-guide__step-body">
+                <h3 className="welcome-guide__step-title">Select your sources</h3>
+                <p className="welcome-guide__step-text">
+                  Check one or more documents. Review AI summaries first if you want a quick read.
+                </p>
+                <Link className="welcome-guide__step-link" to="/knowledge-hub/playbooks">
+                  Start with Playbooks
+                </Link>
+              </div>
             </li>
-            <li>Tap <strong>Use in Chat</strong> on the selection bar</li>
+            <li className="welcome-guide__step">
+              <span className="welcome-guide__num" aria-hidden="true">
+                3
+              </span>
+              <div className="welcome-guide__step-body">
+                <h3 className="welcome-guide__step-title">Ask in Chat</h3>
+                <p className="welcome-guide__step-text">
+                  Tap <strong>Use in Chat</strong>, then ask about recommendations, comparisons, or
+                  what a Brand Manager should focus on.
+                </p>
+                <Link className="welcome-guide__step-link" to="/chat">
+                  Go to TB4L Chat
+                </Link>
+              </div>
+            </li>
           </ol>
+
+          <p className="welcome-guide__example">
+            Example: select the Brand Planning Playbook, then ask
+            <button
+              type="button"
+              className="welcome-guide__example-ask"
+              onClick={() => goToChat('Summarize key recommendations from my selected documents.')}
+            >
+              “Summarize key recommendations from my selected documents.”
+            </button>
+          </p>
         </div>
       </section>
 

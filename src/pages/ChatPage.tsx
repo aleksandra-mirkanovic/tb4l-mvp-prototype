@@ -431,7 +431,7 @@ export function ChatPage() {
   };
 
   const openSession = (sessionId: string) => {
-    if (isTyping || sessionId === activeSessionId) return;
+    if (sessionId === activeSessionId) return;
     cancelRef.current = true;
     clearTimers();
     setStreaming('');
@@ -442,6 +442,9 @@ export function ChatPage() {
     setPlusMenu('closed');
     setSidebarCollapsed(false);
     loadSession(sessionId);
+    window.setTimeout(() => {
+      document.getElementById('chat-input')?.focus();
+    }, 0);
   };
 
   const empty = chatMessages.length === 0 && !streaming && !waitingOnGenie;
@@ -514,7 +517,8 @@ export function ChatPage() {
                   type="button"
                   className={`chat-recent ${session.id === activeSessionId ? 'is-active' : ''}`}
                   onClick={() => openSession(session.id)}
-                  disabled={isTyping}
+                  aria-current={session.id === activeSessionId ? 'true' : undefined}
+                  title="Open conversation and continue chatting"
                 >
                   <span className="chat-recent__title">{session.title}</span>
                   <span className="chat-recent__meta">{formatSessionTime(session.updatedAt)}</span>
@@ -532,7 +536,8 @@ export function ChatPage() {
                   type="button"
                   className={`chat-recent ${session.id === activeSessionId ? 'is-active' : ''}`}
                   onClick={() => openSession(session.id)}
-                  disabled={isTyping}
+                  aria-current={session.id === activeSessionId ? 'true' : undefined}
+                  title="Open conversation and continue chatting"
                 >
                   <span className="chat-recent__title">{session.title}</span>
                   <span className="chat-recent__meta">{formatSessionDate(session.updatedAt)}</span>
@@ -763,7 +768,7 @@ export function ChatPage() {
             type="file"
             className="sr-only"
             multiple
-            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv"
+            accept=".pdf,.doc,.docx,.ppt,.pptx,.md,.txt"
             onChange={(e) => handleAttachFiles(e.target.files)}
           />
           <form

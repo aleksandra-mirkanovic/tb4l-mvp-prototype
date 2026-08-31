@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { formatExtension } from '../data/documents';
 import type { KnowledgeDocument } from '../types';
 import './DocumentSummaryPanel.css';
 
@@ -92,7 +93,7 @@ export function DocumentSummaryPanel({
               Close
             </button>
           </div>
-          <p className="summary-cover__format">{document.fileFormat}</p>
+          <p className="summary-cover__format">{formatExtension(document.fileFormat)}</p>
           <h2 id="summary-title" className="summary-cover__title">
             {document.title}
           </h2>

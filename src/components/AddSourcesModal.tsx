@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { EmptyState } from './EmptyState';
-import { DOCUMENTS } from '../data/documents';
+import { DOCUMENTS, formatExtension } from '../data/documents';
 import { matchesHubCategory } from '../data/sections';
 import type { KnowledgeDocument } from '../types';
 import './AddSourcesModal.css';
@@ -200,7 +200,7 @@ export function AddSourcesModal({ existingSourceIds, onClose, onAdd }: AddSource
                     <strong className="sources-picker__item-title">{doc.title}</strong>
                     <span className="sources-picker__item-desc">{doc.description}</span>
                     <span className="sources-picker__item-meta">
-                      {doc.brand} · {doc.market} · {doc.year} · {doc.fileFormat}
+                      {doc.brand} · {doc.market} · {doc.year} · {formatExtension(doc.fileFormat)}
                     </span>
                   </span>
                 </button>
