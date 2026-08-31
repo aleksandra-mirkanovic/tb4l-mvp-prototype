@@ -470,11 +470,11 @@
 }
 
 [data-theme='dark'] .welcome-capabilities__link--chat {
-  border-left-color: #9963a1;
+  border-left-color: #8a7194;
 }
 
 [data-theme='dark'] .welcome-capabilities__link--chat strong {
-  color: #d4b4d9;
+  color: #cbb6d0;
 }
 
 .welcome-capabilities__link--hub {

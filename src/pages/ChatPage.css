@@ -675,6 +675,16 @@
   margin-bottom: 22px;
 }
 
+.chat-empty__hub-cta {
+  background: #326b80;
+  color: var(--text-on-dark);
+  border-color: transparent;
+}
+
+.chat-empty__hub-cta:hover:not(:disabled) {
+  background: #2a5a6c;
+}
+
 .chat-empty__ask {
   font-size: 13px;
   font-weight: 600;

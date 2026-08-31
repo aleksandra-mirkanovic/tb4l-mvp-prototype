@@ -96,7 +96,7 @@
   --tb4l-dark-blue: #1a4a63;
   --tb4l-header: #071820;
   --tb4l-teal: #3aa8c7;
-  --tb4l-purple: #9963a1;
+  --tb4l-purple: #8a7194;
   --tb4l-green: #6fbf7f;
   --tb4l-magenta: #f05a84;
   --tb4l-gray: #3a5160;
@@ -127,21 +127,21 @@
   --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.5);
 
   --tint-hub: rgba(58, 168, 199, 0.16);
-  --tint-chat: rgba(153, 99, 161, 0.2);
+  --tint-chat: rgba(138, 113, 148, 0.16);
   --tint-m360: rgba(111, 191, 127, 0.14);
   --tint-alert: rgba(240, 90, 132, 0.14);
   --tint-ice: #152a38;
 
   --focus-ring: 0 0 0 3px rgba(58, 168, 199, 0.45);
-  --focus-ring-chat: 0 0 0 3px rgba(153, 99, 161, 0.45);
+  --focus-ring-chat: 0 0 0 3px rgba(138, 113, 148, 0.4);
   --focus-ring-m360: 0 0 0 3px rgba(111, 191, 127, 0.4);
 
   --chip-hub-bg: rgba(58, 168, 199, 0.18);
   --chip-hub-border: rgba(58, 168, 199, 0.4);
   --chip-hub-text: #b7e0ea;
-  --chip-chat-bg: rgba(153, 99, 161, 0.22);
-  --chip-chat-border: rgba(153, 99, 161, 0.5);
-  --chip-chat-text: #d4b4d9;
+  --chip-chat-bg: rgba(138, 113, 148, 0.18);
+  --chip-chat-border: rgba(138, 113, 148, 0.42);
+  --chip-chat-text: #cbb6d0;
   --chip-m360-bg: rgba(111, 191, 127, 0.16);
   --chip-m360-border: rgba(111, 191, 127, 0.4);
   --chip-m360-text: #c5e3cb;
@@ -290,7 +290,7 @@ a:hover {
 }
 
 [data-theme='dark'] .btn-chat:hover:not(:disabled) {
-  background: #b07aba;
+  background: #9d85a6;
 }
 
 .btn-secondary {

@@ -695,7 +695,7 @@ export function ChatPage() {
               </p>
               <p className="chat-empty__context">{contextHelp}</p>
               <div className="chat-empty__actions">
-                <Link className="btn btn-primary btn-sm" to="/knowledge-hub/playbooks">
+                <Link className="btn btn-sm chat-empty__hub-cta" to="/knowledge-hub/playbooks">
                   Pick Hub sources
                 </Link>
                 <button
