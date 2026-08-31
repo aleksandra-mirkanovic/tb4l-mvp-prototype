@@ -19,8 +19,8 @@
   pointer-events: none;
   background:
     radial-gradient(ellipse 70% 55% at 88% 12%, rgba(0, 96, 126, 0.45), transparent 60%),
-    radial-gradient(ellipse 40% 35% at 72% 70%, rgba(98, 73, 99, 0.22), transparent 55%),
-    radial-gradient(ellipse 45% 40% at 8% 88%, rgba(40, 100, 54, 0.16), transparent 55%);
+    radial-gradient(ellipse 40% 35% at 72% 70%, rgba(98, 73, 99, 0.18), transparent 55%),
+    radial-gradient(ellipse 45% 40% at 8% 88%, rgba(40, 100, 54, 0.12), transparent 55%);
   animation: welcomeAtmosphere 12s ease-in-out infinite alternate;
 }
 
@@ -233,7 +233,7 @@
   padding: 0;
   border: none;
   background: none;
-  color: var(--tb4l-purple);
+  color: var(--color-chat);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
@@ -266,7 +266,7 @@
   padding: clamp(22px, 3vw, 32px);
   border: 1px solid rgba(98, 73, 99, 0.18);
   box-shadow: var(--shadow-sm);
-  border-top: 3px solid var(--tb4l-purple);
+  border-top: 3px solid var(--color-chat);
 }
 
 .welcome-ask__eyebrow {
@@ -279,7 +279,7 @@
   font-size: clamp(20px, 2.4vw, 26px);
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--tb4l-purple);
+  color: var(--color-chat);
   line-height: 1.2;
 }
 
@@ -324,7 +324,7 @@
 }
 
 .welcome-ask__chip:hover {
-  border-color: var(--tb4l-purple);
+  border-color: var(--color-chat);
   background: var(--tint-chat);
   transform: translateY(-1px);
   text-decoration: none;
@@ -343,7 +343,7 @@
 }
 
 .welcome-ask__composer:focus-within {
-  border-color: var(--tb4l-purple);
+  border-color: var(--color-chat);
   box-shadow: var(--focus-ring-chat);
 }
 
@@ -372,7 +372,7 @@
   flex-shrink: 0;
   border: none;
   border-radius: 50%;
-  background: var(--tb4l-purple);
+  background: var(--color-chat);
   color: #fff;
   display: grid;
   place-items: center;

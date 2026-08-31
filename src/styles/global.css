@@ -7,11 +7,14 @@
    * ---------------------------
    * #10384F  Dark blue  → brand shell / header / strong text
    * #00607E  Teal       → Hub identity + system primary actions
-   * #624963  Purple     → Chat identity (Chat chrome & Chat CTAs)
+   * #624963  Purple     → Chat identity (Chat accents & Chat CTAs)
    * #286436  Green      → M360 / Genie + success
    * #D30F4B  Magenta    → attention / error / destructive
    * #D9D9D9  Gray       → borders / dividers
    * #FFFFFF  White      → surfaces
+   *
+   * Pattern: teal = Hub + system primary; purple = Chat; green = M360;
+   * dark blue = shell. Do not flatten everything to one color.
    */
 
   --tb4l-dark-blue: #10384f;

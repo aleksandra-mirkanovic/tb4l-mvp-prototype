@@ -21,13 +21,13 @@
   border-radius: 999px;
   padding: 8px 14px;
   font-size: 13px;
-  color: var(--tb4l-purple);
+  color: var(--color-chat);
   cursor: pointer;
 }
 
 .suggested__item:hover:not(:disabled) {
-  border-color: var(--tb4l-purple);
-  background: rgba(98, 73, 99, 0.06);
+  border-color: var(--color-chat);
+  background: var(--tint-chat);
 }
 
 .suggested__item:disabled {

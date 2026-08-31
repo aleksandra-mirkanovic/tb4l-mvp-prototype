@@ -206,7 +206,7 @@
 }
 
 .chat-recent-row.is-active {
-  background: rgba(98, 73, 99, 0.1);
+  background: var(--tint-chat);
   border-color: rgba(98, 73, 99, 0.25);
 }
 
@@ -242,7 +242,7 @@
 }
 
 .chat-recent-row.is-active .chat-recent__title {
-  color: var(--tb4l-purple);
+  color: var(--color-chat);
 }
 
 .chat-recent__meta {
@@ -294,7 +294,7 @@
 .chat-recent.is-active {
   background: transparent;
   border-color: transparent;
-  color: var(--tb4l-purple);
+  color: var(--color-chat);
 }
 
 .chat-connection {
@@ -521,7 +521,7 @@
 .chat-toolbar__title {
   font-size: 14px;
   font-weight: 700;
-  color: var(--tb4l-purple);
+  color: var(--color-chat);
 }
 
 .chat-status {
@@ -708,7 +708,7 @@
 }
 
 .chat-suggestion:hover:not(:disabled) {
-  border-color: var(--tb4l-purple);
+  border-color: var(--color-chat);
   background: var(--tint-chat);
 }
 
