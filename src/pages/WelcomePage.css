@@ -469,6 +469,14 @@
   border-left-color: #c4a3c7;
 }
 
+[data-theme='dark'] .welcome-capabilities__link--chat {
+  border-left-color: #9963a1;
+}
+
+[data-theme='dark'] .welcome-capabilities__link--chat strong {
+  color: #d4b4d9;
+}
+
 .welcome-capabilities__link--hub {
   border-left-color: #5eb3c9;
 }

@@ -106,6 +106,10 @@
   border-bottom-color: #c4a3c7;
 }
 
+[data-theme='dark'] .main-nav__link--chat.is-active {
+  border-bottom-color: #9963a1;
+}
+
 .main-nav__link--hub.is-active {
   border-bottom-color: #5eb3c9;
 }
