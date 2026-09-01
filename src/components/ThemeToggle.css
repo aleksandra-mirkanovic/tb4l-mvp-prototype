@@ -1,14 +1,17 @@
 .theme-toggle {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   flex-shrink: 0;
   margin: 0;
+  min-height: var(--icon-hit);
+  min-width: var(--icon-hit);
   padding: 6px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  border: 1px solid var(--header-control-border);
+  background: var(--header-control-bg);
+  color: var(--header-fg);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -16,18 +19,20 @@
 }
 
 .theme-toggle:hover {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.55);
+  background: var(--header-control-hover);
+  border-color: var(--header-control-border);
   text-decoration: none;
 }
 
 .theme-toggle:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.7);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 .theme-toggle__label {
   letter-spacing: 0.02em;
+  color: inherit;
 }
 
 @media (max-width: 560px) {

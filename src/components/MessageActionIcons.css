@@ -6,11 +6,13 @@
 }
 
 .msg-action {
-  width: 32px;
-  height: 32px;
+  width: var(--icon-hit);
+  height: var(--icon-hit);
+  min-width: var(--icon-hit);
+  min-height: var(--icon-hit);
   border: none;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   border-radius: 8px;
   cursor: pointer;
   display: grid;
@@ -18,20 +20,22 @@
 }
 
 .msg-action:hover {
-  background: rgba(16, 56, 79, 0.07);
+  background: var(--tint-selected-hover);
   color: var(--text-primary);
 }
 
 .msg-action:focus-visible {
-  box-shadow: var(--focus-ring);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 .msg-action.is-on {
-  color: var(--tb4l-green);
-  background: rgba(40, 100, 54, 0.1);
+  color: var(--status-success);
+  background: var(--tint-m360);
 }
 
 .msg-action.is-on-bad {
-  color: var(--tb4l-magenta);
-  background: rgba(211, 15, 75, 0.08);
+  color: var(--status-error);
+  background: var(--tint-alert);
 }

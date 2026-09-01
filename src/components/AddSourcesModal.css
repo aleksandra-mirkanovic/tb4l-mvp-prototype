@@ -71,7 +71,7 @@
 
 .sources-picker__search:focus-within {
   border-color: var(--tb4l-teal);
-  box-shadow: var(--focus-ring);
+  outline: 3px solid var(--focus-ring); outline-offset: 2px; box-shadow: none;
 }
 
 .sources-picker__search-icon {

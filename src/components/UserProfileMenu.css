@@ -8,24 +8,26 @@
   align-items: center;
   gap: 10px;
   max-width: 260px;
+  min-height: var(--icon-hit);
   padding: 4px 6px 4px 4px;
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
-  color: var(--text-on-dark);
+  color: var(--header-fg);
   cursor: pointer;
   text-align: left;
 }
 
 .user-profile__trigger:hover,
 .user-profile__trigger.is-open {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: var(--header-control-hover);
+  border-color: var(--header-control-border);
 }
 
 .user-profile__trigger:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.75);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 .user-profile__avatar {

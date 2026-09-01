@@ -32,5 +32,5 @@
 }
 
 .hub-section-nav__link:focus-visible {
-  box-shadow: var(--focus-ring);
+  outline: 3px solid var(--focus-ring); outline-offset: 2px; box-shadow: none;
 }

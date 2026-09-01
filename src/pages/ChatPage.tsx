@@ -119,7 +119,7 @@ export function ChatPage() {
     if (hasGenie) {
       return 'M360 is connected for structured data. Replies are simulated in this prototype and may take longer.';
     }
-    return 'Without Hub sources, Chat uses approved TB4L framework guidance. Add documents or M360 via + for grounded context.';
+    return 'Without Hub documents, Chat uses general TB4L framework guidance. Add Hub sources to get citations you can verify.';
   }, [hasDocuments, hasGenie]);
 
   const sourceStatus = useMemo(() => {
@@ -688,14 +688,9 @@ export function ChatPage() {
               <p className="chat-empty__tagline">
                 Ask with Hub sources for the highest-trust answers.
               </p>
-              {/* CHANGE C: Hub-first empty state */}
-              <p className="chat-empty__trust">
-                Without Hub documents, Chat uses general TB4L framework guidance. Add Hub sources to
-                get citations you can verify.
-              </p>
-              <p className="chat-empty__context">{contextHelp}</p>
+              <p className="chat-empty__trust">{contextHelp}</p>
               <div className="chat-empty__actions">
-                <Link className="btn btn-sm chat-empty__hub-cta" to="/knowledge-hub/playbooks">
+                <Link className="btn btn-sm btn-outline-secondary" to="/knowledge-hub/playbooks">
                   Pick Hub sources
                 </Link>
                 <button

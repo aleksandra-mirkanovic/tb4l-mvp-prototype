@@ -51,7 +51,7 @@
 }
 
 .document-card__select input:focus-visible + .document-card__check {
-  box-shadow: var(--focus-ring);
+  outline: 3px solid var(--focus-ring); outline-offset: 2px; box-shadow: none;
 }
 
 .document-card__title {

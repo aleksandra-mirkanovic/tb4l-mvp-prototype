@@ -3,18 +3,8 @@
   color-scheme: light;
 
   /*
-   * TB4L Super template palette
-   * ---------------------------
-   * #10384F  Dark blue  → brand shell / header / strong text
-   * #00607E  Teal       → Hub identity + system primary actions
-   * #624963  Purple     → Chat identity (Chat accents & Chat CTAs)
-   * #286436  Green      → M360 / Genie + success
-   * #D30F4B  Magenta    → attention / error / destructive
-   * #D9D9D9  Gray       → borders / dividers
-   * #FFFFFF  White      → surfaces
-   *
-   * Pattern: teal = Hub + system primary; purple = Chat; green = M360;
-   * dark blue = shell. Do not flatten everything to one color.
+   * TB4L Super template palette (brand anchors — Hub / Welcome still reference these)
+   * #10384F Dark blue · #00607E Teal · #624963 Purple · #286436 Green · #D30F4B Magenta
    */
 
   --tb4l-dark-blue: #10384f;
@@ -26,64 +16,117 @@
   --tb4l-gray: #d9d9d9;
   --tb4l-ice: #d8e5eb;
 
-  /* Semantic roles (use these in UI, not raw palette names) */
-  --color-shell: var(--tb4l-dark-blue);
-  --color-hub: var(--tb4l-teal);
-  --color-chat: var(--tb4l-purple);
-  --color-m360: var(--tb4l-green);
-  --color-success: var(--tb4l-green);
-  --color-danger: var(--tb4l-magenta);
-  --color-border: var(--tb4l-gray);
-  --color-action: var(--tb4l-teal); /* system primary = Hub/teal per Super template */
+  /* —— Semantic surface / type / action tokens (shared names with dark) —— */
+  --bg-app: #f7f9fa;
+  --bg-header: #10384f;
+  --bg-main: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-elevated: #f1f4f5;
+  --bg-input: #ffffff;
+  --bg-callout: #eef3f5;
+  --bg-selected: #f3eef3;
 
-  --background-primary: #f7f9fa;
-  --background-secondary: #f1f4f5;
-  --surface-primary: #ffffff;
-  --surface-elevated: #ffffff;
+  --border-default: #d9d9d9;
+  --border-subtle: #e4e8eb;
+  --border-strong: #b8c2c8;
 
   --text-primary: #10384f;
-  --text-body: #333333;
   --text-secondary: #5f6b72;
-  --text-on-dark: #ffffff;
+  --text-muted: #6b7780;
+  --text-disabled: #8a969e;
+  --text-body: #333333;
+  --text-on-primary: #ffffff;
+  --text-on-dark: var(--text-on-primary);
 
-  --border-subtle: #d9d9d9;
-  --shadow-sm: 0 1px 2px rgba(16, 56, 79, 0.06);
-  --shadow-md: 0 4px 16px rgba(16, 56, 79, 0.08);
-  --shadow-lg: 0 12px 32px rgba(16, 56, 79, 0.12);
+  --action-primary: #624963;
+  --action-primary-hover: #523d54;
+  --action-primary-active: #463547;
+
+  --action-secondary: #326b80;
+  --action-secondary-hover: #36758b;
+  --action-secondary-active: #28586a;
+
+  --accent-focus: #00607e;
+  --accent-selection: #624963;
+
+  --status-success: #286436;
+  --status-warning: #a87b1f;
+  --status-error: #d30f4b;
+
+  --bg-chip: #f7f9fa;
+  --border-chip: #c5cdd2;
+  --text-chip: #333333;
+  --focus-ring: var(--accent-focus);
+
+  /* Header sits on brand dark shell in light mode — keep readable on-header fg */
+  --header-fg: #f8fafc;
+  --header-fg-muted: #c4d1d7;
+  --header-border: rgba(248, 250, 252, 0.16);
+  --header-control-bg: transparent;
+  --header-control-border: rgba(248, 250, 252, 0.35);
+  --header-control-hover: rgba(248, 250, 252, 0.1);
+
+  /* Legacy bridges (Hub / shared components) */
+  --color-shell: var(--tb4l-dark-blue);
+  --color-hub: var(--tb4l-teal);
+  --color-chat: var(--action-primary);
+  --color-m360: var(--status-success);
+  --color-success: var(--status-success);
+  --color-danger: var(--status-error);
+  --color-border: var(--border-default);
+  --color-action: var(--tb4l-teal);
+
+  --background-primary: var(--bg-app);
+  --background-secondary: var(--bg-elevated);
+  --surface-primary: var(--bg-main);
+  --surface-elevated: var(--bg-elevated);
+
+  --shadow-sm: 0 1px 2px rgba(16, 56, 79, 0.05);
+  --shadow-md: 0 2px 8px rgba(16, 56, 79, 0.06);
+  --shadow-lg: 0 8px 20px rgba(16, 56, 79, 0.08);
 
   --tint-hub: rgba(0, 96, 126, 0.1);
-  --tint-chat: rgba(98, 73, 99, 0.12);
-  --tint-m360: rgba(40, 100, 54, 0.12);
+  --tint-chat: rgba(98, 73, 99, 0.1);
+  --tint-m360: rgba(40, 100, 54, 0.1);
   --tint-alert: rgba(211, 15, 75, 0.08);
   --tint-ice: #d8e5eb;
+  --tint-secondary-hover: rgba(50, 107, 128, 0.08);
+  --tint-selected-hover: rgba(16, 56, 79, 0.04);
+  --bg-disabled: #e8ecee;
 
-  --radius-sm: 6px;
+  --radius-sm: 8px;
   --radius-md: 10px;
   --radius-lg: 14px;
 
-  --header-height: 56px;
+  --header-height: 64px;
   --nav-height: 48px;
+  --sidebar-width: 292px;
+  --control-height: 40px;
+  --icon-hit: 36px;
 
-  --font-sans: 'DM Sans', 'Segoe UI', Aptos, sans-serif;
+  --font-sans: 'DM Sans', 'Segoe UI', Aptos, Inter, Arial, sans-serif;
 
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
+  --space-20: 20px;
   --space-5: 24px;
   --space-6: 32px;
+  --space-40: 40px;
   --space-7: 48px;
 
-  --focus-ring: 0 0 0 3px rgba(0, 96, 126, 0.35);
-  --focus-ring-chat: 0 0 0 3px rgba(98, 73, 99, 0.35);
-  --focus-ring-m360: 0 0 0 3px rgba(40, 100, 54, 0.35);
+  /* Legacy box-shadow focus helpers (prefer outline + --focus-ring color) */
+  --focus-ring-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-focus) 40%, transparent);
+  --focus-ring-chat: 0 0 0 3px color-mix(in srgb, var(--accent-selection) 40%, transparent);
+  --focus-ring-m360: 0 0 0 3px color-mix(in srgb, var(--status-success) 40%, transparent);
 
   --chip-hub-bg: rgba(0, 96, 126, 0.08);
   --chip-hub-border: rgba(0, 96, 126, 0.35);
   --chip-hub-text: #10384f;
-  --chip-chat-bg: rgba(98, 73, 99, 0.1);
-  --chip-chat-border: rgba(98, 73, 99, 0.35);
-  --chip-chat-text: #624963;
+  --chip-chat-bg: var(--bg-chip);
+  --chip-chat-border: var(--border-chip);
+  --chip-chat-text: var(--text-chip);
   --chip-m360-bg: rgba(40, 100, 54, 0.1);
   --chip-m360-border: rgba(40, 100, 54, 0.4);
   --chip-m360-text: #286436;
@@ -94,56 +137,102 @@
   color-scheme: dark;
 
   --tb4l-dark-blue: #1a4a63;
-  --tb4l-header: #071820;
-  --tb4l-teal: #3aa8c7;
-  --tb4l-purple: #8a7194;
-  --tb4l-green: #6fbf7f;
-  --tb4l-magenta: #f05a84;
-  --tb4l-gray: #3a5160;
-  --tb4l-ice: #152a38;
+  --tb4l-header: #081318;
+  --tb4l-teal: #4fa8c9;
+  --tb4l-purple: #6e5876;
+  --tb4l-green: #67c587;
+  --tb4l-magenta: #e57d87;
+  --tb4l-gray: #234a5b;
+  --tb4l-ice: #163444;
+
+  /* Exact dark semantic tokens */
+  --bg-app: #0b171e;
+  --bg-header: #081318;
+  --bg-main: #0e1b23;
+  --bg-sidebar: #102b37;
+  --bg-elevated: #153747;
+  --bg-input: #081a22;
+  --bg-callout: #163444;
+  --bg-selected: #243e52;
+
+  --border-default: #234a5b;
+  --border-subtle: #1d3c4a;
+  --border-strong: #2a5668;
+
+  --text-primary: #f4f7f8;
+  --text-secondary: #c4d1d7;
+  --text-muted: #91a8b3;
+  --text-disabled: #6b818b;
+  --text-body: var(--text-secondary);
+  --text-on-primary: #f8fafc;
+  --text-on-dark: var(--text-on-primary);
+
+  --action-primary: #6e5876;
+  --action-primary-hover: #80678a;
+  --action-primary-active: #59475f;
+
+  --action-secondary: #326b80;
+  --action-secondary-hover: #36758b;
+  --action-secondary-active: #28586a;
+
+  --accent-focus: #4fa8c9;
+  --accent-selection: #a77fb0;
+
+  --status-success: #67c587;
+  --status-warning: #e9b760;
+  --status-error: #e57d87;
+
+  --bg-chip: #182737;
+  --border-chip: #3d5364;
+  --text-chip: #d8e3e8;
+  --focus-ring: var(--accent-focus);
+
+  --header-fg: var(--text-primary);
+  --header-fg-muted: var(--text-muted);
+  --header-border: var(--border-subtle);
+  --header-control-bg: transparent;
+  --header-control-border: var(--border-default);
+  --header-control-hover: var(--bg-elevated);
 
   --color-shell: var(--tb4l-dark-blue);
   --color-hub: var(--tb4l-teal);
-  --color-chat: var(--tb4l-purple);
-  --color-m360: var(--tb4l-green);
-  --color-success: var(--tb4l-green);
-  --color-danger: var(--tb4l-magenta);
-  --color-border: var(--tb4l-gray);
+  --color-chat: var(--action-primary);
+  --color-m360: var(--status-success);
+  --color-success: var(--status-success);
+  --color-danger: var(--status-error);
+  --color-border: var(--border-default);
   --color-action: var(--tb4l-teal);
 
-  --background-primary: #0b1a22;
-  --background-secondary: #122633;
-  --surface-primary: #143041;
-  --surface-elevated: #1a3a4d;
+  --background-primary: var(--bg-app);
+  --background-secondary: var(--bg-elevated);
+  --surface-primary: var(--bg-main);
+  --surface-elevated: var(--bg-elevated);
 
-  --text-primary: #e8f1f5;
-  --text-body: #d2dee5;
-  --text-secondary: #9bb0bc;
-  --text-on-dark: #ffffff;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 2px 10px rgba(0, 0, 0, 0.32);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.38);
 
-  --border-subtle: #2c4656;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.5);
+  --tint-hub: rgba(79, 168, 201, 0.14);
+  --tint-chat: rgba(110, 88, 118, 0.22);
+  --tint-m360: rgba(103, 197, 135, 0.14);
+  --tint-alert: rgba(229, 125, 135, 0.14);
+  --tint-ice: #163444;
+  --tint-secondary-hover: rgba(50, 107, 128, 0.18);
+  --tint-selected-hover: rgba(244, 247, 248, 0.04);
+  --bg-disabled: #152833;
 
-  --tint-hub: rgba(58, 168, 199, 0.16);
-  --tint-chat: rgba(138, 113, 148, 0.16);
-  --tint-m360: rgba(111, 191, 127, 0.14);
-  --tint-alert: rgba(240, 90, 132, 0.14);
-  --tint-ice: #152a38;
+  --focus-ring-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-focus) 45%, transparent);
+  --focus-ring-chat: 0 0 0 3px color-mix(in srgb, var(--accent-selection) 45%, transparent);
+  --focus-ring-m360: 0 0 0 3px color-mix(in srgb, var(--status-success) 40%, transparent);
 
-  --focus-ring: 0 0 0 3px rgba(58, 168, 199, 0.45);
-  --focus-ring-chat: 0 0 0 3px rgba(138, 113, 148, 0.4);
-  --focus-ring-m360: 0 0 0 3px rgba(111, 191, 127, 0.4);
-
-  --chip-hub-bg: rgba(58, 168, 199, 0.18);
-  --chip-hub-border: rgba(58, 168, 199, 0.4);
+  --chip-hub-bg: rgba(79, 168, 201, 0.16);
+  --chip-hub-border: rgba(79, 168, 201, 0.4);
   --chip-hub-text: #b7e0ea;
-  --chip-chat-bg: rgba(138, 113, 148, 0.18);
-  --chip-chat-border: rgba(138, 113, 148, 0.42);
-  --chip-chat-text: #cbb6d0;
-  --chip-m360-bg: rgba(111, 191, 127, 0.16);
-  --chip-m360-border: rgba(111, 191, 127, 0.4);
+  --chip-chat-bg: var(--bg-chip);
+  --chip-chat-border: var(--border-chip);
+  --chip-chat-text: var(--text-chip);
+  --chip-m360-bg: rgba(103, 197, 135, 0.14);
+  --chip-m360-border: rgba(103, 197, 135, 0.4);
   --chip-m360-text: #c5e3cb;
   --overlay-scrim: rgba(0, 0, 0, 0.65);
 }
@@ -187,7 +276,7 @@ textarea {
 }
 
 a {
-  color: var(--tb4l-teal);
+  color: var(--accent-focus);
   text-decoration: none;
 }
 
@@ -196,14 +285,16 @@ a:hover {
 }
 
 :focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 .app-shell {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg-app);
 }
 
 .app-main {
@@ -212,6 +303,7 @@ a:hover {
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--space-5) var(--space-5) var(--space-7);
+  background: var(--bg-app);
 }
 
 .page-title {
@@ -253,59 +345,97 @@ a:hover {
   gap: var(--space-2);
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
+  min-height: var(--control-height);
   padding: 10px 16px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  color: var(--text-primary);
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .btn:disabled {
-  opacity: 0.55;
+  background: var(--bg-disabled);
+  color: var(--text-disabled);
+  border-color: var(--border-subtle);
   cursor: not-allowed;
 }
 
+/* Hub / system filled primary (teal) */
 .btn-primary {
   background: var(--color-action);
-  color: var(--text-on-dark);
+  color: var(--text-on-primary);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #004e66;
+  background: var(--action-secondary-active);
 }
 
 [data-theme='dark'] .btn-primary:hover:not(:disabled) {
-  background: #2b92b0;
+  background: var(--action-secondary-hover);
 }
 
-/* CHANGE F: Chat-identity primary (purple), not system teal */
+.btn-primary:active:not(:disabled) {
+  background: var(--action-secondary-active);
+}
+
+/* Chat / brand primary (plum) */
 .btn-chat {
-  background: var(--color-chat);
-  color: var(--text-on-dark);
+  background: var(--action-primary);
+  color: var(--text-on-primary);
   border-color: transparent;
 }
 
 .btn-chat:hover:not(:disabled) {
-  background: #523d54;
+  background: var(--action-primary-hover);
 }
 
-[data-theme='dark'] .btn-chat:hover:not(:disabled) {
-  background: #9d85a6;
+.btn-chat:active:not(:disabled) {
+  background: var(--action-primary-active);
+}
+
+.btn-chat:disabled {
+  background: var(--bg-disabled);
+  color: var(--text-disabled);
+}
+
+.btn-filled-secondary {
+  background: var(--action-secondary);
+  color: var(--text-on-primary);
+  border-color: transparent;
+}
+
+.btn-filled-secondary:hover:not(:disabled) {
+  background: var(--action-secondary-hover);
+}
+
+.btn-filled-secondary:active:not(:disabled) {
+  background: var(--action-secondary-active);
+}
+
+.btn-outline-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--action-secondary);
+}
+
+.btn-outline-secondary:hover:not(:disabled) {
+  background: var(--tint-secondary-hover);
 }
 
 .btn-secondary {
-  background: var(--surface-primary);
+  background: transparent;
   color: var(--text-primary);
-  border-color: var(--border-subtle);
+  border-color: var(--border-default);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--background-secondary);
+  background: var(--tint-selected-hover);
 }
 
 .btn-ghost {
   background: transparent;
-  color: var(--color-hub);
+  color: var(--accent-focus);
   border-color: transparent;
   padding-inline: 10px;
 }
@@ -314,9 +444,15 @@ a:hover {
   background: var(--tint-hub);
 }
 
+.btn-ghost:disabled {
+  background: transparent;
+  color: var(--text-disabled);
+  border-color: transparent;
+}
+
 .btn-ghost-chat {
   background: transparent;
-  color: var(--color-chat);
+  color: var(--action-primary);
   border-color: transparent;
   padding-inline: 10px;
 }
@@ -326,9 +462,9 @@ a:hover {
 }
 
 .btn-danger {
-  background: var(--surface-primary);
-  color: var(--color-danger);
-  border-color: var(--color-danger);
+  background: var(--bg-main);
+  color: var(--status-error);
+  border-color: var(--status-error);
 }
 
 .btn-danger:hover:not(:disabled) {
@@ -336,6 +472,7 @@ a:hover {
 }
 
 .btn-sm {
+  min-height: var(--icon-hit);
   padding: 6px 12px;
   font-size: 13px;
 }
@@ -414,15 +551,15 @@ a:hover {
 }
 
 .card {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-main);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
 .panel {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-main);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
 }
 
@@ -444,7 +581,7 @@ a:hover {
 }
 
 .field-control:focus-visible {
-  border-color: var(--tb4l-teal);
+  border-color: var(--accent-focus);
 }
 
 .breadcrumbs {
@@ -454,11 +591,11 @@ a:hover {
   gap: 6px;
   margin-bottom: var(--space-4);
   font-size: 13px;
-  color: var(--text-secondary);
+  color: var(--text-muted);
 }
 
 .breadcrumbs a {
-  color: var(--tb4l-teal);
+  color: var(--accent-focus);
   font-weight: 600;
 }
 
@@ -470,15 +607,15 @@ a:hover {
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(0, 96, 126, 0.2);
-  border-top-color: var(--tb4l-teal);
+  border: 2px solid color-mix(in srgb, var(--accent-focus) 25%, transparent);
+  border-top-color: var(--accent-focus);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
 
 .spinner-green {
-  border-color: rgba(40, 100, 54, 0.2);
-  border-top-color: var(--tb4l-green);
+  border-color: color-mix(in srgb, var(--status-success) 25%, transparent);
+  border-top-color: var(--status-success);
 }
 
 @keyframes spin {
