@@ -1,0 +1,277 @@
+/**
+ * Semantic color system — only active when <html class="semantic-colors">
+ * Revert: set SEMANTIC_COLORS = false in src/config/semanticColors.ts
+ *
+ * Navy+Teal = Platform · Green = Knowledge · Magenta = AI/Chat · Purple = Accent
+ */
+
+/* —— Global token remaps (light) —— */
+html.semantic-colors,
+html.semantic-colors[data-theme='light'] {
+  /* Chat / AI actions (was purple primary) */
+  --action-primary: #d30f4b;
+  --action-primary-hover: #b80d41;
+  --action-primary-active: #9a0b36;
+
+  /* Platform secondary / filled secondary stays teal family */
+  --action-secondary: #00607e;
+  --action-secondary-hover: #004e66;
+  --action-secondary-active: #003d50;
+
+  --accent-focus: #00607e;
+  /* Purple stays decorative selection tint, not primary CTA */
+  --accent-selection: #624963;
+
+  --color-action: #00607e;
+  --color-hub: #286436;
+  --color-chat: #d30f4b;
+  --color-m360: #286436;
+
+  --tint-hub: rgba(40, 100, 54, 0.1);
+  --tint-chat: rgba(211, 15, 75, 0.1);
+  --tint-m360: rgba(40, 100, 54, 0.1);
+
+  --chip-hub-bg: rgba(40, 100, 54, 0.08);
+  --chip-hub-border: rgba(40, 100, 54, 0.35);
+  --chip-hub-text: #286436;
+
+  --chip-chat-bg: rgba(211, 15, 75, 0.08);
+  --chip-chat-border: rgba(211, 15, 75, 0.35);
+  --chip-chat-text: #d30f4b;
+
+  --bg-selected: rgba(211, 15, 75, 0.06);
+}
+
+/* —— Global token remaps (dark) —— */
+html.semantic-colors[data-theme='dark'] {
+  --action-primary: #ff6b8a;
+  --action-primary-hover: #ff8aa3;
+  --action-primary-active: #e85774;
+
+  --action-secondary: #4fa8c9;
+  --action-secondary-hover: #6bb8d4;
+  --action-secondary-active: #3d91b0;
+
+  --accent-focus: #4fa8c9;
+  --accent-selection: #c9a3cc;
+
+  --color-action: #4fa8c9;
+  --color-hub: #6dd99a;
+  --color-chat: #ff6b8a;
+  --color-m360: #6dd99a;
+
+  --tint-hub: rgba(109, 217, 154, 0.14);
+  --tint-chat: rgba(211, 15, 75, 0.16);
+  --tint-m360: rgba(109, 217, 154, 0.14);
+
+  --chip-hub-bg: rgba(109, 217, 154, 0.12);
+  --chip-hub-border: rgba(109, 217, 154, 0.4);
+  --chip-hub-text: #6dd99a;
+
+  --chip-chat-bg: rgba(255, 107, 138, 0.12);
+  --chip-chat-border: rgba(255, 107, 138, 0.4);
+  --chip-chat-text: #ff6b8a;
+
+  --bg-selected: rgba(255, 107, 138, 0.1);
+}
+
+/* —— Home: Hub = Knowledge green (not purple) —— */
+html.semantic-colors .tb4l-home {
+  --home-chat: #d30f4b;
+  --home-hub: #286436;
+  --home-data: #286436;
+  --home-nav: #00607e;
+  --home-structure: #10384f;
+}
+
+html.semantic-colors .tb4l-home-hero__canvas {
+  background:
+    radial-gradient(ellipse 50% 80% at 0% 50%, rgba(211, 15, 75, 0.1), transparent 58%),
+    radial-gradient(ellipse 45% 75% at 100% 50%, rgba(0, 96, 126, 0.1), transparent 55%),
+    radial-gradient(ellipse 40% 60% at 70% 20%, rgba(98, 73, 99, 0.06), transparent 50%);
+}
+
+html.semantic-colors[data-theme='dark'] .tb4l-home {
+  --home-chat: #ff6b8a;
+  --home-hub: #6dd99a;
+  --home-data: #6dd99a;
+  --home-nav: #4fa8c9;
+  --home-structure: #e8eef1;
+}
+
+/* —— Legacy Hub workspace tokens: knowledge = green —— */
+html.semantic-colors .hub-page--workspace {
+  --hub-knowledge: #286436;
+  --hub-data: #286436;
+  --hub-chat: #d30f4b;
+  --hub-nav: #00607e;
+}
+
+html.semantic-colors[data-theme='dark'] .hub-page--workspace {
+  --hub-knowledge: #6dd99a;
+  --hub-data: #6dd99a;
+  --hub-chat: #ff6b8a;
+  --hub-nav: #4fa8c9;
+}
+
+/* —— Hub ecosystem: aliases + unified category green —— */
+html.semantic-colors .hub-page--ecosystem {
+  --hub: var(--knowledge);
+  --hub-soft: var(--knowledge-soft);
+  --hub-line: var(--line);
+  --nav: var(--teal);
+  --chat: var(--ai);
+  --data: var(--knowledge);
+}
+
+html.semantic-colors .hub-ws-cat,
+html.semantic-colors .hub-ws-cat--playbooks,
+html.semantic-colors .hub-ws-cat--templates,
+html.semantic-colors .hub-ws-cat--tb4l-training,
+html.semantic-colors .hub-ws-cat--accelerator-outputs,
+html.semantic-colors .hub-ws-cat--brand-frames,
+html.semantic-colors .hub-ws-cat--tb4l-glossary,
+html.semantic-colors .hub-ws-cat--outputs,
+html.semantic-colors .hub-ws-cat--team {
+  --cat: #286436;
+  --cat-soft: rgba(40, 100, 54, 0.12);
+}
+
+html.semantic-colors[data-theme='dark'] .hub-ws-cat,
+html.semantic-colors[data-theme='dark'] .hub-ws-cat--playbooks,
+html.semantic-colors[data-theme='dark'] .hub-ws-cat--templates,
+html.semantic-colors[data-theme='dark'] .hub-ws-cat--tb4l-training,
+html.semantic-colors[data-theme='dark'] .hub-ws-cat--accelerator-outputs,
+html.semantic-colors[data-theme='dark'] .hub-ws-cat--brand-frames,
+html.semantic-colors[data-theme='dark'] .hub-ws-cat--tb4l-glossary,
+html.semantic-colors[data-theme='dark'] .hub-ws-cat--outputs,
+html.semantic-colors[data-theme='dark'] .hub-ws-cat--team {
+  --cat: #6dd99a;
+  --cat-soft: rgba(109, 217, 154, 0.16);
+}
+
+/* Subtle hover differentiation without rainbow */
+html.semantic-colors .hub-ws-cat:hover {
+  border-color: color-mix(in srgb, #286436 40%, var(--line, #d9e2e7));
+  box-shadow: 0 4px 16px rgba(40, 100, 54, 0.12);
+}
+
+html.semantic-colors[data-theme='dark'] .hub-ws-cat:hover {
+  border-color: color-mix(in srgb, #6dd99a 45%, transparent);
+  box-shadow: 0 4px 16px rgba(109, 217, 154, 0.12);
+}
+
+/* Connected data: status semantics */
+html.semantic-colors .hub-ws-source--connected {
+  border-left-color: #286436;
+}
+
+html.semantic-colors .hub-ws-source--coming_soon {
+  border-left-color: #00607e;
+}
+
+html.semantic-colors .hub-ws-source--planned {
+  border-left-color: #624963;
+}
+
+html.semantic-colors .hub-ws-source--unavailable {
+  border-left-color: #a8b2b8;
+}
+
+html.semantic-colors .hub-ws-source__status--connected {
+  background: rgba(40, 100, 54, 0.1);
+  color: #286436;
+}
+
+html.semantic-colors .hub-ws-source__status--coming_soon {
+  background: rgba(0, 96, 126, 0.1);
+  color: #00607e;
+}
+
+html.semantic-colors .hub-ws-source__status--planned {
+  background: rgba(98, 73, 99, 0.1);
+  color: #624963;
+}
+
+html.semantic-colors[data-theme='dark'] .hub-ws-source--connected {
+  border-left-color: #6dd99a;
+}
+
+html.semantic-colors[data-theme='dark'] .hub-ws-source--coming_soon {
+  border-left-color: #4fa8c9;
+}
+
+html.semantic-colors[data-theme='dark'] .hub-ws-source--planned {
+  border-left-color: #c9a3cc;
+}
+
+html.semantic-colors[data-theme='dark'] .hub-ws-source__status--connected {
+  background: rgba(109, 217, 154, 0.14);
+  color: #6dd99a;
+}
+
+html.semantic-colors[data-theme='dark'] .hub-ws-source__status--coming_soon {
+  background: rgba(79, 168, 201, 0.16);
+  color: #4fa8c9;
+}
+
+html.semantic-colors[data-theme='dark'] .hub-ws-source__status--planned {
+  background: rgba(201, 163, 204, 0.14);
+  color: #c9a3cc;
+}
+
+/* Section pages: knowledge green accents instead of purple-as-primary */
+html.semantic-colors .section-page--purple .section-hero,
+html.semantic-colors .section-page--blue .section-hero,
+html.semantic-colors .section-page--teal .section-hero {
+  border-left-color: #286436;
+}
+
+html.semantic-colors .section-page--green .section-hero {
+  border-left-color: #286436;
+}
+
+html.semantic-colors .section-page--purple .section-hero__eyebrow,
+html.semantic-colors .section-page--blue .section-hero__eyebrow,
+html.semantic-colors .section-page--teal .section-hero__eyebrow,
+html.semantic-colors .section-page--purple .section-kicker {
+  color: #286436;
+}
+
+html.semantic-colors[data-theme='dark'] .section-page--purple .section-hero,
+html.semantic-colors[data-theme='dark'] .section-page--blue .section-hero,
+html.semantic-colors[data-theme='dark'] .section-page--teal .section-hero,
+html.semantic-colors[data-theme='dark'] .section-page--green .section-hero {
+  border-left-color: #6dd99a;
+}
+
+html.semantic-colors[data-theme='dark'] .section-page--purple .section-hero__eyebrow,
+html.semantic-colors[data-theme='dark'] .section-page--blue .section-hero__eyebrow,
+html.semantic-colors[data-theme='dark'] .section-page--teal .section-hero__eyebrow,
+html.semantic-colors[data-theme='dark'] .section-page--purple .section-kicker {
+  color: #6dd99a;
+}
+
+/* Hub section nav active stays platform teal */
+html.semantic-colors .hub-section-nav__link.is-active {
+  background: #00607e;
+  border-color: #00607e;
+  color: #ffffff;
+}
+
+html.semantic-colors[data-theme='dark'] .hub-section-nav__link.is-active {
+  background: #4fa8c9;
+  border-color: #4fa8c9;
+  color: #081318;
+}
+
+/* Doc summary covers: platform + knowledge (no per-category rainbow) */
+html.semantic-colors .summary-cover,
+html.semantic-colors .summary-cover[data-category] {
+  background: linear-gradient(145deg, #10384f, #286436) !important;
+}
+
+html.semantic-colors[data-theme='dark'] .summary-cover,
+html.semantic-colors[data-theme='dark'] .summary-cover[data-category] {
+  background: linear-gradient(145deg, #0e1b23, #1a4a3a) !important;
+}

@@ -216,7 +216,7 @@ export function WelcomePage() {
                 >
                   <defs>
                     <linearGradient id="orbitPathGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#624963" />
+                      <stop offset="0%" stopColor="#286436" />
                       <stop offset="33%" stopColor="#286436" />
                       <stop offset="66%" stopColor="#d30f4b" />
                       <stop offset="100%" stopColor="#00607e" />
