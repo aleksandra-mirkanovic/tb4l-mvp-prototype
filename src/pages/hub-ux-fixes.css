@@ -1,0 +1,62 @@
+/**
+ * Hub UX fixes — scoped under .hub-page--ux-fixes
+ * Revert: set HUB_UX_FIXES = false in src/config/hubUxFixes.ts
+ */
+
+/* Empty Selected: compact, not sticky */
+.hub-page--ux-fixes .hub-ws-selected.is-empty,
+.hub-page--ux-fixes .hub-ws-selected--compact {
+  position: static;
+  z-index: auto;
+  padding: 0.85rem 1rem;
+  box-shadow: none;
+  border-color: rgba(211, 15, 75, 0.14);
+}
+
+.hub-page--ux-fixes .hub-ws-selected--compact .hub-ws-section__head {
+  margin-bottom: 0.45rem;
+}
+
+.hub-page--ux-fixes .hub-ws-selected--compact .hub-ws-section__head h2 {
+  font-size: 1.05rem;
+  margin-bottom: 0;
+}
+
+.hub-page--ux-fixes .hub-ws-selected__compact-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+}
+
+.hub-page--ux-fixes .hub-ws-selected__compact-empty > p {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--muted);
+  flex: 1 1 12rem;
+}
+
+.hub-page--ux-fixes .hub-ws-selected__compact-empty .hub-ws-selected__actions {
+  margin-top: 0;
+}
+
+/* Sticky only when there is a selection */
+.hub-page--ux-fixes .hub-ws-selected.has-selection {
+  position: sticky;
+}
+
+/* Slightly denser category section when Quick categories are hidden */
+.hub-page--ux-fixes .hub-ws-section--categories {
+  margin-top: 0.35rem;
+}
+
+.hub-page--ux-fixes .hub-ws-discover {
+  margin-bottom: 0.25rem;
+}
+
+[data-theme='dark'] .hub-page--ux-fixes .hub-ws-selected.is-empty,
+[data-theme='dark'] .hub-page--ux-fixes .hub-ws-selected--compact {
+  border-color: rgba(211, 15, 75, 0.28);
+  box-shadow: none;
+}

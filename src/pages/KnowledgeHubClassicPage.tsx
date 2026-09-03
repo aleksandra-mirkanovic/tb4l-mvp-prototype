@@ -1,10 +1,11 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { HubSectionNav } from '../components/HubSectionNav';
 import { SelectedDocumentsBar } from '../components/SelectedDocumentsBar';
+import { HUB_UX_FIXES } from '../config/hubUxFixes';
 import { useApp } from '../context/AppContext';
-import { DATA_SOURCES, DATA_SOURCE_STATUS_LABEL } from '../data/dataSources';
+import { DATA_SOURCES, type DataSourceStatus } from '../data/dataSources';
 import { DOCUMENTS, getDocumentById } from '../data/documents';
 import { GLOSSARY_TERMS } from '../data/glossary';
 import { HUB_SECTIONS, matchesHubCategory, type HubSection } from '../data/sections';
@@ -12,8 +13,9 @@ import { TEAM_MEMBERS } from '../data/team';
 import type { KnowledgeDocument } from '../types';
 import './KnowledgeHubClassicPage.css';
 import './SectionPage.css';
+import './hub-ux-fixes.css';
 
-const SUGGESTED_SEARCHES = [
+const POPULAR_SEARCHES = [
   'Brand Frames',
   'Must Win Battles',
   'Discover playbook',
@@ -23,17 +25,28 @@ const SUGGESTED_SEARCHES = [
 
 const RECENT_SEARCHES = ['Brand Equity', 'Accelerator roadmap', 'TB4L glossary'];
 
+const QUICK_CATEGORIES = HUB_SECTIONS.filter((s) => s.kind !== 'team').map((s) => ({
+  id: s.slug,
+  title: s.title,
+  to: `/knowledge-hub/${s.slug}`,
+}));
+
+const STARTER_DOC_IDS = ['doc-2', 'doc-11', 'doc-6'];
+
+const STATUS_LABEL: Record<DataSourceStatus, string> = {
+  connected: 'Connected',
+  coming_soon: 'Available soon',
+  planned: 'Planned',
+  unavailable: 'Unavailable',
+};
+
 type CategoryMeta = {
-  section: HubSection | null;
   id: string;
   title: string;
   description: string;
   to: string;
-  accent: HubSection['accent'] | 'coral';
   assetCount: number;
-  lastUpdated: string;
-  featured: string;
-  preview: string;
+  countNoun: string;
 };
 
 function docsForSection(section: HubSection): KnowledgeDocument[] {
@@ -41,86 +54,55 @@ function docsForSection(section: HubSection): KnowledgeDocument[] {
   return DOCUMENTS.filter((d) => matchesHubCategory(d.category, section.category!));
 }
 
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+function countLabel(count: number, noun: string) {
+  const singular = noun.endsWith('s') ? noun.slice(0, -1) : noun;
+  const word = count === 1 ? singular : noun;
+  return `${count} ${word}`;
 }
 
 function buildCategories(): CategoryMeta[] {
   const fromSections: CategoryMeta[] = HUB_SECTIONS.map((section) => {
     if (section.kind === 'glossary') {
       return {
-        section,
         id: section.slug,
         title: section.title,
-        description: section.description,
+        description: section.tagline,
         to: `/knowledge-hub/${section.slug}`,
-        accent: section.accent,
         assetCount: GLOSSARY_TERMS.length,
-        lastUpdated: '2026-02-12',
-        featured: GLOSSARY_TERMS[0]?.term ?? 'TB4L terminology',
-        preview: GLOSSARY_TERMS.slice(0, 3)
-          .map((t) => t.term)
-          .join(' · '),
+        countNoun: 'Terms',
       };
     }
     if (section.kind === 'team') {
       return {
-        section,
         id: section.slug,
         title: section.title,
-        description: section.description,
+        description: section.tagline,
         to: `/knowledge-hub/${section.slug}`,
-        accent: section.accent,
         assetCount: TEAM_MEMBERS.length,
-        lastUpdated: '2026-01-20',
-        featured: TEAM_MEMBERS[0]?.name ?? 'TB4L experts',
-        preview: TEAM_MEMBERS.slice(0, 3)
-          .map((m) => m.name)
-          .join(' · '),
+        countNoun: 'Contacts',
       };
     }
     const docs = docsForSection(section);
-    const latest = [...docs].sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated))[0];
     return {
-      section,
       id: section.slug,
       title: section.title,
-      description: section.description,
+      description: section.tagline,
       to: `/knowledge-hub/${section.slug}`,
-      accent: section.accent,
       assetCount: docs.length,
-      lastUpdated: latest?.lastUpdated ?? '2025-12-01',
-      featured: latest?.title ?? section.title,
-      preview: docs
-        .slice(0, 3)
-        .map((d) => d.title)
-        .join(' · '),
+      countNoun: 'Assets',
     };
   });
 
   const outputDocs = DOCUMENTS.filter((d) => d.category === 'Global Best Practices');
-  const outputLatest = [...outputDocs].sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated))[0];
-
   const outputsCard: CategoryMeta = {
-    section: null,
     id: 'outputs',
     title: 'Outputs',
-    description: 'Examples of completed deliverables, analyses, and project outcomes.',
+    description: 'Completed deliverables, analyses, and project outcomes.',
     to: '/knowledge-hub/browse',
-    accent: 'coral',
     assetCount: outputDocs.length || DOCUMENTS.filter((d) => d.category === 'Brand & Strategy').length,
-    lastUpdated: outputLatest?.lastUpdated ?? '2025-11-15',
-    featured: outputLatest?.title ?? 'Market deliverable examples',
-    preview:
-      outputDocs
-        .slice(0, 3)
-        .map((d) => d.title)
-        .join(' · ') || 'Analyses · Case studies · Outcomes',
+    countNoun: 'Examples',
   };
 
-  // Insert Outputs after Accelerators (accelerator-outputs)
   const accelIdx = fromSections.findIndex((c) => c.id === 'accelerator-outputs');
   const ordered = [...fromSections];
   ordered.splice(accelIdx + 1, 0, outputsCard);
@@ -129,8 +111,8 @@ function buildCategories(): CategoryMeta[] {
 
 function CategoryIcon({ id }: { id: string }) {
   const common = {
-    width: 20,
-    height: 20,
+    width: 22,
+    height: 22,
     viewBox: '0 0 24 24',
     fill: 'none',
     stroke: 'currentColor',
@@ -211,6 +193,20 @@ function CategoryIcon({ id }: { id: string }) {
   }
 }
 
+function resolveStarterDocs(): KnowledgeDocument[] {
+  const byId = STARTER_DOC_IDS.map((id) => getDocumentById(id)).filter(
+    (d): d is KnowledgeDocument => Boolean(d),
+  );
+  if (byId.length >= 2) return byId.slice(0, 3);
+
+  const preferred = ['Brand Planning Playbook', 'TB4L Training Module', 'Brand Frames Quality Checklist'];
+  const found = preferred
+    .map((title) => DOCUMENTS.find((d) => d.title === title))
+    .filter((d): d is KnowledgeDocument => Boolean(d));
+  if (found.length) return found.slice(0, 3);
+  return DOCUMENTS.slice(0, 3);
+}
+
 export function KnowledgeHubClassicPage() {
   const navigate = useNavigate();
   const {
@@ -232,14 +228,7 @@ export function KnowledgeHubClassicPage() {
         .filter((d): d is KnowledgeDocument => Boolean(d)),
     [selectedDocumentIds],
   );
-  const selectedCategories = useMemo(() => {
-    const set = new Set(selectedDocs.map((d) => d.category));
-    return Array.from(set);
-  }, [selectedDocs]);
-  const latestSelected = useMemo(() => {
-    if (selectedDocs.length === 0) return null;
-    return [...selectedDocs].sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated))[0];
-  }, [selectedDocs]);
+  const starterDocs = useMemo(() => resolveStarterDocs(), []);
 
   const runSearch = (term: string) => {
     const q = term.trim();
@@ -253,23 +242,28 @@ export function KnowledgeHubClassicPage() {
     runSearch(query);
   };
 
-  const selectAllDocuments = () => {
-    DOCUMENTS.forEach((d) => selectDocument(d.id));
-  };
-
-  const addToChatContext = () => {
-    setActiveSourcesFromSelection();
-  };
-
   const askInChat = () => {
     setActiveSourcesFromSelection();
     navigate('/chat');
   };
 
-  const contextActive = selectedDocumentIds.length > 0;
+  const addStarterSet = () => {
+    starterDocs.forEach((d) => selectDocument(d.id));
+  };
 
   return (
-    <div className="hub-page hub-page--workspace hub-page--ecosystem section-page section-page--purple">
+    <div
+      className={[
+        'hub-page',
+        'hub-page--workspace',
+        'hub-page--ecosystem',
+        'section-page',
+        'section-page--purple',
+        HUB_UX_FIXES ? 'hub-page--ux-fixes' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <Breadcrumbs
         items={[
           { label: 'Home', to: '/' },
@@ -279,316 +273,278 @@ export function KnowledgeHubClassicPage() {
 
       <HubSectionNav />
 
-      <header className="hub-eco-hero">
-        <p className="hub-eco-hero__eyebrow">TB4L Knowledge Hub</p>
-        <h1 className="hub-eco-hero__title">Trusted knowledge for better brand decisions</h1>
-        <p className="hub-eco-hero__lede">
-          Discover approved TB4L content, control what Chat can use, and see which live data sources
-          are connected—one AI-powered knowledge ecosystem.
-        </p>
-      </header>
+      {/* SECTION 1 — Compact discovery (search-first workspace) */}
+      <header className="hub-ws-hero">
+        <div className="hub-ws-hero__intro">
+          <h1 className="hub-ws-hero__title">Find trusted TB4L knowledge</h1>
+          <p className="hub-ws-hero__lede">
+            Select sources for Chat, then combine with connected enterprise data.
+          </p>
+        </div>
 
-      {/* 1. Global Search */}
-      <section className="hub-eco-search" aria-labelledby="hub-search-heading">
-        <h2 id="hub-search-heading" className="visually-hidden">
-          Search knowledge
-        </h2>
-        <form className="hub-eco-search__form" onSubmit={onSearchSubmit}>
-          <label className="visually-hidden" htmlFor="hub-global-search">
-            Search playbooks, templates, training, frameworks, glossaries
-          </label>
-          <input
-            id="hub-global-search"
-            className="hub-eco-search__input"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search playbooks, templates, training, frameworks, glossaries..."
-            autoComplete="off"
-          />
-          <button type="submit" className="btn hub-eco-search__submit">
-            Search
-          </button>
-        </form>
-        <div className="hub-eco-search__hints">
-          <div className="hub-eco-search__hint-group">
-            <span className="hub-eco-search__hint-label">Suggested</span>
-            <ul className="hub-eco-search__chips">
-              {SUGGESTED_SEARCHES.map((term) => (
-                <li key={term}>
-                  <button type="button" className="hub-eco-chip" onClick={() => runSearch(term)}>
-                    {term}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="hub-eco-search__hint-group">
-            <span className="hub-eco-search__hint-label">Recent</span>
-            <ul className="hub-eco-search__chips">
-              {recent.map((term) => (
-                <li key={term}>
-                  <button type="button" className="hub-eco-chip hub-eco-chip--muted" onClick={() => runSearch(term)}>
-                    {term}
-                  </button>
-                </li>
-              ))}
-            </ul>
+        <div className="hub-ws-discover">
+          <form className="hub-ws-search" onSubmit={onSearchSubmit} role="search">
+            <label className="visually-hidden" htmlFor="hub-global-search">
+              Search trusted TB4L knowledge
+            </label>
+            <input
+              id="hub-global-search"
+              className="hub-ws-search__input"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search playbooks, templates, training, glossaries…"
+              autoComplete="off"
+            />
+            <button type="submit" className="btn hub-ws-search__submit">
+              Search
+            </button>
+          </form>
+
+          <div className="hub-ws-hints">
+            <div className="hub-ws-hints__row">
+              <span className="hub-ws-hints__label">Popular</span>
+              <ul className="hub-ws-hints__chips">
+                {POPULAR_SEARCHES.map((term) => (
+                  <li key={term}>
+                    <button type="button" className="hub-ws-chip" onClick={() => runSearch(term)}>
+                      {term}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="hub-ws-hints__row">
+              <span className="hub-ws-hints__label">Recent</span>
+              <ul className="hub-ws-hints__chips">
+                {recent.map((term) => (
+                  <li key={term}>
+                    <button
+                      type="button"
+                      className="hub-ws-chip hub-ws-chip--muted"
+                      onClick={() => runSearch(term)}
+                    >
+                      {term}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {!HUB_UX_FIXES ? (
+              <div className="hub-ws-hints__row">
+                <span className="hub-ws-hints__label">Quick categories</span>
+                <ul className="hub-ws-hints__chips">
+                  {QUICK_CATEGORIES.map((cat) => (
+                    <li key={cat.id}>
+                      <Link className="hub-ws-chip hub-ws-chip--link" to={cat.to}>
+                        {cat.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
         </div>
-      </section>
+      </header>
 
-      {/* 2. Knowledge Categories */}
-      <section className="hub-eco-section" aria-labelledby="hub-categories-heading">
-        <header className="hub-eco-section__head">
-          <p className="hub-eco-section__badge">Knowledge categories</p>
-          <h2 id="hub-categories-heading">Browse trusted content areas</h2>
-          <p>Each area shows what it contains, how fresh it is, and a featured asset to start with.</p>
+      {/* SECTION 2 — Knowledge Categories */}
+      <section className="hub-ws-section hub-ws-section--categories" aria-labelledby="hub-categories-heading">
+        <header className="hub-ws-section__head hub-ws-section__head--compact">
+          <h2 id="hub-categories-heading">Knowledge categories</h2>
         </header>
 
-        <ul className="hub-eco-categories">
+        <ul className="hub-ws-categories">
           {categories.map((cat) => (
-            <li key={cat.id} className={`hub-eco-cat hub-eco-cat--${cat.accent}`}>
-              <div className="hub-eco-cat__top">
-                <span className="hub-eco-cat__icon" aria-hidden="true">
+            <li key={cat.id}>
+              <Link className={`hub-ws-cat hub-ws-cat--${cat.id}`} to={cat.to}>
+                <span className="hub-ws-cat__icon" aria-hidden="true">
                   <CategoryIcon id={cat.id} />
                 </span>
-                <div className="hub-eco-cat__meta">
-                  <span className="hub-eco-cat__count">
-                    {cat.assetCount} {cat.assetCount === 1 ? 'asset' : 'assets'}
+                <span className="hub-ws-cat__body">
+                  <span className="hub-ws-cat__title-row">
+                    <span className="hub-ws-cat__title">{cat.title}</span>
+                    <span className="hub-ws-cat__count">
+                      {HUB_UX_FIXES
+                        ? countLabel(cat.assetCount, cat.countNoun)
+                        : `${cat.assetCount} ${cat.assetCount === 1 ? 'Asset' : 'Assets'}`}
+                    </span>
                   </span>
-                  <span className="hub-eco-cat__updated">Updated {formatDate(cat.lastUpdated)}</span>
-                </div>
-              </div>
-              <h3 className="hub-eco-cat__title">{cat.title}</h3>
-              <p className="hub-eco-cat__desc">{cat.description}</p>
-              <div className="hub-eco-cat__featured">
-                <span className="hub-eco-cat__featured-label">Featured</span>
-                <p className="hub-eco-cat__featured-title">{cat.featured}</p>
-                {cat.preview ? <p className="hub-eco-cat__preview">{cat.preview}</p> : null}
-              </div>
-              <Link className="hub-eco-cat__open" to={cat.to}>
-                Open {cat.title}
+                  <span className="hub-ws-cat__desc">{cat.description}</span>
+                </span>
               </Link>
             </li>
           ))}
         </ul>
+
+        {!HUB_UX_FIXES ? (
+          <p className="hub-ws-bridge" aria-hidden="true">
+            Browse knowledge <span>↓</span> Select sources <span>↓</span> Open in Chat
+          </p>
+        ) : null}
       </section>
 
-      {/* 3. Selected for TB4L Chat */}
-      <section className="hub-eco-section hub-eco-context" aria-labelledby="hub-context-heading">
-        <header className="hub-eco-section__head">
-          <p className="hub-eco-section__badge hub-eco-section__badge--chat">Chat context</p>
-          <h2 id="hub-context-heading">Selected for TB4L Chat</h2>
-          <p>
-            Control exactly which knowledge assets TB4L Chat can use. Status is always visible—no
-            guessing what the AI can see.
+      {/* SECTION 3 — Selected for Chat */}
+      <section
+        className={[
+          'hub-ws-section',
+          'hub-ws-selected',
+          selectedDocs.length ? 'has-selection' : 'is-empty',
+          HUB_UX_FIXES && selectedDocs.length === 0 ? 'hub-ws-selected--compact' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        aria-labelledby="hub-selected-heading"
+      >
+        <header className="hub-ws-section__head">
+          <p className="hub-ws-section__step hub-ws-section__step--chat">
+            {HUB_UX_FIXES ? 'Step 2 · Select for Chat' : 'Step 2 · Select'}
           </p>
+          <h2 id="hub-selected-heading">
+            Selected for TB4L Chat
+            <span className="hub-ws-selected__count">
+              {selectedDocs.length} {selectedDocs.length === 1 ? 'source' : 'sources'}
+            </span>
+          </h2>
+          {!(HUB_UX_FIXES && selectedDocs.length === 0) ? (
+            <p>Selected assets become context in TB4L Chat.</p>
+          ) : null}
         </header>
 
-        <div className="hub-eco-context__panel">
-          <div className="hub-eco-context__summary">
-            <div className="hub-eco-context__stat">
-              <span className="hub-eco-context__stat-value">{selectedDocs.length}</span>
-              <span className="hub-eco-context__stat-label">Documents</span>
+        {selectedDocs.length === 0 ? (
+          HUB_UX_FIXES ? (
+            <div className="hub-ws-selected__compact-empty">
+              <p>No sources yet — open a category, or add a starter set.</p>
+              <div className="hub-ws-selected__actions">
+                <button type="button" className="btn btn-secondary btn-sm" onClick={addStarterSet}>
+                  Add starter set
+                </button>
+                <Link className="btn btn-secondary btn-sm" to="/knowledge-hub/browse">
+                  Browse library
+                </Link>
+              </div>
             </div>
-            <div className="hub-eco-context__stat">
-              <span className="hub-eco-context__stat-value">{selectedCategories.length}</span>
-              <span className="hub-eco-context__stat-label">Categories</span>
-            </div>
-            <div className="hub-eco-context__stat">
-              <span className="hub-eco-context__stat-value">
-                {latestSelected ? formatDate(latestSelected.lastUpdated) : '—'}
-              </span>
-              <span className="hub-eco-context__stat-label">Last update</span>
-            </div>
-            <div className="hub-eco-context__stat">
-              <span
-                className={`hub-eco-context__status ${contextActive ? 'is-active' : 'is-idle'}`}
-              >
-                {contextActive ? 'Active' : 'Inactive'}
-              </span>
-              <span className="hub-eco-context__stat-label">Context status</span>
-            </div>
-          </div>
-
-          <div className="hub-eco-context__actions">
-            <button type="button" className="btn btn-secondary btn-sm" onClick={selectAllDocuments}>
-              Select All
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={clearDocumentSelection}
-              disabled={selectedDocs.length === 0}
-            >
-              Clear Selection
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={addToChatContext}
-              disabled={selectedDocs.length === 0}
-            >
-              Add to Chat Context
-            </button>
-            <button
-              type="button"
-              className="btn hub-eco-btn-chat btn-sm"
-              onClick={askInChat}
-              disabled={selectedDocs.length === 0}
-            >
-              Open in TB4L Chat
-            </button>
-          </div>
-
-          {selectedCategories.length > 0 ? (
-            <p className="hub-eco-context__cats">
-              <strong>Selected categories:</strong> {selectedCategories.join(' · ')}
-            </p>
-          ) : null}
-
-          <ul className="hub-eco-context__files">
-            {[
-              ...selectedDocs,
-              ...DOCUMENTS.filter((d) => !selectedDocumentIds.includes(d.id)),
-            ]
-              .slice(0, 8)
-              .map((doc) => {
-              const inContext = selectedDocumentIds.includes(doc.id);
-              return (
-                <li key={doc.id} className={`hub-eco-file ${inContext ? 'is-on' : 'is-off'}`}>
-                  <button
-                    type="button"
-                    className="hub-eco-file__toggle"
-                    onClick={() => toggleDocumentSelection(doc.id)}
-                    aria-pressed={inContext}
-                  >
-                    <span className="hub-eco-file__mark" aria-hidden="true">
-                      {inContext ? '✅' : '⚪'}
-                    </span>
-                    <span className="hub-eco-file__body">
-                      <span className="hub-eco-file__title">{doc.title}</span>
-                      <span className="hub-eco-file__meta">
-                        {doc.category} · {formatDate(doc.lastUpdated)}
-                      </span>
-                      <span className={`hub-eco-file__state ${inContext ? 'is-on' : 'is-off'}`}>
-                        {inContext
-                          ? 'Available to TB4L Chat'
-                          : 'Not Currently Used by TB4L Chat'}
-                      </span>
-                    </span>
-                  </button>
-                  {inContext ? (
+          ) : (
+            <div className="hub-ws-selected__empty">
+              <p>No sources selected yet. Browse a category, or start with these:</p>
+              <ul className="hub-ws-selected__list">
+                {starterDocs.map((doc) => (
+                  <li key={doc.id}>
                     <button
                       type="button"
-                      className="hub-eco-file__remove"
+                      className="hub-ws-selected__item"
+                      onClick={() => selectDocument(doc.id)}
+                    >
+                      <span className="hub-ws-selected__item-title">{doc.title}</span>
+                      <span className="hub-ws-selected__item-action">Add</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <div className="hub-ws-selected__actions">
+                <button type="button" className="btn btn-secondary" onClick={addStarterSet}>
+                  Add starter set
+                </button>
+                <Link className="btn btn-secondary" to="/knowledge-hub/browse">
+                  Browse library
+                </Link>
+              </div>
+            </div>
+          )
+        ) : (
+          <div className="hub-ws-selected__panel">
+            <ul className="hub-ws-selected__list">
+              {selectedDocs.map((doc) => (
+                <li key={doc.id}>
+                  <div className="hub-ws-selected__item is-on">
+                    <span className="hub-ws-selected__item-title">{doc.title}</span>
+                    <button
+                      type="button"
+                      className="hub-ws-selected__item-action"
                       onClick={() => toggleDocumentSelection(doc.id)}
                     >
                       Remove
                     </button>
-                  ) : (
-                    <button
-                      type="button"
-                      className="hub-eco-file__add"
-                      onClick={() => selectDocument(doc.id)}
-                    >
-                      Add
-                    </button>
-                  )}
+                  </div>
                 </li>
-              );
-            })}
-          </ul>
-          <p className="hub-eco-context__more">
-            Showing sample assets.{' '}
-            <Link to="/knowledge-hub/browse">Browse the full library</Link> to select more.
-          </p>
-        </div>
+              ))}
+            </ul>
+            <div className="hub-ws-selected__actions">
+              <button type="button" className="btn btn-secondary" onClick={clearDocumentSelection}>
+                Clear
+              </button>
+              <button type="button" className="btn hub-ws-btn-chat" onClick={askInChat}>
+                Open in TB4L Chat
+              </button>
+            </div>
+          </div>
+        )}
       </section>
 
-      {/* 4. Connected Data Sources */}
-      <section className="hub-eco-section" aria-labelledby="hub-data-heading">
-        <header className="hub-eco-section__head">
-          <p className="hub-eco-section__badge hub-eco-section__badge--data">Live enterprise data</p>
-          <h2 id="hub-data-heading">Connected Data Sources</h2>
-          <p>
-            Knowledge files and live data are separate. Chat can use both—when you connect them
-            deliberately.
+      {/* SECTION 4 — Connected Data */}
+      <section className="hub-ws-section" aria-labelledby="hub-data-heading">
+        <header className="hub-ws-section__head">
+          <p className="hub-ws-section__step">
+            {HUB_UX_FIXES ? 'Step 3 · Connected data' : 'Step 4 · Enhance'}
           </p>
+          <h2 id="hub-data-heading">Connected data sources</h2>
+          <p>Enterprise data you can combine with Hub knowledge in Chat.</p>
         </header>
 
-        <ul className="hub-eco-sources">
+        <ul className="hub-ws-sources">
           {DATA_SOURCES.map((source) => (
             <li
               key={source.id}
-              className={`hub-eco-source hub-eco-source--${source.status}`}
+              className={`hub-ws-source hub-ws-source--${source.status}`}
             >
-              <div className="hub-eco-source__top">
-                <h3 className="hub-eco-source__name">{source.name}</h3>
-                <span className={`hub-eco-source__badge hub-eco-source__badge--${source.status}`}>
-                  {DATA_SOURCE_STATUS_LABEL[source.status]}
+              <div className="hub-ws-source__top">
+                <h3 className="hub-ws-source__name">{source.name}</h3>
+                <span className={`hub-ws-source__status hub-ws-source__status--${source.status}`}>
+                  {STATUS_LABEL[source.status]}
                 </span>
               </div>
-              <p className="hub-eco-source__desc">{source.description}</p>
-              <dl className="hub-eco-source__facts">
-                <div>
-                  <dt>Availability</dt>
-                  <dd>{source.availability ?? DATA_SOURCE_STATUS_LABEL[source.status]}</dd>
-                </div>
-                <div>
-                  <dt>Last refresh</dt>
-                  <dd>{source.lastRefresh ? formatDate(source.lastRefresh) : '—'}</dd>
-                </div>
-              </dl>
+              <p className="hub-ws-source__desc">{source.description}</p>
             </li>
           ))}
         </ul>
       </section>
 
-      {/* 5. Knowledge + Data Integration */}
-      <section className="hub-eco-section hub-eco-flow" aria-labelledby="hub-flow-heading">
-        <header className="hub-eco-section__head hub-eco-section__head--center">
-          <p className="hub-eco-section__badge">How it works together</p>
-          <h2 id="hub-flow-heading">Knowledge Hub ↔ TB4L Chat ↔ Connected Data</h2>
-          <p>One system: curated knowledge and live data power grounded answers in Chat.</p>
+      {/* SECTION 5 — How it works */}
+      <section className="hub-ws-section hub-ws-how" aria-labelledby="hub-how-heading">
+        <header className="hub-ws-section__head hub-ws-section__head--center">
+          <p className="hub-ws-section__step">How it works</p>
+          <h2 id="hub-how-heading">From knowledge to better answers</h2>
         </header>
 
-        <ol className="hub-eco-flow__track">
-          <li className="hub-eco-flow__node hub-eco-flow__node--hub">
-            <span className="hub-eco-flow__label">Knowledge Hub</span>
-            <p>Browse and select trusted documents</p>
+        <ol className="hub-ws-how__steps">
+          <li className="hub-ws-how__step hub-ws-how__step--hub">
+            <span className="hub-ws-how__num">1</span>
+            <div>
+              <strong>Knowledge Hub</strong>
+              <p>Find and select trusted documents</p>
+            </div>
           </li>
-          <li className="hub-eco-flow__arrow" aria-hidden="true">
-            →
+          <li className="hub-ws-how__arrow" aria-hidden="true">
+            ↓
           </li>
-          <li className="hub-eco-flow__node hub-eco-flow__node--chat">
-            <span className="hub-eco-flow__label">TB4L Chat</span>
-            <p>Uses your selected Hub content as context</p>
+          <li className="hub-ws-how__step hub-ws-how__step--chat">
+            <span className="hub-ws-how__num">2</span>
+            <div>
+              <strong>TB4L Chat</strong>
+              <p>Ask questions grounded in your sources</p>
+            </div>
           </li>
-          <li className="hub-eco-flow__arrow" aria-hidden="true">
-            ←
+          <li className="hub-ws-how__arrow" aria-hidden="true">
+            ↓
           </li>
-          <li className="hub-eco-flow__node hub-eco-flow__node--data">
-            <span className="hub-eco-flow__label">Connected Data</span>
-            <p>Live sources you connect explicitly in Chat</p>
+          <li className="hub-ws-how__step hub-ws-how__step--data">
+            <span className="hub-ws-how__num">3</span>
+            <div>
+              <strong>Connected Data</strong>
+              <p>Enhance answers with enterprise data</p>
+            </div>
           </li>
         </ol>
-
-        <ul className="hub-eco-flow__points">
-          <li>TB4L Chat can use selected Hub content.</li>
-          <li>TB4L Chat can access connected enterprise data sources.</li>
-          <li>Knowledge assets and live data stay separate—and work together when you choose.</li>
-        </ul>
-
-        <div className="hub-eco-flow__cta">
-          <Link className="btn hub-eco-btn-chat" to="/chat">
-            Open TB4L Chat
-          </Link>
-          <Link className="btn btn-secondary" to="/knowledge-hub/browse">
-            Browse all knowledge
-          </Link>
-        </div>
       </section>
 
       <SelectedDocumentsBar

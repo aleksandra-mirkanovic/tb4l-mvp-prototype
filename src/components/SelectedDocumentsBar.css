@@ -15,7 +15,7 @@
   align-items: center;
   padding: 14px 16px;
   background: var(--surface-elevated);
-  border: 2px solid #624963;
+  border: 2px solid #d30f4b;
   border-radius: var(--radius-md);
   box-shadow: none;
 }
@@ -29,7 +29,7 @@
 }
 
 .selected-bar__info strong {
-  color: #624963;
+  color: #d30f4b;
   font-size: 15px;
 }
 
@@ -59,14 +59,14 @@
   padding-inline: 20px;
   font-size: 15px;
   font-weight: 700;
-  background: #624963;
-  border-color: #624963;
+  background: #d30f4b;
+  border-color: #d30f4b;
   color: #fff;
 }
 
 .selected-bar__cta:hover:not(:disabled) {
-  background: #523d54;
-  border-color: #523d54;
+  background: #b80d41;
+  border-color: #b80d41;
   color: #fff;
 }
 
