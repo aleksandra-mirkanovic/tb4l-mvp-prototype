@@ -10,7 +10,6 @@ import { useApp } from '../context/AppContext';
 import { DOCUMENTS, EMPTY_FILTERS } from '../data/documents';
 import { GLOSSARY_TERMS } from '../data/glossary';
 import { getHubSectionBySlug, matchesHubCategory } from '../data/sections';
-import { TEAM_MEMBERS } from '../data/team';
 import './SectionPage.css';
 
 export function KnowledgeHubSectionPage() {
@@ -19,10 +18,14 @@ export function KnowledgeHubSectionPage() {
   const navigate = useNavigate();
   const {
     selectedDocumentIds,
+    m360Selected,
     toggleDocumentSelection,
     selectDocument,
     clearDocumentSelection,
+    toggleM360Selection,
     setActiveSourcesFromSelection,
+    clearSources,
+    setGenieEnabled,
     addSources,
     setFilters,
   } = useApp();
@@ -56,6 +59,14 @@ export function KnowledgeHubSectionPage() {
   };
 
   const askInChat = () => {
+    if (m360Selected) {
+      clearSources();
+      setGenieEnabled(true);
+      clearDocumentSelection();
+      navigate('/chat');
+      return;
+    }
+    setGenieEnabled(false);
     setActiveSourcesFromSelection();
     navigate('/chat');
   };
@@ -83,7 +94,7 @@ export function KnowledgeHubSectionPage() {
             <button type="button" className="btn btn-secondary btn-sm" onClick={openBrowseFiltered}>
               Open in full library
             </button>
-          ) : section.kind === 'team' ? null : (
+          ) : (
             <Link className="btn btn-secondary btn-sm" to="/knowledge-hub/browse">
               Browse all documents
             </Link>
@@ -129,8 +140,10 @@ export function KnowledgeHubSectionPage() {
 
           <SelectedDocumentsBar
             selectedIds={selectedDocumentIds}
+            m360Selected={m360Selected}
             onClear={clearDocumentSelection}
             onRemove={(id) => toggleDocumentSelection(id)}
+            onRemoveM360={toggleM360Selection}
             onAskInChat={askInChat}
           />
         </section>
@@ -155,39 +168,6 @@ export function KnowledgeHubSectionPage() {
                       {r}
                     </span>
                   ))}
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {section.kind === 'team' ? (
-        <section className="section-content" aria-labelledby="team-heading">
-          <div className="section-content__head">
-            <h3 id="team-heading" className="section-title">
-              Enablement partners
-            </h3>
-            <p>
-              Reach out for Accelerator support, training, or Hub adoption coaching. Team profiles
-              are contacts only—they are not selected as Chat sources.
-            </p>
-          </div>
-          <div className="team-grid">
-            {TEAM_MEMBERS.map((member) => (
-              <article key={member.id} className="team-card">
-                <div className="team-card__avatar" aria-hidden="true">
-                  {member.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')}
-                </div>
-                <h4>{member.name}</h4>
-                <p className="team-card__role">{member.role}</p>
-                <p className="team-card__focus">{member.focus}</p>
-                <div className="team-card__meta">
-                  <span className="badge badge-hub">{member.region}</span>
-                  <span className="team-card__email">{member.emailLabel}</span>
                 </div>
               </article>
             ))}

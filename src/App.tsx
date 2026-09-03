@@ -7,6 +7,8 @@ import { ChatPage } from './pages/ChatPage';
 import { KnowledgeHubBrowsePage } from './pages/KnowledgeHubBrowsePage';
 import { KnowledgeHubPage } from './pages/KnowledgeHubPage';
 import { KnowledgeHubSectionPage } from './pages/KnowledgeHubSectionPage';
+import { KnowledgeHubSourcesPage } from './pages/KnowledgeHubSourcesPage';
+import { TeamPage } from './pages/TeamPage';
 import { WelcomePage } from './pages/WelcomePage';
 
 function LegacySectionRedirect() {
@@ -26,7 +28,10 @@ function AppRoutes() {
           <Route path="/" element={<WelcomePage />} />
           <Route path="/knowledge-hub" element={<KnowledgeHubPage />} />
           <Route path="/knowledge-hub/browse" element={<KnowledgeHubBrowsePage />} />
+          <Route path="/knowledge-hub/sources" element={<KnowledgeHubSourcesPage />} />
+          <Route path="/knowledge-hub/team" element={<Navigate to="/team" replace />} />
           <Route path="/knowledge-hub/:slug" element={<KnowledgeHubSectionPage />} />
+          <Route path="/team" element={<TeamPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/sections/:slug" element={<LegacySectionRedirect />} />
           <Route path="*" element={<Navigate to="/" replace />} />

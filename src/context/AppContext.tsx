@@ -32,6 +32,8 @@ interface AppContextValue extends AppState {
   toggleDocumentSelection: (id: string) => void;
   selectDocument: (id: string) => void;
   clearDocumentSelection: () => void;
+  m360Selected: boolean;
+  toggleM360Selection: () => void;
   setActiveSourcesFromSelection: () => void;
   addSources: (documentIds: string[]) => void;
   removeSource: (id: string) => void;
@@ -46,6 +48,8 @@ interface AppContextValue extends AppState {
   startNewSession: () => void;
   loadSession: (sessionId: string) => void;
   deleteSession: (sessionId: string) => void;
+  togglePinSession: (sessionId: string) => void;
+  renameSession: (sessionId: string, title: string) => void;
 }
 
 function persistSessionsSnapshot(sessions: ChatSession[], activeId: string) {
@@ -72,7 +76,12 @@ function readPersistedSessions(): { sessions: ChatSession[]; activeSessionId: st
     };
     if (!parsed?.sessions?.length || !parsed.activeSessionId) return null;
     if (!parsed.sessions.some((s) => s.id === parsed.activeSessionId)) return null;
-    return { sessions: parsed.sessions, activeSessionId: parsed.activeSessionId };
+    const sessions = parsed.sessions.map((s) => ({
+      ...s,
+      pinned: Boolean(s.pinned),
+      titleCustom: Boolean(s.titleCustom),
+    }));
+    return { sessions, activeSessionId: parsed.activeSessionId };
   } catch {
     return null;
   }
@@ -113,6 +122,7 @@ function createEmptySession(): ChatSession {
     messages: [],
     sources: [GENERAL_SOURCE],
     genieEnabled: false,
+    pinned: false,
     createdAt: now,
     updatedAt: now,
   };
@@ -131,7 +141,10 @@ function withActiveSessionSnapshot(
   );
   return {
     ...session,
-    title: snapshot.messages.length ? titleFromMessages(snapshot.messages) : session.title,
+    title:
+      session.titleCustom || !snapshot.messages.length
+        ? session.title
+        : titleFromMessages(snapshot.messages),
     messages: snapshot.messages,
     sources: snapshot.sources,
     genieEnabled: snapshot.genieEnabled,
@@ -342,6 +355,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
+  const [m360Selected, setM360Selected] = useState(false);
   const [activeSources, setActiveSources] = useState<ChatSource[]>(boot.sources);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(boot.messages);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(boot.sessions);
@@ -368,16 +382,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const resetFilters = useCallback(() => setFilters(EMPTY_FILTERS), []);
 
   const toggleDocumentSelection = useCallback((id: string) => {
+    setM360Selected(false);
     setSelectedDocumentIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   }, []);
 
   const selectDocument = useCallback((id: string) => {
+    setM360Selected(false);
     setSelectedDocumentIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
   }, []);
 
-  const clearDocumentSelection = useCallback(() => setSelectedDocumentIds([]), []);
+  const clearDocumentSelection = useCallback(() => {
+    setSelectedDocumentIds([]);
+    setM360Selected(false);
+  }, []);
+
+  const toggleM360Selection = useCallback(() => {
+    setM360Selected((prev) => {
+      const next = !prev;
+      if (next) setSelectedDocumentIds([]);
+      return next;
+    });
+  }, []);
 
   const setActiveSourcesFromSelection = useCallback(() => {
     setActiveSources((prev) => {
@@ -570,9 +597,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [activeSessionId, chatSessions],
   );
 
+  const togglePinSession = useCallback((sessionId: string) => {
+    setChatSessions((prev) => {
+      const next = prev.map((s) =>
+        s.id === sessionId ? { ...s, pinned: !s.pinned } : s,
+      );
+      persistSessionsSnapshot(next, activeSessionId);
+      return next;
+    });
+  }, [activeSessionId]);
+
+  const renameSession = useCallback(
+    (sessionId: string, title: string) => {
+      const nextTitle = title.trim() || 'New chat';
+      setChatSessions((prev) => {
+        const next = prev.map((s) =>
+          s.id === sessionId ? { ...s, title: nextTitle, titleCustom: true } : s,
+        );
+        persistSessionsSnapshot(next, activeSessionId);
+        return next;
+      });
+    },
+    [activeSessionId],
+  );
+
   const value = useMemo<AppContextValue>(
     () => ({
       selectedDocumentIds,
+      m360Selected,
       activeSources,
       chatMessages,
       chatSessions,
@@ -585,6 +637,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toggleDocumentSelection,
       selectDocument,
       clearDocumentSelection,
+      toggleM360Selection,
       setActiveSourcesFromSelection,
       addSources,
       removeSource,
@@ -599,9 +652,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       startNewSession,
       loadSession,
       deleteSession,
+      togglePinSession,
+      renameSession,
     }),
     [
       selectedDocumentIds,
+      m360Selected,
       activeSources,
       chatMessages,
       chatSessions,
@@ -613,6 +669,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       toggleDocumentSelection,
       selectDocument,
       clearDocumentSelection,
+      toggleM360Selection,
       setActiveSourcesFromSelection,
       addSources,
       removeSource,
@@ -626,6 +683,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       startNewSession,
       loadSession,
       deleteSession,
+      togglePinSession,
+      renameSession,
     ],
   );
 

@@ -2,16 +2,15 @@ import { NavLink } from 'react-router-dom';
 import { HUB_SECTIONS } from '../data/sections';
 import './HubSectionNav.css';
 
-/** Knowledge / Chat context sections only — Teams lives outside this nav. */
-const NAV_SECTIONS = HUB_SECTIONS.filter((s) => s.kind !== 'team');
+/** Knowledge sections for Hub nav — Sources is a dedicated nav item. */
+const NAV_SECTIONS = HUB_SECTIONS;
 
 export type HubSectionNavMode = 'full' | 'minimal';
 
 type HubSectionNavProps = {
   /**
-   * `full` — Overview + every knowledge category + Browse all (default; section/browse pages).
-   * `minimal` — Overview + Browse all only (Hub Overview when HUB_UX_FIXES).
-   * Revert slim Overview nav: set HUB_UX_FIXES = false or pass mode="full".
+   * `full` — Overview + knowledge categories + Browse all + Sources (default).
+   * `minimal` — Overview + Browse all only.
    */
   mode?: HubSectionNavMode;
 };
@@ -55,6 +54,21 @@ export function HubSectionNav({ mode = 'full' }: HubSectionNavProps) {
         }
       >
         Browse all
+      </NavLink>
+      <span className="hub-section-nav__divider" aria-hidden="true" />
+      <NavLink
+        to="/knowledge-hub/sources"
+        className={({ isActive }) =>
+          [
+            'hub-section-nav__link',
+            'hub-section-nav__link--sources',
+            isActive ? 'is-active' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')
+        }
+      >
+        Sources
       </NavLink>
     </nav>
   );

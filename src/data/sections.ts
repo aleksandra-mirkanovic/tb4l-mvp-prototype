@@ -6,10 +6,9 @@ export type HubSectionSlug =
   | 'tb4l-training'
   | 'accelerator-outputs'
   | 'tb4l-glossary'
-  | 'brand-frames'
-  | 'team';
+  | 'brand-frames';
 
-export type HubSectionKind = 'documents' | 'glossary' | 'team';
+export type HubSectionKind = 'documents' | 'glossary';
 
 export interface HubSection {
   slug: HubSectionSlug;
@@ -94,17 +93,6 @@ export const HUB_SECTIONS: HubSection[] = [
       'Common TB4L terminology, definitions, and shared language across Brand, Medical, Insights, and Agency partners.',
     ctaLabel: 'Open Glossary',
     accent: 'teal',
-  },
-  {
-    slug: 'team',
-    title: 'Teams & Experts',
-    kind: 'team',
-    eyebrow: 'People & support',
-    tagline: 'Key contacts, ownership areas, and expert networks.',
-    description:
-      'Key contacts, ownership areas, responsibilities, and expert networks. Profiles are for contact only—not Chat sources.',
-    ctaLabel: 'Meet the team',
-    accent: 'purple',
   },
 ];
 

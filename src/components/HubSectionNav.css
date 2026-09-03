@@ -61,3 +61,20 @@
 .hub-section-nav__link:focus-visible {
   outline: 3px solid var(--focus-ring); outline-offset: 2px; box-shadow: none;
 }
+
+.hub-section-nav__divider {
+  align-self: stretch;
+  width: 1px;
+  margin: 4px -2px;
+  flex-shrink: 0;
+  background: var(--border-default);
+  opacity: 0.85;
+}
+
+.hub-section-nav__link--sources {
+  margin-left: 0;
+}
+
+[data-theme='dark'] .hub-section-nav__divider {
+  background: color-mix(in srgb, var(--text-primary) 22%, transparent);
+}

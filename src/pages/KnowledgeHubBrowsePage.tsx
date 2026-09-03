@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ActiveFilterChips } from '../components/ActiveFilterChips';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -15,6 +15,9 @@ import type { HubFilters } from '../types';
 import './KnowledgeHubBrowsePage.css';
 import './SectionPage.css';
 
+const PAGE_SIZE_OPTIONS = [10, 20, 30, 50] as const;
+type PageSize = (typeof PAGE_SIZE_OPTIONS)[number];
+
 export function KnowledgeHubBrowsePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -24,14 +27,20 @@ export function KnowledgeHubBrowsePage() {
     setFilters,
     resetFilters,
     selectedDocumentIds,
+    m360Selected,
     toggleDocumentSelection,
     selectDocument,
     clearDocumentSelection,
+    toggleM360Selection,
     setActiveSourcesFromSelection,
+    clearSources,
+    setGenieEnabled,
     addSources,
   } = useApp();
 
   const [summaryId, setSummaryId] = useState<string | null>(null);
+  const [pageSize, setPageSize] = useState<PageSize>(10);
+  const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     return DOCUMENTS.filter((doc) => {
@@ -45,6 +54,25 @@ export function KnowledgeHubBrowsePage() {
       return true;
     });
   }, [filters, searchQuery]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const showPagination = filtered.length > pageSize;
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters, searchQuery, pageSize]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  const pageItems = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, page, pageSize]);
+
+  const rangeStart = filtered.length === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = Math.min(page * pageSize, filtered.length);
 
   const summaryDoc = summaryId ? DOCUMENTS.find((d) => d.id === summaryId) ?? null : null;
 
@@ -60,6 +88,14 @@ export function KnowledgeHubBrowsePage() {
   };
 
   const askInChat = () => {
+    if (m360Selected) {
+      clearSources();
+      setGenieEnabled(true);
+      clearDocumentSelection();
+      navigate('/chat');
+      return;
+    }
+    setGenieEnabled(false);
     setActiveSourcesFromSelection();
     navigate('/chat');
   };
@@ -73,25 +109,6 @@ export function KnowledgeHubBrowsePage() {
           { label: 'Browse all' },
         ]}
       />
-
-      <header className="section-hero">
-        <div className="section-hero__copy">
-          <p className="section-hero__eyebrow">TB4L Hub</p>
-          <h1 className="section-hero__title">
-            {searchQuery ? `Results for “${searchParams.get('q')}”` : 'Browse all documents'}
-          </h1>
-          <p className="section-hero__tagline">
-            {searchQuery
-              ? 'Refine with filters, then select documents to build Chat context.'
-              : 'Filter and select Hub documents to build Chat context, then ask with those sources.'}
-          </p>
-        </div>
-        <div className="section-hero__actions">
-          <p className="browse-page__count" aria-live="polite">
-            {filtered.length} result{filtered.length === 1 ? '' : 's'}
-          </p>
-        </div>
-      </header>
 
       <HubSectionNav />
 
@@ -131,25 +148,84 @@ export function KnowledgeHubBrowsePage() {
           }
         />
       ) : (
-        <div className="browse-page__list" role="list">
-          {filtered.map((doc) => (
-            <div key={doc.id} role="listitem">
-              <DocumentCard
-                document={doc}
-                selected={selectedDocumentIds.includes(doc.id)}
-                onToggle={() => toggleDocumentSelection(doc.id)}
-                onViewSummary={() => setSummaryId(doc.id)}
-                compact
-              />
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="browse-page__toolbar">
+            <p className="browse-page__range" aria-live="polite">
+              Showing {rangeStart}–{rangeEnd} of {filtered.length}
+            </p>
+            <label className="browse-page__page-size">
+              <span>Per page</span>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value) as PageSize)}
+                aria-label="Number of files per page"
+              >
+                {PAGE_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          <div className="browse-page__list" role="list">
+            {pageItems.map((doc) => (
+              <div key={doc.id} role="listitem">
+                <DocumentCard
+                  document={doc}
+                  selected={selectedDocumentIds.includes(doc.id)}
+                  onToggle={() => toggleDocumentSelection(doc.id)}
+                  onViewSummary={() => setSummaryId(doc.id)}
+                  compact
+                />
+              </div>
+            ))}
+          </div>
+
+          {showPagination ? (
+            <nav className="browse-page__pagination" aria-label="Document pages">
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+              >
+                Previous
+              </button>
+              <ul className="browse-page__pages">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <li key={pageNum}>
+                    <button
+                      type="button"
+                      className={`browse-page__page-btn${pageNum === page ? ' is-active' : ''}`}
+                      onClick={() => setPage(pageNum)}
+                      aria-current={pageNum === page ? 'page' : undefined}
+                    >
+                      {pageNum}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+              >
+                Next
+              </button>
+            </nav>
+          ) : null}
+        </>
       )}
 
       <SelectedDocumentsBar
         selectedIds={selectedDocumentIds}
+        m360Selected={m360Selected}
         onClear={clearDocumentSelection}
         onRemove={(id) => toggleDocumentSelection(id)}
+        onRemoveM360={toggleM360Selection}
         onAskInChat={askInChat}
       />
 

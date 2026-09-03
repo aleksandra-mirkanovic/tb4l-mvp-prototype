@@ -73,6 +73,8 @@ export function ChatPage() {
     startNewSession,
     loadSession,
     deleteSession,
+    togglePinSession,
+    renameSession,
   } = useApp();
 
   const [input, setInput] = useState('');
@@ -85,8 +87,14 @@ export function ChatPage() {
   const [plusMenu, setPlusMenu] = useState<'closed' | 'main' | 'data'>('closed');
   const [attachedFiles, setAttachedFiles] = useState<{ id: string; name: string }[]>([]);
   const [attachNotice, setAttachNotice] = useState('');
+  const [menuSessionId, setMenuSessionId] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const plusMenuRef = useRef<HTMLDivElement>(null);
+  const sessionMenuRef = useRef<HTMLDivElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+  const skipRenameCommitRef = useRef(false);
   const [lastPrompt, setLastPrompt] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const cancelRef = useRef(false);
@@ -96,6 +104,7 @@ export function ChatPage() {
   const documentSources = activeSources.filter((s) => s.kind === 'document');
   const hasDocuments = documentSources.length > 0;
   const hasGenie = genieEnabled;
+  const hasLocalContext = hasDocuments || attachedFiles.length > 0;
 
   const suggestions = useMemo(() => {
     if (hasGenie && !hasDocuments) return GENIE_SUGGESTIONS;
@@ -130,17 +139,22 @@ export function ChatPage() {
     return parts.join(' · ');
   }, [documentSources.length, hasDocuments, hasGenie]);
 
-  const { todaySessions, previousSessions } = useMemo(() => {
+  const { pinnedSessions, todaySessions, previousSessions } = useMemo(() => {
     const todayStart = startOfToday();
     const sorted = [...chatSessions].sort((a, b) => b.updatedAt - a.updatedAt);
+    const pinned: ChatSession[] = [];
     const today: ChatSession[] = [];
     const previous: ChatSession[] = [];
     for (const session of sorted) {
       if (session.messages.length === 0 && session.id !== activeSessionId) continue;
+      if (session.pinned) {
+        pinned.push(session);
+        continue;
+      }
       if (session.updatedAt >= todayStart) today.push(session);
       else previous.push(session);
     }
-    return { todaySessions: today, previousSessions: previous };
+    return { pinnedSessions: pinned, todaySessions: today, previousSessions: previous };
   }, [activeSessionId, chatSessions]);
 
   useEffect(() => {
@@ -167,8 +181,33 @@ export function ChatPage() {
     };
   }, [plusMenu]);
 
+  useEffect(() => {
+    if (!menuSessionId) return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (!sessionMenuRef.current?.contains(e.target as Node)) {
+        setMenuSessionId(null);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuSessionId(null);
+    };
+    window.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onPointerDown);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [menuSessionId]);
+
+  useEffect(() => {
+    if (!renamingId) return;
+    renameInputRef.current?.focus();
+    renameInputRef.current?.select();
+  }, [renamingId]);
+
   const handleAttachFiles = (files: FileList | null) => {
     if (!files?.length) return;
+    setGenieEnabled(false);
     const next = Array.from(files).map((file) => ({
       id: `file-${file.name}-${file.size}-${file.lastModified}`,
       name: file.name,
@@ -472,47 +511,154 @@ export function ChatPage() {
     setLastPrompt(null);
     setAttachedFiles([]);
     setPlusMenu('closed');
+    setMenuSessionId(null);
+    if (renamingId === sessionId) {
+      setRenamingId(null);
+      setRenameDraft('');
+    }
     deleteSession(sessionId);
   };
 
-  const renderSessionRow = (session: ChatSession, timeLabel: string) => (
-    <div
-      key={session.id}
-      className={`chat-recent-row${session.id === activeSessionId ? ' is-active' : ''}`}
-    >
-      <button
-        type="button"
-        className="chat-recent"
-        onClick={() => openSession(session.id)}
-        aria-current={session.id === activeSessionId ? 'true' : undefined}
-        title="Resume this chat with its sources"
+  const beginRename = (session: ChatSession) => {
+    setMenuSessionId(null);
+    skipRenameCommitRef.current = false;
+    setRenamingId(session.id);
+    setRenameDraft(session.title);
+  };
+
+  const commitRename = () => {
+    if (skipRenameCommitRef.current) {
+      skipRenameCommitRef.current = false;
+      return;
+    }
+    if (!renamingId) return;
+    renameSession(renamingId, renameDraft);
+    setRenamingId(null);
+    setRenameDraft('');
+  };
+
+  const cancelRename = () => {
+    skipRenameCommitRef.current = true;
+    setRenamingId(null);
+    setRenameDraft('');
+  };
+
+  const renderSessionRow = (session: ChatSession, timeLabel: string) => {
+    const menuOpen = menuSessionId === session.id;
+    const isRenaming = renamingId === session.id;
+
+    return (
+      <div
+        key={session.id}
+        className={`chat-recent-row${session.id === activeSessionId ? ' is-active' : ''}${session.pinned ? ' is-pinned' : ''}`}
       >
-        <span className="chat-recent__title">{session.title}</span>
-        <span className="chat-recent__meta">
-          {timeLabel}
-          {sessionSourceHint(session)}
-        </span>
-      </button>
-      <button
-        type="button"
-        className="chat-recent__delete"
-        onClick={(e) => {
-          e.stopPropagation();
-          removeSession(session.id, session.title);
-        }}
-        aria-label={`Delete conversation: ${session.title}`}
-        title="Delete conversation"
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-          <path d="M3 6h18" />
-          <path d="M8 6V4h8v2" />
-          <path d="M19 6l-1 14H6L5 6" />
-          <path d="M10 11v6" />
-          <path d="M14 11v6" />
-        </svg>
-      </button>
-    </div>
-  );
+        {isRenaming ? (
+          <form
+            className="chat-recent-rename"
+            onSubmit={(e) => {
+              e.preventDefault();
+              commitRename();
+            }}
+          >
+            <input
+              ref={renameInputRef}
+              className="chat-recent-rename__input"
+              value={renameDraft}
+              onChange={(e) => setRenameDraft(e.target.value)}
+              onBlur={commitRename}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancelRename();
+                }
+              }}
+              aria-label="Rename conversation"
+              maxLength={80}
+            />
+          </form>
+        ) : (
+          <button
+            type="button"
+            className="chat-recent"
+            onClick={() => openSession(session.id)}
+            aria-current={session.id === activeSessionId ? 'true' : undefined}
+            title="Resume this chat with its sources"
+          >
+            <span className="chat-recent__title">
+              {session.pinned ? (
+                <span className="chat-recent__pin-mark" aria-hidden="true">
+                  ★
+                </span>
+              ) : null}
+              {session.title}
+            </span>
+            <span className="chat-recent__meta">
+              {timeLabel}
+              {sessionSourceHint(session)}
+            </span>
+          </button>
+        )}
+
+        <div
+          className={`chat-recent__menu${menuOpen ? ' is-open' : ''}`}
+          ref={menuOpen ? sessionMenuRef : undefined}
+        >
+          <button
+            type="button"
+            className="chat-recent__more"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuSessionId((prev) => (prev === session.id ? null : session.id));
+            }}
+            aria-label={`Conversation options: ${session.title}`}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            title="Conversation options"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="12" cy="5" r="1.75" />
+              <circle cx="12" cy="12" r="1.75" />
+              <circle cx="12" cy="19" r="1.75" />
+            </svg>
+          </button>
+          {menuOpen ? (
+            <div className="chat-recent__dropdown" role="menu" aria-label="Conversation actions">
+              <button
+                type="button"
+                className="chat-recent__dropdown-item"
+                role="menuitem"
+                onClick={() => beginRename(session)}
+              >
+                Rename
+              </button>
+              <button
+                type="button"
+                className="chat-recent__dropdown-item"
+                role="menuitem"
+                onClick={() => {
+                  togglePinSession(session.id);
+                  setMenuSessionId(null);
+                }}
+              >
+                {session.pinned ? 'Unpin' : 'Pin'}
+              </button>
+              <button
+                type="button"
+                className="chat-recent__dropdown-item chat-recent__dropdown-item--danger"
+                role="menuitem"
+                onClick={() => {
+                  setMenuSessionId(null);
+                  removeSession(session.id, session.title);
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    );
+  };
 
   const empty = chatMessages.length === 0 && !streaming && !waitingOnGenie;
 
@@ -576,9 +722,24 @@ export function ChatPage() {
           <div id="chat-history-list" className="chat-sidebar__section chat-sidebar__section--grow">
             <div className="chat-sidebar__label">Continue working</div>
             <p className="chat-sidebar__hint chat-sidebar__hint--tight">
-              Resume a chat, or delete a whole conversation.
+              Resume a chat, or use ⋮ to rename, pin, or delete.
             </p>
-            <div className="chat-sidebar__sublabel">Active today</div>
+
+            {pinnedSessions.length > 0 ? (
+              <>
+                <div className="chat-sidebar__sublabel">Pinned</div>
+                {pinnedSessions.map((session) =>
+                  renderSessionRow(
+                    session,
+                    session.updatedAt >= startOfToday()
+                      ? formatSessionTime(session.updatedAt)
+                      : formatSessionDate(session.updatedAt),
+                  ),
+                )}
+              </>
+            ) : null}
+
+            <div className="chat-sidebar__sublabel chat-sidebar__sublabel--spaced">Active today</div>
             {todaySessions.length === 0 ? (
               <p className="chat-sidebar__hint">No chats yet today. Start one below.</p>
             ) : (
@@ -602,21 +763,6 @@ export function ChatPage() {
       <section className="chat-main" aria-label="Conversation">
         <div className="chat-toolbar">
           <div className="chat-toolbar__left">
-            {sidebarCollapsed ? (
-              <button
-                type="button"
-                className="chat-sidebar-collapse-btn chat-sidebar-collapse-btn--toolbar"
-                onClick={() => setSidebarCollapsed(false)}
-                aria-label="Expand history sidebar"
-                title="Show history"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <rect x="3" y="4" width="18" height="16" rx="2" />
-                  <path d="M9 4v16" />
-                  <path d="m14 9 3 3-3 3" />
-                </svg>
-              </button>
-            ) : null}
             <span className="chat-toolbar__title">TB4L Chat</span>
             <span className="chat-status">
               <span className="chat-status__dot" aria-hidden="true" />
@@ -626,6 +772,19 @@ export function ChatPage() {
             {attachNotice ? <span className="chat-toolbar__notice">{attachNotice}</span> : null}
           </div>
           <div className="chat-toolbar__right">
+            <button
+              type="button"
+              className={`btn btn-ghost btn-sm${chatSessions.find((s) => s.id === activeSessionId)?.pinned ? ' is-pinned' : ''}`}
+              onClick={() => togglePinSession(activeSessionId)}
+              aria-pressed={Boolean(chatSessions.find((s) => s.id === activeSessionId)?.pinned)}
+              title={
+                chatSessions.find((s) => s.id === activeSessionId)?.pinned
+                  ? 'Unpin this conversation'
+                  : 'Pin this conversation to the top'
+              }
+            >
+              {chatSessions.find((s) => s.id === activeSessionId)?.pinned ? 'Unpin' : 'Pin'}
+            </button>
             <button type="button" className="btn btn-ghost btn-sm" onClick={startNewChat}>
               Clear
             </button>
@@ -681,10 +840,6 @@ export function ChatPage() {
         <div className="chat-messages" ref={messagesRef} aria-live="polite">
           {empty ? (
             <div className="chat-empty">
-              <div className="chat-empty__mark" aria-hidden="true">
-                TB
-              </div>
-              <h1>TB4L Chat</h1>
               <p className="chat-empty__tagline">
                 Ask with Hub sources for the highest-trust answers.
               </p>
@@ -693,28 +848,58 @@ export function ChatPage() {
                 <button
                   type="button"
                   className="btn btn-sm btn-outline-secondary"
-                  onClick={() => setShowAddSources(true)}
+                  onClick={() => {
+                    setGenieEnabled(false);
+                    fileInputRef.current?.click();
+                  }}
+                  disabled={isTyping || hasGenie}
                 >
-                  Pick Hub sources
+                  + Attach file
                 </button>
                 <button
                   type="button"
-                  className="btn btn-chat btn-sm"
+                  className="btn btn-sm btn-outline-secondary"
                   onClick={() => {
-                    setPlusMenu('main');
+                    setGenieEnabled(false);
+                    setShowAddSources(true);
                   }}
+                  disabled={isTyping || hasGenie}
                 >
-                  + Add context here
+                  + Pick Hub sources
+                </button>
+                <button
+                  type="button"
+                  className={`btn btn-sm btn-outline-secondary${hasGenie ? ' is-active' : ''}`}
+                  onClick={() => setGenieEnabled(true)}
+                  disabled={isTyping || hasGenie || hasLocalContext}
+                  aria-pressed={hasGenie}
+                  title={
+                    hasLocalContext
+                      ? 'Exit attached files or Hub sources before connecting M360'
+                      : undefined
+                  }
+                >
+                  {hasGenie ? 'M360 connected' : '+ Connect with M360'}
                 </button>
               </div>
-              <p className="chat-empty__ask">Or try a framework question</p>
-              <div className="chat-suggestions">
-                {emptySuggestions.map((q) => (
-                  <button key={q} type="button" className="chat-suggestion" onClick={() => submit(q)} disabled={isTyping}>
-                    {q}
-                  </button>
-                ))}
-              </div>
+              {!hasGenie ? (
+                <>
+                  <p className="chat-empty__ask">Or try a framework question</p>
+                  <div className="chat-suggestions">
+                    {emptySuggestions.map((q) => (
+                      <button
+                        key={q}
+                        type="button"
+                        className="chat-suggestion"
+                        onClick={() => submit(q)}
+                        disabled={isTyping}
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : null}
             </div>
           ) : (
             <>
@@ -869,7 +1054,12 @@ export function ChatPage() {
                         type="button"
                         className="chat-plus-menu__item"
                         role="menuitem"
-                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isTyping || hasGenie}
+                        title={hasGenie ? 'Exit M360 mode before attaching files' : undefined}
+                        onClick={() => {
+                          setGenieEnabled(false);
+                          fileInputRef.current?.click();
+                        }}
                       >
                         <span className="chat-plus-menu__icon" aria-hidden="true">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -886,7 +1076,10 @@ export function ChatPage() {
                         type="button"
                         className="chat-plus-menu__item"
                         role="menuitem"
+                        disabled={isTyping || hasGenie}
+                        title={hasGenie ? 'Exit M360 mode before picking Hub sources' : undefined}
                         onClick={() => {
+                          setGenieEnabled(false);
                           setPlusMenu('closed');
                           setShowAddSources(true);
                         }}
@@ -904,8 +1097,14 @@ export function ChatPage() {
                       </button>
                       <button
                         type="button"
-                        className="chat-plus-menu__item"
+                        className={`chat-plus-menu__item${hasLocalContext ? ' is-disabled' : ''}`}
                         role="menuitem"
+                        disabled={isTyping || hasLocalContext}
+                        title={
+                          hasLocalContext
+                            ? 'Remove attached files or Hub sources before connecting M360'
+                            : undefined
+                        }
                         onClick={() => setPlusMenu('data')}
                       >
                         <span className="chat-plus-menu__icon" aria-hidden="true">
@@ -917,7 +1116,11 @@ export function ChatPage() {
                         </span>
                         <span>
                           <strong>Connect to data source</strong>
-                          <em>M360 and more platforms</em>
+                          <em>
+                            {hasLocalContext
+                              ? 'Unavailable while files or Hub sources are active'
+                              : 'M360 and more platforms'}
+                          </em>
                         </span>
                         <span className="chat-plus-menu__chevron" aria-hidden="true">
                           ›
@@ -936,20 +1139,26 @@ export function ChatPage() {
                       <p className="chat-plus-menu__section">Data sources</p>
                       <button
                         type="button"
-                        className={`chat-plus-menu__item chat-plus-menu__item--toggle${hasGenie ? ' is-on' : ''}`}
+                        className={`chat-plus-menu__item chat-plus-menu__item--toggle${hasGenie ? ' is-on' : ''}${hasLocalContext ? ' is-disabled' : ''}`}
                         role="menuitemcheckbox"
                         aria-checked={hasGenie}
-                        disabled={isTyping}
-                        title="M360 data is used as one of the data sources in the Landscape Assessment module within the Discover phase of the TB4L Brand Building Framework. It helps in understanding market dynamics, competitor analysis, and brand performance."
+                        disabled={isTyping || hasLocalContext}
+                        title={
+                          hasLocalContext
+                            ? 'Remove attached files or Hub sources before connecting M360'
+                            : 'M360 data is used as one of the data sources in the Landscape Assessment module within the Discover phase of the TB4L Brand Building Framework. It helps in understanding market dynamics, competitor analysis, and brand performance.'
+                        }
                         onClick={() => setGenieEnabled(!hasGenie)}
                       >
                         <span className={`chat-connection__dot ${hasGenie ? 'is-live' : ''}`} aria-hidden="true" />
                         <span>
                           <strong>M360</strong>
                           <em>
-                            {hasGenie
-                              ? 'Connected · Landscape Assessment / Discover'
-                              : 'Connect for market & brand performance data'}
+                            {hasLocalContext
+                              ? 'Unavailable while files or Hub sources are active'
+                              : hasGenie
+                                ? 'Connected · Landscape Assessment / Discover'
+                                : 'Connect for market & brand performance data'}
                           </em>
                         </span>
                         <span className="chat-plus-menu__badge">{hasGenie ? 'On' : 'Off'}</span>
@@ -1023,6 +1232,7 @@ export function ChatPage() {
           existingSourceIds={activeSources.map((s) => s.id)}
           onClose={() => setShowAddSources(false)}
           onAdd={(ids) => {
+            setGenieEnabled(false);
             addSources(ids);
             setShowAddSources(false);
           }}

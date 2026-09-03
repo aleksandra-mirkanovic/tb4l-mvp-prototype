@@ -35,7 +35,7 @@ export function AppHeader() {
             isActive ? 'main-nav__link main-nav__link--home is-active' : 'main-nav__link main-nav__link--home'
           }
         >
-          TB4L Home
+          Home
         </NavLink>
         <NavLink
           to="/chat"
@@ -43,7 +43,7 @@ export function AppHeader() {
             isActive ? 'main-nav__link main-nav__link--chat is-active' : 'main-nav__link main-nav__link--chat'
           }
         >
-          TB4L Chat
+          Chat
         </NavLink>
         <NavLink
           to="/knowledge-hub"
@@ -51,7 +51,7 @@ export function AppHeader() {
             isActive ? 'main-nav__link main-nav__link--hub is-active' : 'main-nav__link main-nav__link--hub'
           }
         >
-          TB4L Hub
+          Hub
         </NavLink>
       </nav>
     </header>

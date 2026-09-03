@@ -10,7 +10,7 @@ export function AppFooter() {
           AIssistant — AI support for brand teams
         </p>
         <div className="app-footer__meta">
-          <Link className="app-footer__link" to="/knowledge-hub/team">
+          <Link className="app-footer__link" to="/team">
             TB4L Team
           </Link>
           <p className="app-footer__prototype">MVP Prototype · Mocked data</p>

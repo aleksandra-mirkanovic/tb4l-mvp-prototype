@@ -257,11 +257,8 @@ export function WelcomePage() {
                   <div
                     key={pillar.id}
                     className={`tb4l-home-orbit__node tb4l-home-orbit__node--${pillar.place} tb4l-home-orbit__node--${pillar.id}`}
-                    title={`${pillar.step}. ${pillar.title}`}
+                    title={pillar.title}
                   >
-                    <span className="tb4l-home-orbit__step" aria-hidden="true">
-                      {pillar.step}
-                    </span>
                     <span className="tb4l-home-orbit__bubble">
                       <PillarIcon id={pillar.id} />
                     </span>

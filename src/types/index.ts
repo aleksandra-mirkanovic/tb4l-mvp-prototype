@@ -69,9 +69,12 @@ export type GenieStatus = 'idle' | 'loading' | 'success' | 'error' | 'cancelled'
 export interface ChatSession {
   id: string;
   title: string;
+  /** When true, title was set by the user and should not be overwritten from messages. */
+  titleCustom?: boolean;
   messages: ChatMessage[];
   sources: ChatSource[];
   genieEnabled: boolean;
+  pinned?: boolean;
   createdAt: number;
   updatedAt: number;
 }

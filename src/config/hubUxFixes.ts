@@ -3,8 +3,7 @@
  *
  * When true on Hub Overview:
  * - No breadcrumb / Overview|Browse strip (Browse all sits by categories)
- * - No page title/lede chrome; search is first
- * - Popular chips only (no Recent / Quick categories)
+ * - No page title/lede chrome; Popular files list (no search)
  * - Tighter spacing so category cards sit above the fold
  * - Compact empty Selected; fixed step labels; honest count nouns
  *

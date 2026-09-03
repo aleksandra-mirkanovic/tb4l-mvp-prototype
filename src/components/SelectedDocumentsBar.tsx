@@ -3,18 +3,23 @@ import './SelectedDocumentsBar.css';
 
 interface SelectedDocumentsBarProps {
   selectedIds: string[];
+  m360Selected?: boolean;
   onClear: () => void;
   onRemove: (id: string) => void;
+  onRemoveM360?: () => void;
   onAskInChat: () => void;
 }
 
 export function SelectedDocumentsBar({
   selectedIds,
+  m360Selected = false,
   onClear,
   onRemove,
+  onRemoveM360,
   onAskInChat,
 }: SelectedDocumentsBarProps) {
-  if (selectedIds.length === 0) return null;
+  const total = selectedIds.length + (m360Selected ? 1 : 0);
+  if (total === 0) return null;
 
   return (
     <>
@@ -22,13 +27,26 @@ export function SelectedDocumentsBar({
       <div className="selected-bar" role="region" aria-label="Selected context for TB4L Chat">
         <div className="selected-bar__info">
           <strong>
-            {selectedIds.length} trusted source{selectedIds.length === 1 ? '' : 's'} selected
+            {total} trusted source{total === 1 ? '' : 's'} selected
           </strong>
           <p className="selected-bar__hint">
-            Open TB4L Chat with these Hub documents as context. You can also connect data sources
-            (like M360) inside Chat.
+            {m360Selected
+              ? 'Open TB4L Chat with M360 connected for structured market and brand data.'
+              : 'Open TB4L Chat with these Hub documents as context. You can also connect data sources (like M360) inside Chat.'}
           </p>
           <div className="selected-bar__chips">
+            {m360Selected ? (
+              <span className="chip chip-hub chip-removable">
+                <span>M360</span>
+                <button
+                  type="button"
+                  aria-label="Remove M360"
+                  onClick={() => onRemoveM360?.()}
+                >
+                  ×
+                </button>
+              </span>
+            ) : null}
             {selectedIds.map((id) => {
               const doc = getDocumentById(id);
               return (
