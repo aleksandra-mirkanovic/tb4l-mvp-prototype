@@ -25,6 +25,3 @@ export type OrbitLayout =
 
 /** Recommended — left-aligned mirrored panels with overlapping orbit. */
 export const ORBIT_LAYOUT: OrbitLayout = 'exclusion';
-
-/** @deprecated Use ORBIT_LAYOUT === 'wrap' */
-export const ORBIT_TEXT_WRAP = ORBIT_LAYOUT === 'wrap';
