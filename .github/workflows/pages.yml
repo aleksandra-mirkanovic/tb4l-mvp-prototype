@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages
+﻿name: Deploy GitHub Pages
 
 on:
   push:
@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -29,13 +31,30 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build
-        run: npm run build
+      - name: Build main → site root (live URL stays on main)
+        run: |
+          git checkout origin/main
+          npm run build
+          mkdir -p site
+          cp -R dist/. site/
+
+      - name: Build design-v2 → /design-v2/ (if branch exists)
+        run: |
+          if git rev-parse --verify origin/feature/tb4l-design-v2 >/dev/null 2>&1; then
+            git checkout origin/feature/tb4l-design-v2
+            npm install
+            npx vite build --base /tb4l-mvp-prototype/design-v2/
+            mkdir -p site/design-v2
+            cp -R dist/. site/design-v2/
+            echo "Published design-v2 preview under /design-v2/"
+          else
+            echo "No feature/tb4l-design-v2 branch — skipping preview"
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
   deploy:
     needs: build
