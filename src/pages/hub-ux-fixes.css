@@ -1,7 +1,100 @@
 /**
- * Hub UX fixes — scoped under .hub-page--ux-fixes
+ * Hub UX fixes — content-first Overview (scoped under .hub-page--ux-fixes)
  * Revert: set HUB_UX_FIXES = false in src/config/hubUxFixes.ts
  */
+
+/* —— Top stack: search → popular → categories ASAP —— */
+.hub-page--ux-fixes.hub-page--ecosystem {
+  padding-top: 0.35rem;
+}
+
+.hub-page--ux-fixes .hub-ws-hero {
+  padding: 0;
+  margin-bottom: 0.45rem;
+}
+
+.hub-page--ux-fixes .hub-ws-discover {
+  padding: 0.45rem 0.55rem 0.5rem;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(16, 56, 79, 0.04);
+  margin-bottom: 0;
+}
+
+.hub-page--ux-fixes .hub-ws-search {
+  padding: 0.2rem;
+  border-radius: 8px;
+}
+
+.hub-page--ux-fixes .hub-ws-search__input {
+  padding: 0.42rem 0.6rem;
+  font-size: 0.9rem;
+}
+
+.hub-page--ux-fixes .hub-ws-search__submit {
+  padding: 0.42rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+/* Popular chips: helper row, not a section */
+.hub-page--ux-fixes .hub-ws-hints {
+  margin-top: 0.35rem;
+  gap: 0;
+}
+
+.hub-page--ux-fixes .hub-ws-hints__label {
+  min-width: auto;
+  margin-right: 0.15rem;
+  font-size: 0.58rem;
+  letter-spacing: 0.05em;
+}
+
+.hub-page--ux-fixes .hub-ws-chip {
+  font-size: 0.68rem;
+  padding: 0.12rem 0.42rem;
+}
+
+/* Categories: primary focal point */
+.hub-page--ux-fixes .hub-ws-section--categories {
+  margin-top: 0.15rem;
+  margin-bottom: 0.85rem;
+}
+
+.hub-page--ux-fixes .hub-ws-section__head--cats {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.hub-page--ux-fixes .hub-ws-section__head--cats h2 {
+  font-size: 0.95rem;
+}
+
+.hub-page--ux-fixes .hub-ws-library-link {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--teal);
+  text-decoration: none;
+}
+
+.hub-page--ux-fixes .hub-ws-library-link:hover {
+  text-decoration: underline;
+  color: var(--teal-deep);
+}
+
+.hub-page--ux-fixes .hub-ws-categories {
+  gap: 0.55rem;
+}
+
+.hub-page--ux-fixes .hub-ws-cat {
+  padding: 0.7rem 0.75rem;
+}
+
+.hub-page--ux-fixes .hub-ws-cat__desc {
+  font-size: 0.78rem;
+}
 
 /* Empty Selected: compact, not sticky */
 .hub-page--ux-fixes .hub-ws-selected.is-empty,
@@ -41,22 +134,20 @@
   margin-top: 0;
 }
 
-/* Sticky only when there is a selection */
 .hub-page--ux-fixes .hub-ws-selected.has-selection {
   position: sticky;
-}
-
-/* Slightly denser category section when Quick categories are hidden */
-.hub-page--ux-fixes .hub-ws-section--categories {
-  margin-top: 0.35rem;
-}
-
-.hub-page--ux-fixes .hub-ws-discover {
-  margin-bottom: 0.25rem;
 }
 
 [data-theme='dark'] .hub-page--ux-fixes .hub-ws-selected.is-empty,
 [data-theme='dark'] .hub-page--ux-fixes .hub-ws-selected--compact {
   border-color: rgba(211, 15, 75, 0.28);
   box-shadow: none;
+}
+
+[data-theme='dark'] .hub-page--ux-fixes .hub-ws-library-link {
+  color: #5eb8d4;
+}
+
+[data-theme='dark'] .hub-page--ux-fixes .hub-ws-library-link:hover {
+  color: #8ed0e4;
 }

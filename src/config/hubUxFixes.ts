@@ -1,10 +1,14 @@
 /**
- * TB4L Hub UX fixes (workspace polish).
+ * TB4L Hub UX fixes (workspace polish + IA + content-first Overview).
  *
- * TO REVERT to the previous Hub Overview UX:
- *   1. Set `HUB_UX_FIXES` to `false` below, save, and refresh.
- *   — or —
- *   2. Delete this file’s usages and remove `hub-page--ux-fixes` styles
- *      from `KnowledgeHubClassicPage.css` / `hub-ux-fixes.css`.
+ * When true on Hub Overview:
+ * - No breadcrumb / Overview|Browse strip (Browse all sits by categories)
+ * - No page title/lede chrome; search is first
+ * - Popular chips only (no Recent / Quick categories)
+ * - Tighter spacing so category cards sit above the fold
+ * - Compact empty Selected; fixed step labels; honest count nouns
+ *
+ * TO REVERT:
+ *   Set `HUB_UX_FIXES` to `false` below, save, and refresh.
  */
 export const HUB_UX_FIXES = true;

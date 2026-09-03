@@ -264,23 +264,30 @@ export function KnowledgeHubClassicPage() {
         .filter(Boolean)
         .join(' ')}
     >
-      <Breadcrumbs
-        items={[
-          { label: 'Home', to: '/' },
-          { label: 'TB4L Hub' },
-        ]}
-      />
+      {!HUB_UX_FIXES ? (
+        <Breadcrumbs
+          items={[
+            { label: 'Home', to: '/' },
+            { label: 'TB4L Hub' },
+          ]}
+        />
+      ) : null}
 
-      <HubSectionNav />
+      {/* Full strip when fixes off; Overview drops nav entirely (Library link near categories) */}
+      {!HUB_UX_FIXES ? <HubSectionNav mode="full" /> : null}
 
-      {/* SECTION 1 — Compact discovery (search-first workspace) */}
+      {/* SECTION 1 — Compact discovery (workspace, not landing) */}
       <header className="hub-ws-hero">
-        <div className="hub-ws-hero__intro">
-          <h1 className="hub-ws-hero__title">Find trusted TB4L knowledge</h1>
-          <p className="hub-ws-hero__lede">
-            Select sources for Chat, then combine with connected enterprise data.
-          </p>
-        </div>
+        {HUB_UX_FIXES ? (
+          <h1 className="visually-hidden">TB4L Hub</h1>
+        ) : (
+          <div className="hub-ws-hero__intro">
+            <h1 className="hub-ws-hero__title">Find trusted TB4L knowledge</h1>
+            <p className="hub-ws-hero__lede">
+              Select sources for Chat, then combine with connected enterprise data.
+            </p>
+          </div>
+        )}
 
         <div className="hub-ws-discover">
           <form className="hub-ws-search" onSubmit={onSearchSubmit} role="search">
@@ -293,7 +300,11 @@ export function KnowledgeHubClassicPage() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search playbooks, templates, training, glossaries…"
+              placeholder={
+                HUB_UX_FIXES
+                  ? 'Search trusted TB4L knowledge…'
+                  : 'Search playbooks, templates, training, glossaries…'
+              }
               autoComplete="off"
             />
             <button type="submit" className="btn hub-ws-search__submit">
@@ -314,22 +325,24 @@ export function KnowledgeHubClassicPage() {
                 ))}
               </ul>
             </div>
-            <div className="hub-ws-hints__row">
-              <span className="hub-ws-hints__label">Recent</span>
-              <ul className="hub-ws-hints__chips">
-                {recent.map((term) => (
-                  <li key={term}>
-                    <button
-                      type="button"
-                      className="hub-ws-chip hub-ws-chip--muted"
-                      onClick={() => runSearch(term)}
-                    >
-                      {term}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {!HUB_UX_FIXES ? (
+              <div className="hub-ws-hints__row">
+                <span className="hub-ws-hints__label">Recent</span>
+                <ul className="hub-ws-hints__chips">
+                  {recent.map((term) => (
+                    <li key={term}>
+                      <button
+                        type="button"
+                        className="hub-ws-chip hub-ws-chip--muted"
+                        onClick={() => runSearch(term)}
+                      >
+                        {term}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             {!HUB_UX_FIXES ? (
               <div className="hub-ws-hints__row">
                 <span className="hub-ws-hints__label">Quick categories</span>
@@ -350,8 +363,13 @@ export function KnowledgeHubClassicPage() {
 
       {/* SECTION 2 — Knowledge Categories */}
       <section className="hub-ws-section hub-ws-section--categories" aria-labelledby="hub-categories-heading">
-        <header className="hub-ws-section__head hub-ws-section__head--compact">
+        <header className="hub-ws-section__head hub-ws-section__head--compact hub-ws-section__head--cats">
           <h2 id="hub-categories-heading">Knowledge categories</h2>
+          {HUB_UX_FIXES ? (
+            <Link className="hub-ws-library-link" to="/knowledge-hub/browse">
+              Browse all
+            </Link>
+          ) : null}
         </header>
 
         <ul className="hub-ws-categories">

@@ -9,6 +9,13 @@
   border-radius: var(--radius-md);
 }
 
+/* Overview + Browse all only (mode="minimal" / HUB_UX_FIXES on Overview) */
+.hub-section-nav--minimal {
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+}
+
 .hub-section-nav__link {
   text-decoration: none;
   color: var(--text-secondary);
