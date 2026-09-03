@@ -1,71 +1,16 @@
-# Deploys design-v2 under /design-v2/ while rebuilding main at site root,
-# so https://aleksandra-mirkanovic.github.io/tb4l-mvp-prototype/#/ stays on main.
-#
-# Preview URL:
-#   https://aleksandra-mirkanovic.github.io/tb4l-mvp-prototype/design-v2/#/
-#
-# Note: a later push to `main` (pages.yml) redeploys root-only and will remove
-# /design-v2/ until this workflow runs again.
-
-name: Deploy design-v2 preview (keep main root)
+﻿name: Design-v2 preview note
 
 on:
   push:
     branches: [feature/tb4l-design-v2]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
 jobs:
-  build:
+  note:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (full history for both refs)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build main → site root (unchanged live URL)
+      - name: Preview is published via main Pages workflow
         run: |
-          git checkout origin/main
-          npm run build
-          mkdir -p site
-          cp -R dist/. site/
-
-      - name: Build design-v2 → /design-v2/
-        run: |
-          git checkout origin/feature/tb4l-design-v2
-          npx vite build --base /tb4l-mvp-prototype/design-v2/
-          mkdir -p site/design-v2
-          cp -R dist/. site/design-v2/
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-  deploy:
-    needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          echo "Live site (main, unchanged): https://aleksandra-mirkanovic.github.io/tb4l-mvp-prototype/#/"
+          echo "Design v2 preview: https://aleksandra-mirkanovic.github.io/tb4l-mvp-prototype/design-v2/#/"
+          echo "Re-run workflow 'Deploy GitHub Pages' on main after pushing this branch to refresh the preview."
