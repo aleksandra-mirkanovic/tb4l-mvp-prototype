@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './AppFooter.css';
 
 export function AppFooter() {
@@ -8,7 +9,12 @@ export function AppFooter() {
           <span className="app-footer__soon-label">Coming soon</span>
           AIssistant — AI support for brand teams
         </p>
-        <p className="app-footer__prototype">MVP Prototype · Mocked data</p>
+        <div className="app-footer__meta">
+          <Link className="app-footer__link" to="/knowledge-hub/team">
+            TB4L Team
+          </Link>
+          <p className="app-footer__prototype">MVP Prototype · Mocked data</p>
+        </div>
       </div>
     </footer>
   );

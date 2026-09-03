@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { AddSourcesModal } from '../components/AddSourcesModal';
 import { ErrorState } from '../components/ErrorState';
 import { MessageActionIcons } from '../components/MessageActionIcons';
@@ -690,9 +690,13 @@ export function ChatPage() {
               </p>
               <p className="chat-empty__trust">{contextHelp}</p>
               <div className="chat-empty__actions">
-                <Link className="btn btn-sm btn-outline-secondary" to="/knowledge-hub/playbooks">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={() => setShowAddSources(true)}
+                >
                   Pick Hub sources
-                </Link>
+                </button>
                 <button
                   type="button"
                   className="btn btn-chat btn-sm"

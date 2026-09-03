@@ -139,9 +139,10 @@
   --tb4l-dark-blue: #1a4a63;
   --tb4l-header: #081318;
   --tb4l-teal: #4fa8c9;
-  --tb4l-purple: #6e5876;
-  --tb4l-green: #67c587;
-  --tb4l-magenta: #e57d87;
+  /* Lighter Hub purple for text/accents on navy (brand #624963 is too dark here) */
+  --tb4l-purple: #c9a3cc;
+  --tb4l-green: #6dd99a;
+  --tb4l-magenta: #ff6b8a;
   --tb4l-gray: #234a5b;
   --tb4l-ice: #163444;
 
@@ -167,9 +168,9 @@
   --text-on-primary: #f8fafc;
   --text-on-dark: var(--text-on-primary);
 
-  --action-primary: #6e5876;
-  --action-primary-hover: #80678a;
-  --action-primary-active: #59475f;
+  --action-primary: #8b6b99;
+  --action-primary-hover: #9d7eaa;
+  --action-primary-active: #7a5c88;
 
   --action-secondary: #326b80;
   --action-secondary-hover: #36758b;
@@ -213,7 +214,7 @@
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.38);
 
   --tint-hub: rgba(79, 168, 201, 0.14);
-  --tint-chat: rgba(110, 88, 118, 0.22);
+  --tint-chat: rgba(201, 163, 204, 0.16);
   --tint-m360: rgba(103, 197, 135, 0.14);
   --tint-alert: rgba(229, 125, 135, 0.14);
   --tint-ice: #163444;

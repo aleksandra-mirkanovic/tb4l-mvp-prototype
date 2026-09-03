@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ActiveFilterChips } from '../components/ActiveFilterChips';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 import { DocumentCard } from '../components/DocumentCard';
@@ -13,9 +13,12 @@ import { DOCUMENTS } from '../data/documents';
 import { matchesHubCategory } from '../data/sections';
 import type { HubFilters } from '../types';
 import './KnowledgeHubBrowsePage.css';
+import './SectionPage.css';
 
 export function KnowledgeHubBrowsePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQuery = (searchParams.get('q') ?? '').trim().toLowerCase();
   const {
     filters,
     setFilters,
@@ -35,9 +38,13 @@ export function KnowledgeHubBrowsePage() {
       if (filters.brand && doc.brand !== filters.brand) return false;
       if (filters.market && doc.market !== filters.market) return false;
       if (filters.category && !matchesHubCategory(doc.category, filters.category)) return false;
+      if (searchQuery) {
+        const haystack = `${doc.title} ${doc.description} ${doc.category} ${doc.keyTopics.join(' ')}`.toLowerCase();
+        if (!haystack.includes(searchQuery)) return false;
+      }
       return true;
     });
-  }, [filters]);
+  }, [filters, searchQuery]);
 
   const summaryDoc = summaryId ? DOCUMENTS.find((d) => d.id === summaryId) ?? null : null;
 
@@ -58,7 +65,7 @@ export function KnowledgeHubBrowsePage() {
   };
 
   return (
-    <div className="browse-page">
+    <div className="browse-page section-page section-page--purple">
       <Breadcrumbs
         items={[
           { label: 'Home', to: '/' },
@@ -67,17 +74,23 @@ export function KnowledgeHubBrowsePage() {
         ]}
       />
 
-      <header className="browse-page__header">
-        <div>
-          <span className="badge badge-hub">TB4L Hub</span>
-          <h1 className="browse-page__title">Browse all documents</h1>
-          <p className="browse-page__subtitle">
-            Filter by brand or market, select documents, then use them in Chat for grounded answers.
+      <header className="section-hero">
+        <div className="section-hero__copy">
+          <p className="section-hero__eyebrow">TB4L Hub</p>
+          <h1 className="section-hero__title">
+            {searchQuery ? `Results for “${searchParams.get('q')}”` : 'Browse all documents'}
+          </h1>
+          <p className="section-hero__tagline">
+            {searchQuery
+              ? 'Refine with filters, then select documents to build Chat context.'
+              : 'Filter and select Hub documents to build Chat context, then ask with those sources.'}
           </p>
         </div>
-        <p className="browse-page__count" aria-live="polite">
-          {filtered.length} result{filtered.length === 1 ? '' : 's'}
-        </p>
+        <div className="section-hero__actions">
+          <p className="browse-page__count" aria-live="polite">
+            {filtered.length} result{filtered.length === 1 ? '' : 's'}
+          </p>
+        </div>
       </header>
 
       <HubSectionNav />

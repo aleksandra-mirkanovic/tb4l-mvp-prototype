@@ -39,29 +39,32 @@
   border-radius: 8px;
 }
 
-.app-header__mark {
-  width: 36px;
+.app-header__logo {
+  display: block;
   height: 36px;
-  border-radius: 8px;
-  background: var(--accent-focus);
-  color: var(--text-on-primary);
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-size: 13px;
+  width: auto;
+  max-width: min(168px, 42vw);
+  object-fit: contain;
+  /* Header is always a dark shell — keep wordmark light for contrast */
+  filter: brightness(0) invert(1);
 }
 
-.app-header__title {
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.1;
-  color: var(--header-fg);
+[data-theme='dark'] .app-header__logo {
+  filter: brightness(0) invert(1) opacity(0.96);
 }
 
-.app-header__subtitle {
+.app-header__brand-text {
   font-size: 12px;
+  font-weight: 500;
   color: var(--header-fg-muted);
-  opacity: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .app-header__brand-text {
+    display: none;
+  }
 }
 
 .app-header__tools {
@@ -123,8 +126,10 @@
   border-bottom-color: var(--accent-selection);
 }
 
-.main-nav__link--hub.is-active {
-  border-bottom-color: var(--accent-focus);
+.main-nav__link--home.is-active,
+.main-nav__link--hub.is-active,
+.main-nav__link--chat.is-active {
+  border-bottom-color: #00607e;
 }
 
 .main-nav__link:focus-visible {

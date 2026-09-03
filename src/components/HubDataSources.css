@@ -1,0 +1,220 @@
+.hub-data-sources {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  background: var(--bg-main);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.hub-data-sources--embedded {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.hub-data-sources__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.hub-data-sources__eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--status-success);
+}
+
+.hub-data-sources__head .section-title {
+  font-size: 20px;
+  margin: 0 0 6px;
+}
+
+.hub-data-sources__intro {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.hub-data-sources__actions {
+  margin-top: var(--space-3);
+}
+
+.hub-data-sources__group-label,
+.hub-data-sources__upcoming-label {
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.hub-data-sources__group-label {
+  color: var(--status-success);
+}
+
+.hub-data-sources__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hub-data-sources__item {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  padding: 12px 14px;
+}
+
+.hub-data-sources--embedded .hub-data-sources__item--featured {
+  background: var(--tint-m360);
+  border-color: color-mix(in srgb, var(--status-success) 30%, var(--border-default));
+}
+
+.hub-data-sources__item-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.hub-data-sources__dot {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--text-disabled);
+}
+
+.hub-data-sources__dot.is-live {
+  background: var(--status-success);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-success) 45%, transparent);
+  animation: hubDataPulse 1.8s infinite;
+}
+
+@keyframes hubDataPulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--status-success) 45%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.hub-data-sources__item-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-data-sources__item-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.hub-data-sources__item-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.hub-data-sources__badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-default);
+}
+
+.hub-data-sources__badge--available {
+  color: var(--status-success);
+  background: var(--bg-main);
+  border-color: color-mix(in srgb, var(--status-success) 35%, var(--border-default));
+}
+
+.hub-data-sources__badge--soon {
+  color: var(--text-muted);
+  background: var(--bg-chip);
+  border-color: var(--border-chip);
+}
+
+.hub-data-sources__item-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.hub-data-sources__item-usage {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.hub-data-sources__upcoming {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.hub-data-sources__upcoming-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hub-data-sources__upcoming-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.hub-data-sources__upcoming-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hub-data-sources__upcoming-item .hub-data-sources__dot {
+  margin-top: 0;
+}
+
+.hub-data-sources__upcoming-item .hub-data-sources__badge {
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .hub-data-sources__actions .btn {
+    width: 100%;
+  }
+}

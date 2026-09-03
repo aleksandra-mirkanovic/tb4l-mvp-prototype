@@ -83,7 +83,7 @@ export function KnowledgeHubSectionPage() {
             <button type="button" className="btn btn-secondary btn-sm" onClick={openBrowseFiltered}>
               Open in full library
             </button>
-          ) : (
+          ) : section.kind === 'team' ? null : (
             <Link className="btn btn-secondary btn-sm" to="/knowledge-hub/browse">
               Browse all documents
             </Link>
@@ -98,8 +98,8 @@ export function KnowledgeHubSectionPage() {
               Documents in {section.title}
             </h3>
             <p>
-              {docs.length} curated document{docs.length === 1 ? '' : 's'} · select any, then{' '}
-              <strong>Ask with these sources</strong>
+              {docs.length} curated document{docs.length === 1 ? '' : 's'} · select any to build Chat
+              context, then <strong>Ask with these sources</strong>
             </p>
           </div>
           {docs.length === 0 ? (
@@ -168,7 +168,10 @@ export function KnowledgeHubSectionPage() {
             <h3 id="team-heading" className="section-title">
               Enablement partners
             </h3>
-            <p>Reach out for Accelerator support, training, or Hub adoption coaching.</p>
+            <p>
+              Reach out for Accelerator support, training, or Hub adoption coaching. Team profiles
+              are contacts only—they are not selected as Chat sources.
+            </p>
           </div>
           <div className="team-grid">
             {TEAM_MEMBERS.map((member) => (

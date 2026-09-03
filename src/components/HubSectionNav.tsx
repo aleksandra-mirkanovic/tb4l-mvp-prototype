@@ -2,6 +2,9 @@ import { NavLink } from 'react-router-dom';
 import { HUB_SECTIONS } from '../data/sections';
 import './HubSectionNav.css';
 
+/** Knowledge / Chat context sections only — Teams lives outside this nav. */
+const NAV_SECTIONS = HUB_SECTIONS.filter((s) => s.kind !== 'team');
+
 export function HubSectionNav() {
   return (
     <nav className="hub-section-nav" aria-label="TB4L Hub sections">
@@ -14,7 +17,7 @@ export function HubSectionNav() {
       >
         Overview
       </NavLink>
-      {HUB_SECTIONS.map((section) => (
+      {NAV_SECTIONS.map((section) => (
         <NavLink
           key={section.slug}
           to={`/knowledge-hub/${section.slug}`}

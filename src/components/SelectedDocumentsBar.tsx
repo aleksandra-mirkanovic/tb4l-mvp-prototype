@@ -19,13 +19,14 @@ export function SelectedDocumentsBar({
   return (
     <>
       <div className="selected-bar-spacer" aria-hidden="true" />
-      <div className="selected-bar" role="region" aria-label="Selected documents">
+      <div className="selected-bar" role="region" aria-label="Selected context for TB4L Chat">
         <div className="selected-bar__info">
           <strong>
             {selectedIds.length} trusted source{selectedIds.length === 1 ? '' : 's'} selected
           </strong>
           <p className="selected-bar__hint">
-            Chat will cite these Hub documents so answers stay grounded and checkable.
+            Open TB4L Chat with these Hub documents as context. You can also connect data sources
+            (like M360) inside Chat.
           </p>
           <div className="selected-bar__chips">
             {selectedIds.map((id) => {
@@ -45,7 +46,7 @@ export function SelectedDocumentsBar({
           <button type="button" className="btn btn-ghost btn-sm" onClick={onClear}>
             Clear
           </button>
-          <button type="button" className="btn btn-primary selected-bar__cta" onClick={onAskInChat}>
+          <button type="button" className="btn selected-bar__cta" onClick={onAskInChat}>
             Ask with these sources
           </button>
         </div>

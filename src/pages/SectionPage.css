@@ -1,15 +1,17 @@
 .section-hero {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
   flex-wrap: wrap;
   margin-bottom: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  padding: 18px 22px;
+  min-height: 112px;
+  box-sizing: border-box;
   border-radius: var(--radius-lg);
   background: var(--tb4l-ice);
   border: 1px solid var(--border-subtle);
-  border-left: 3px solid var(--tb4l-teal);
+  border-left: 3px solid var(--tb4l-purple);
 }
 
 .section-page--purple .section-hero {
@@ -23,12 +25,13 @@
 }
 
 .section-page--blue .section-hero {
-  border-left-color: var(--tb4l-dark-blue);
-  background: linear-gradient(135deg, rgba(16, 56, 79, 0.08), var(--tb4l-ice));
+  border-left-color: var(--tb4l-purple);
+  background: linear-gradient(135deg, rgba(98, 73, 99, 0.08), var(--tb4l-ice));
 }
 
 .section-page--teal .section-hero {
-  border-left-color: var(--tb4l-teal);
+  border-left-color: var(--tb4l-purple);
+  background: linear-gradient(135deg, rgba(98, 73, 99, 0.08), var(--tb4l-ice));
 }
 
 .section-hero__copy {
@@ -42,24 +45,24 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-secondary);
+  color: var(--tb4l-purple);
 }
 
 .section-hero__title {
   margin: 4px 0 0;
-  font-size: clamp(24px, 3vw, 28px);
+  font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text-primary);
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .section-hero__tagline {
   margin: 6px 0 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
-  max-width: 48ch;
+  max-width: 56ch;
   line-height: 1.4;
 }
 
@@ -68,6 +71,7 @@
   flex-wrap: wrap;
   gap: 8px;
   flex: 0 0 auto;
+  align-items: center;
 }
 
 .section-content__head {
@@ -191,4 +195,35 @@
   .team-grid {
     grid-template-columns: 1fr;
   }
+}
+
+[data-theme='dark'] .section-hero {
+  background: var(--bg-sidebar);
+  border-color: var(--border-default);
+}
+
+[data-theme='dark'] .section-page--purple .section-hero,
+[data-theme='dark'] .section-page--blue .section-hero {
+  background: linear-gradient(135deg, rgba(201, 163, 204, 0.14), var(--bg-sidebar));
+  border-left-color: var(--tb4l-purple);
+}
+
+[data-theme='dark'] .section-page--green .section-hero {
+  background: linear-gradient(135deg, rgba(109, 217, 154, 0.12), var(--bg-sidebar));
+  border-left-color: var(--tb4l-green);
+}
+
+[data-theme='dark'] .section-page--teal .section-hero {
+  background: linear-gradient(135deg, rgba(79, 168, 201, 0.14), var(--bg-sidebar));
+  border-left-color: var(--tb4l-teal);
+}
+
+[data-theme='dark'] .section-hero__eyebrow {
+  color: var(--tb4l-purple);
+}
+
+[data-theme='dark'] .team-card,
+[data-theme='dark'] .glossary-item {
+  background: var(--bg-sidebar);
+  border-color: var(--border-default);
 }

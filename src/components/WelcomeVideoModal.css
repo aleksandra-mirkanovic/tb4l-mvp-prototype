@@ -1,0 +1,270 @@
+.welcome-video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  background: var(--overlay-scrim, rgba(58, 66, 72, 0.35));
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+.welcome-video-modal {
+  width: min(640px, 100%);
+  max-height: min(88vh, 820px);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-main);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 24px 48px rgba(58, 66, 72, 0.18),
+    0 8px 20px rgba(58, 66, 72, 0.1);
+  overflow: hidden;
+  pointer-events: auto;
+  animation: welcomeVideoPop 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes welcomeVideoPop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.welcome-video-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+}
+
+.welcome-video-modal__eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-focus);
+}
+
+.welcome-video-modal__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.welcome-video-modal__close {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.welcome-video-modal__close:hover {
+  background: var(--tint-selected-hover);
+}
+
+.welcome-video-modal__close:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.welcome-video-modal__player {
+  padding: 16px 18px 0;
+}
+
+.welcome-video-modal__screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #5a5060 0%, #6e5876 48%, #7a9eaa 100%);
+  border: 1px solid color-mix(in srgb, var(--accent-focus) 35%, transparent);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.welcome-video-modal__screen-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(184, 164, 192, 0.28), transparent 45%),
+    radial-gradient(circle at 80% 75%, rgba(143, 191, 154, 0.2), transparent 40%);
+  pointer-events: none;
+}
+
+.welcome-video-modal__screen.is-playing .welcome-video-modal__scene {
+  animation: welcomeSceneIn 0.45s ease;
+}
+
+.welcome-video-modal__play {
+  position: absolute;
+  z-index: 2;
+  width: 64px;
+  height: 64px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--color-hub);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.welcome-video-modal__play:hover {
+  transform: scale(1.04);
+}
+
+.welcome-video-modal__play:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.welcome-video-modal__scene {
+  position: relative;
+  z-index: 1;
+  max-width: 36rem;
+  text-align: center;
+  color: #fff;
+}
+
+.welcome-video-modal__scene-badge {
+  display: inline-flex;
+  margin-bottom: 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.welcome-video-modal__scene h3 {
+  margin: 0 0 10px;
+  font-size: clamp(20px, 3vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.welcome-video-modal__scene p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.welcome-video-modal__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.welcome-video-modal__control-btn {
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.welcome-video-modal__control-btn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.welcome-video-modal__progress {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+}
+
+.welcome-video-modal__progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent-focus);
+  transition: width 0.08s linear;
+}
+
+.welcome-video-modal__time {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 48px;
+  text-align: right;
+}
+
+.welcome-video-modal__foot {
+  padding: 14px 18px 18px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.welcome-video-modal__note {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.welcome-video-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@keyframes welcomeSceneIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome-video-modal {
+    animation: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .welcome-video-modal__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .welcome-video-modal__actions .btn {
+    width: 100%;
+  }
+}
