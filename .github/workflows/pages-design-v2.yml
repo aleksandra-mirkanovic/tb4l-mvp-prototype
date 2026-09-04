@@ -1,16 +1,68 @@
-﻿name: Design-v2 preview note
+﻿name: Deploy design-v2 preview
 
 on:
   push:
     branches: [feature/tb4l-design-v2]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
-  note:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Preview is published via main Pages workflow
+      - name: Checkout main (live site root)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main-src
+
+      - name: Checkout design-v2 branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/tb4l-design-v2
+          path: design-v2-src
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build main site
+        working-directory: main-src
         run: |
-          echo "Live site (main, unchanged): https://aleksandra-mirkanovic.github.io/tb4l-mvp-prototype/#/"
-          echo "Design v2 preview: https://aleksandra-mirkanovic.github.io/tb4l-mvp-prototype/design-v2/#/"
-          echo "Re-run workflow 'Deploy GitHub Pages' on main after pushing this branch to refresh the preview."
+          npm install
+          npm run build
+          mkdir -p ../site
+          cp -R dist/. ../site/
+
+      - name: Build design-v2 preview
+        working-directory: design-v2-src
+        run: |
+          npm install
+          npx vite build --base=/tb4l-mvp-prototype/design-v2/
+          mkdir -p ../site/design-v2
+          cp -R dist/. ../site/design-v2/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
