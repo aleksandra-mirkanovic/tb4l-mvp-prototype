@@ -7,9 +7,10 @@ import { EmptyState } from '../components/EmptyState';
 import { HubSectionNav } from '../components/HubSectionNav';
 import { SelectedDocumentsBar } from '../components/SelectedDocumentsBar';
 import { useApp } from '../context/AppContext';
-import { DOCUMENTS, EMPTY_FILTERS } from '../data/documents';
-import { GLOSSARY_TERMS } from '../data/glossary';
+import { DOCUMENTS } from '../data/documents';
+import { GLOSSARY_FILE } from '../data/glossary';
 import { getHubSectionBySlug, matchesHubCategory } from '../data/sections';
+import './KnowledgeHubClassicPage.css';
 import './SectionPage.css';
 
 export function KnowledgeHubSectionPage() {
@@ -27,7 +28,6 @@ export function KnowledgeHubSectionPage() {
     clearSources,
     setGenieEnabled,
     addSources,
-    setFilters,
   } = useApp();
   const [summaryId, setSummaryId] = useState<string | null>(null);
 
@@ -42,20 +42,20 @@ export function KnowledgeHubSectionPage() {
 
   const summaryDoc = summaryId ? DOCUMENTS.find((d) => d.id === summaryId) ?? null : null;
 
-  const openBrowseFiltered = () => {
-    if (section.category) {
-      setFilters({ ...EMPTY_FILTERS, category: section.category });
-    } else {
-      setFilters(EMPTY_FILTERS);
-    }
-    navigate('/knowledge-hub/browse');
-  };
-
   const openInChat = (id: string) => {
     selectDocument(id);
     addSources([id]);
     setSummaryId(null);
     navigate('/chat');
+  };
+
+  const askQuestionFromSummary = (question: string) => {
+    if (!summaryDoc) return;
+    selectDocument(summaryDoc.id);
+    addSources([summaryDoc.id]);
+    setGenieEnabled(false);
+    setSummaryId(null);
+    navigate(`/chat?ask=${encodeURIComponent(question)}`);
   };
 
   const askInChat = () => {
@@ -72,7 +72,7 @@ export function KnowledgeHubSectionPage() {
   };
 
   return (
-    <div className={`section-page section-page--${section.accent}`}>
+    <div className={`section-page section-page--library section-page--${section.accent}`}>
       <Breadcrumbs
         items={[
           { label: 'Home', to: '/' },
@@ -83,36 +83,19 @@ export function KnowledgeHubSectionPage() {
 
       <HubSectionNav />
 
-      <header className="section-hero">
-        <div className="section-hero__copy">
-          <p className="section-hero__eyebrow">{section.eyebrow}</p>
-          <h1 className="section-hero__title">{section.title}</h1>
-          <p className="section-hero__tagline">{section.tagline}</p>
-        </div>
-        <div className="section-hero__actions">
-          {section.kind === 'documents' ? (
-            <button type="button" className="btn btn-secondary btn-sm" onClick={openBrowseFiltered}>
-              Open in full library
-            </button>
-          ) : (
-            <Link className="btn btn-secondary btn-sm" to="/knowledge-hub/browse">
-              Browse all documents
-            </Link>
-          )}
+      <header className="section-library-header">
+        <div className="hub-ov-section-head">
+          <h1 id="section-docs-heading">{section.title}</h1>
+          <p>
+            {section.kind === 'documents'
+              ? `${docs.length} document${docs.length === 1 ? '' : 's'} · ${section.description}`
+              : `1 document · ${section.description}`}
+          </p>
         </div>
       </header>
 
       {section.kind === 'documents' ? (
         <section className="section-content" aria-labelledby="section-docs-heading">
-          <div className="section-content__head">
-            <h3 id="section-docs-heading" className="section-title">
-              Documents in {section.title}
-            </h3>
-            <p>
-              {docs.length} curated document{docs.length === 1 ? '' : 's'} · select any to build Chat
-              context, then <strong>Ask with these sources</strong>
-            </p>
-          </div>
           {docs.length === 0 ? (
             <EmptyState
               title="No content available"
@@ -124,18 +107,19 @@ export function KnowledgeHubSectionPage() {
               }
             />
           ) : (
-            <div className="section-docs-grid">
+            <ul className="section-docs-grid">
               {docs.map((doc) => (
-                <DocumentCard
-                  key={doc.id}
-                  document={doc}
-                  selected={selectedDocumentIds.includes(doc.id)}
-                  onToggle={() => toggleDocumentSelection(doc.id)}
-                  onViewSummary={() => setSummaryId(doc.id)}
-                  compact
-                />
+                <li key={doc.id}>
+                  <DocumentCard
+                    document={doc}
+                    selected={selectedDocumentIds.includes(doc.id)}
+                    onToggle={() => toggleDocumentSelection(doc.id)}
+                    onViewSummary={() => setSummaryId(doc.id)}
+                    tile
+                  />
+                </li>
               ))}
-            </div>
+            </ul>
           )}
 
           <SelectedDocumentsBar
@@ -150,28 +134,32 @@ export function KnowledgeHubSectionPage() {
       ) : null}
 
       {section.kind === 'glossary' ? (
-        <section className="section-content" aria-labelledby="glossary-heading">
-          <div className="section-content__head">
-            <h3 id="glossary-heading" className="section-title">
-              Glossary
-            </h3>
-            <p>Shared definitions used across Knowledge Hub and Chat.</p>
-          </div>
-          <div className="glossary-list">
-            {GLOSSARY_TERMS.map((item) => (
-              <article key={item.id} className="glossary-item">
-                <h4>{item.term}</h4>
-                <p>{item.definition}</p>
-                <div className="glossary-item__related" aria-label="Related terms">
-                  {item.related.map((r) => (
-                    <span key={r} className="chip chip-hub">
-                      {r}
-                    </span>
-                  ))}
+        <section className="section-content" aria-labelledby="section-docs-heading">
+          <ul className="section-docs-grid">
+            <li>
+              <a
+                className="document-card document-card--tile document-card--external"
+                href={GLOSSARY_FILE.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${GLOSSARY_FILE.title} in SharePoint`}
+              >
+                <div className="document-card__top document-card__top--tile">
+                  <h3 className="document-card__title">{GLOSSARY_FILE.title}</h3>
+                  <span className="document-card__badge">{GLOSSARY_FILE.format}</span>
                 </div>
-              </article>
-            ))}
-          </div>
+                <p className="document-card__desc">{GLOSSARY_FILE.description}</p>
+                <p className="document-card__meta-line">
+                  <span>SharePoint</span>
+                  <span aria-hidden="true">·</span>
+                  <span>Excel workbook</span>
+                </p>
+                <div className="document-card__actions document-card__actions--tile">
+                  <span className="btn btn-primary btn-sm document-card__ask">Open in SharePoint</span>
+                </div>
+              </a>
+            </li>
+          </ul>
         </section>
       ) : null}
 
@@ -182,6 +170,8 @@ export function KnowledgeHubSectionPage() {
           onClose={() => setSummaryId(null)}
           onSelectForChat={() => selectDocument(summaryDoc.id)}
           onOpenInChat={() => openInChat(summaryDoc.id)}
+          onOpenRelated={(id) => setSummaryId(id)}
+          onAskQuestion={askQuestionFromSummary}
         />
       ) : null}
     </div>

@@ -18,29 +18,43 @@ export function SelectedDocumentsBar({
   onRemoveM360,
   onAskInChat,
 }: SelectedDocumentsBarProps) {
-  const total = selectedIds.length + (m360Selected ? 1 : 0);
+  const docCount = selectedIds.length;
+  const total = docCount + (m360Selected ? 1 : 0);
   if (total === 0) return null;
+
+  const sourceLabel =
+    total === 1
+      ? m360Selected
+        ? 'AI grounded on 1 trusted live source'
+        : 'AI grounded on 1 trusted source'
+      : `AI grounded on ${total} trusted sources`;
 
   return (
     <>
       <div className="selected-bar-spacer" aria-hidden="true" />
-      <div className="selected-bar" role="region" aria-label="Selected context for TB4L Chat">
-        <div className="selected-bar__info">
-          <strong>
-            {total} trusted source{total === 1 ? '' : 's'} selected
-          </strong>
-          <p className="selected-bar__hint">
-            {m360Selected
-              ? 'Open TB4L Chat with M360 connected for structured market and brand data.'
-              : 'Open TB4L Chat with these Hub documents as context. You can also connect data sources (like M360) inside Chat.'}
-          </p>
-          <div className="selected-bar__chips">
+      <div
+        className="selected-bar selected-bar--context"
+        role="region"
+        aria-label="AI context for TB4L Chat"
+      >
+        <div className="selected-bar__main">
+          <div className="selected-bar__header">
+            <p className="selected-bar__eyebrow">AI Context Ready</p>
+            <strong className="selected-bar__title">{sourceLabel}</strong>
+            <p className="selected-bar__hint">
+              TB4L Chat will use approved knowledge assets to generate grounded, traceable
+              responses.
+            </p>
+          </div>
+
+          <div className="selected-bar__assets" aria-label="Connected knowledge assets">
             {m360Selected ? (
-              <span className="chip chip-hub chip-removable">
-                <span>M360</span>
+              <span className="context-asset context-asset--live">
+                <span className="context-asset__name">M360</span>
                 <button
                   type="button"
-                  aria-label="Remove M360"
+                  className="context-asset__remove"
+                  aria-label="Remove M360 from AI context"
                   onClick={() => onRemoveM360?.()}
                 >
                   ×
@@ -50,23 +64,40 @@ export function SelectedDocumentsBar({
             {selectedIds.map((id) => {
               const doc = getDocumentById(id);
               return (
-                <span key={id} className="chip chip-hub chip-removable">
-                  <span>{doc?.title ?? id}</span>
-                  <button type="button" aria-label={`Remove ${doc?.title ?? id}`} onClick={() => onRemove(id)}>
+                <span key={id} className="context-asset">
+                  <span className="context-asset__name">{doc?.title ?? id}</span>
+                  <button
+                    type="button"
+                    className="context-asset__remove"
+                    aria-label={`Remove ${doc?.title ?? id} from AI context`}
+                    onClick={() => onRemove(id)}
+                  >
                     ×
                   </button>
                 </span>
               );
             })}
           </div>
+
+          <ul className="selected-bar__trust">
+            <li>Grounded in selected TB4L knowledge</li>
+            <li>Sources cited in answers</li>
+            <li>Approved knowledge, not generic AI</li>
+          </ul>
         </div>
+
         <div className="selected-bar__actions">
           <button type="button" className="btn btn-ghost btn-sm" onClick={onClear}>
-            Clear
+            Clear context
           </button>
-          <button type="button" className="btn selected-bar__cta" onClick={onAskInChat}>
-            Ask with these sources
-          </button>
+          <div className="selected-bar__cta-wrap">
+            <button type="button" className="btn selected-bar__cta" onClick={onAskInChat}>
+              Ask TB4L Chat
+            </button>
+            <p className="selected-bar__cta-hint">
+              Generate AI responses grounded in selected sources.
+            </p>
+          </div>
         </div>
       </div>
     </>

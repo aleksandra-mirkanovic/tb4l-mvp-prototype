@@ -2,14 +2,14 @@ import { NavLink } from 'react-router-dom';
 import { HUB_SECTIONS } from '../data/sections';
 import './HubSectionNav.css';
 
-/** Knowledge sections for Hub nav — Sources is a dedicated nav item. */
+/** Knowledge sections for Hub nav — Sources & Team are dedicated nav items. */
 const NAV_SECTIONS = HUB_SECTIONS;
 
 export type HubSectionNavMode = 'full' | 'minimal';
 
 type HubSectionNavProps = {
   /**
-   * `full` — Overview + knowledge categories + Browse all + Sources (default).
+   * `full` — Overview + knowledge categories + Browse all + Sources + TB4L Team (default).
    * `minimal` — Overview + Browse all only.
    */
   mode?: HubSectionNavMode;
@@ -69,6 +69,21 @@ export function HubSectionNav({ mode = 'full' }: HubSectionNavProps) {
         }
       >
         Sources
+      </NavLink>
+      <span className="hub-section-nav__divider" aria-hidden="true" />
+      <NavLink
+        to="/knowledge-hub/team"
+        className={({ isActive }) =>
+          [
+            'hub-section-nav__link',
+            'hub-section-nav__link--team',
+            isActive ? 'is-active' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')
+        }
+      >
+        TB4L Team
       </NavLink>
     </nav>
   );

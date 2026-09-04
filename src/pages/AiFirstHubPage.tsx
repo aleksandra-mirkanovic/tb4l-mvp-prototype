@@ -502,6 +502,13 @@ export function AiFirstHubPage() {
             setSummaryId(null);
             navigate('/chat');
           }}
+          onOpenRelated={(id) => setSummaryId(id)}
+          onAskQuestion={(question) => {
+            selectDocument(summaryDoc.id);
+            addSources([summaryDoc.id]);
+            setSummaryId(null);
+            navigate(`/chat?ask=${encodeURIComponent(question)}`);
+          }}
         />
       ) : null}
     </div>

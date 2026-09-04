@@ -29,9 +29,9 @@ function AppRoutes() {
           <Route path="/knowledge-hub" element={<KnowledgeHubPage />} />
           <Route path="/knowledge-hub/browse" element={<KnowledgeHubBrowsePage />} />
           <Route path="/knowledge-hub/sources" element={<KnowledgeHubSourcesPage />} />
-          <Route path="/knowledge-hub/team" element={<Navigate to="/team" replace />} />
+          <Route path="/knowledge-hub/team" element={<TeamPage />} />
           <Route path="/knowledge-hub/:slug" element={<KnowledgeHubSectionPage />} />
-          <Route path="/team" element={<TeamPage />} />
+          <Route path="/team" element={<Navigate to="/knowledge-hub/team" replace />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/sections/:slug" element={<LegacySectionRedirect />} />
           <Route path="*" element={<Navigate to="/" replace />} />

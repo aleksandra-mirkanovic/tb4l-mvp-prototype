@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Breadcrumbs } from '../components/Breadcrumbs';
+import { DocumentCard } from '../components/DocumentCard';
+import { DocumentSummaryPanel } from '../components/DocumentSummaryPanel';
 import { HubSectionNav } from '../components/HubSectionNav';
 import { HubSourcesPanel } from '../components/HubSourcesPanel';
 import { SelectedDocumentsBar } from '../components/SelectedDocumentsBar';
 import { useApp } from '../context/AppContext';
-import { getDocumentById } from '../data/documents';
+import { DOCUMENTS, getDocumentById } from '../data/documents';
 import type { KnowledgeDocument } from '../types';
 import './KnowledgeHubClassicPage.css';
 import './SectionPage.css';
@@ -36,12 +39,33 @@ export function KnowledgeHubClassicPage() {
     selectedDocumentIds,
     m360Selected,
     toggleDocumentSelection,
+    selectDocument,
     clearDocumentSelection,
     toggleM360Selection,
     setActiveSourcesFromSelection,
     clearSources,
     setGenieEnabled,
+    addSources,
   } = useApp();
+  const [summaryId, setSummaryId] = useState<string | null>(null);
+
+  const summaryDoc = summaryId ? DOCUMENTS.find((d) => d.id === summaryId) ?? null : null;
+
+  const openInChat = (id: string) => {
+    selectDocument(id);
+    addSources([id]);
+    setSummaryId(null);
+    navigate('/chat');
+  };
+
+  const askQuestionFromSummary = (question: string) => {
+    if (!summaryDoc) return;
+    selectDocument(summaryDoc.id);
+    addSources([summaryDoc.id]);
+    setGenieEnabled(false);
+    setSummaryId(null);
+    navigate(`/chat?ask=${encodeURIComponent(question)}`);
+  };
 
   const askInChat = () => {
     if (m360Selected) {
@@ -96,31 +120,18 @@ export function KnowledgeHubClassicPage() {
           <h2 id="hub-popular-heading">Popular files</h2>
           <p>Select files to use as Chat sources—same as picking them from any Hub section.</p>
         </header>
-        <ul className="hub-ov-popular__grid">
-          {POPULAR_DOCS.map((doc) => {
-            const selected = selectedDocumentIds.includes(doc.id);
-            return (
-              <li key={doc.id}>
-                <button
-                  type="button"
-                  className={`hub-ov-popular__card${selected ? ' is-selected' : ''}`}
-                  onClick={() => toggleDocumentSelection(doc.id)}
-                  aria-pressed={selected}
-                  aria-label={`${selected ? 'Deselect' : 'Select'} ${doc.title}`}
-                >
-                  <span className="hub-ov-popular__check" aria-hidden="true">
-                    {selected ? '✓' : ''}
-                  </span>
-                  <span className="hub-ov-popular__title">{doc.title}</span>
-                  <span className="hub-ov-popular__meta">
-                    <span>{doc.brand}</span>
-                    <span aria-hidden="true">·</span>
-                    <span>{doc.market}</span>
-                  </span>
-                </button>
-              </li>
-            );
-          })}
+        <ul className="section-docs-grid hub-ov-popular__grid">
+          {POPULAR_DOCS.map((doc) => (
+            <li key={doc.id}>
+              <DocumentCard
+                document={doc}
+                selected={selectedDocumentIds.includes(doc.id)}
+                onToggle={() => toggleDocumentSelection(doc.id)}
+                onViewSummary={() => setSummaryId(doc.id)}
+                tile
+              />
+            </li>
+          ))}
         </ul>
       </section>
 
@@ -134,6 +145,18 @@ export function KnowledgeHubClassicPage() {
         onRemoveM360={toggleM360Selection}
         onAskInChat={askInChat}
       />
+
+      {summaryDoc ? (
+        <DocumentSummaryPanel
+          document={summaryDoc}
+          selected={selectedDocumentIds.includes(summaryDoc.id)}
+          onClose={() => setSummaryId(null)}
+          onSelectForChat={() => selectDocument(summaryDoc.id)}
+          onOpenInChat={() => openInChat(summaryDoc.id)}
+          onOpenRelated={(id) => setSummaryId(id)}
+          onAskQuestion={askQuestionFromSummary}
+        />
+      ) : null}
     </div>
   );
 }

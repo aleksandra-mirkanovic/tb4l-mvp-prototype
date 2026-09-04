@@ -87,6 +87,15 @@ export function KnowledgeHubBrowsePage() {
     navigate('/chat');
   };
 
+  const askQuestionFromSummary = (question: string) => {
+    if (!summaryDoc) return;
+    selectDocument(summaryDoc.id);
+    addSources([summaryDoc.id]);
+    setGenieEnabled(false);
+    setSummaryId(null);
+    navigate(`/chat?ask=${encodeURIComponent(question)}`);
+  };
+
   const askInChat = () => {
     if (m360Selected) {
       clearSources();
@@ -169,19 +178,19 @@ export function KnowledgeHubBrowsePage() {
             </label>
           </div>
 
-          <div className="browse-page__list" role="list">
+          <ul className="section-docs-grid browse-page__grid">
             {pageItems.map((doc) => (
-              <div key={doc.id} role="listitem">
+              <li key={doc.id}>
                 <DocumentCard
                   document={doc}
                   selected={selectedDocumentIds.includes(doc.id)}
                   onToggle={() => toggleDocumentSelection(doc.id)}
                   onViewSummary={() => setSummaryId(doc.id)}
-                  compact
+                  tile
                 />
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
 
           {showPagination ? (
             <nav className="browse-page__pagination" aria-label="Document pages">
@@ -236,6 +245,8 @@ export function KnowledgeHubBrowsePage() {
           onClose={() => setSummaryId(null)}
           onSelectForChat={() => selectDocument(summaryDoc.id)}
           onOpenInChat={() => openInChat(summaryDoc.id)}
+          onOpenRelated={(id) => setSummaryId(id)}
+          onAskQuestion={askQuestionFromSummary}
         />
       ) : null}
     </div>

@@ -5,6 +5,16 @@ export interface GlossaryTerm {
   related: string[];
 }
 
+/** Single Hub Glossary entry — opens the SharePoint workbook in a new tab. */
+export const GLOSSARY_FILE = {
+  id: 'market360-glossary',
+  title: 'Market360_Glossary',
+  description:
+    'Official Market360 glossary workbook with shared TB4L terminology and definitions.',
+  format: '.xlsx',
+  url: 'https://bayergroup.sharepoint.com/:x:/r/sites/022091/_layouts/15/Doc.aspx?action=edit&sourcedoc=%7B98695fab-b32f-4b27-aa1f-be1669ccaf22%7D&wdExp=TEAMS-TREATMENT&web=1',
+} as const;
+
 export const GLOSSARY_TERMS: GlossaryTerm[] = [
   {
     id: 'g1',

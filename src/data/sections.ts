@@ -90,7 +90,7 @@ export const HUB_SECTIONS: HubSection[] = [
     eyebrow: 'Shared language',
     tagline: 'Common TB4L terminology, definitions, and shared language.',
     description:
-      'Common TB4L terminology, definitions, and shared language across Brand, Medical, Insights, and Agency partners.',
+      'Official Market360 glossary workbook for shared TB4L terminology and definitions.',
     ctaLabel: 'Open Glossary',
     accent: 'teal',
   },

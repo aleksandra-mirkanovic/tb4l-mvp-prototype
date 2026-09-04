@@ -50,6 +50,14 @@
   gap: 8px;
 }
 
+.browse-page__grid {
+  margin-bottom: var(--space-2);
+}
+
+.browse-page__grid > li > .document-card {
+  height: 100%;
+}
+
 .browse-page__pagination {
   display: flex;
   flex-wrap: wrap;
