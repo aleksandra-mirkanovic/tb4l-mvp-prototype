@@ -30,6 +30,12 @@ jobs:
           ref: feature/tb4l-design-v2
           path: design-v2-src
 
+      - name: Checkout M360&Finance branch
+        uses: actions/checkout@v4
+        with:
+          ref: M360&Finance
+          path: m360-src
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -50,6 +56,14 @@ jobs:
           npx vite build --base=/tb4l-mvp-prototype/design-v2/
           mkdir -p ../site/design-v2
           cp -R dist/. ../site/design-v2/
+
+      - name: Build M360&Finance preview (AI Assistant)
+        working-directory: m360-src
+        run: |
+          npm install
+          npx vite build --base=/tb4l-mvp-prototype/m360-finance/
+          mkdir -p ../site/m360-finance
+          cp -R dist/. ../site/m360-finance/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
