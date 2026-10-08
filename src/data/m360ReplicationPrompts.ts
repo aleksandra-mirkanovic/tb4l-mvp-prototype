@@ -40,7 +40,7 @@ export const M360_REPLICATION_PROMPTS: ReplicationPrompt[] = [
     title: '1 · LLM system instructions (market story)',
     purpose:
       'Paste as system / developer instructions. Tells the model how to structure the report, which charts to use, and what not to invent.',
-    body: `You are building a brand-manager Market story from Sirius sell-out (CHDAA), not internal finance.
+    body: `You are building a brand-manager Market story from Sirius sell-out (CHDAA) only.
 
 SCOPE
 - Country: {{COUNTRY}}
@@ -49,14 +49,13 @@ SCOPE
 - Focus brand: {{BRAND}}
 - Manufacturer share: {{MANUFACTURER}}
 - Window: latest 12 months (MAT) ending {{MAT_END}}
-- Do NOT mix in company COPA / Fiona euros or calendar-year finance unless the user opens a separate Finance window with the same latest-12-months clock.
+- Stay inside Sirius sell-out for this Market story — do not bring in other systems or calendars.
 
 HARD RULES
 1. Only use metrics that exist in the retrieval + CALC list (segment/sub-brand + channel). If a metric is missing, say N/A — do not invent.
 2. One business question per section. End each analytic section with a short Insight (what the numbers mean) and a Then bridge (why dig deeper) — do not name the next section title in the bridge.
 3. Highlight numbers sparsely: color only deltas and EVI (vs 100); bold levels/sizes without rainbow text.
-4. Keep market and finance clocks apart in implications.
-5. Prefer 1–2 charts per section. No aquarium of tiny charts.
+4. Prefer 1–2 charts per section. No aquarium of tiny charts.
 
 STORY ORDER (required)
 1. Category overview — executive summary + 3 KPIs (set sales, {{MANUFACTURER}} share, {{BRAND}} EVI vs {{PRIMARY_SEGMENT}})
@@ -178,7 +177,7 @@ KPI strip (overview only):
 Executive summary (overview): five short blocks —
 Market; {{BRAND}} in that market; What to do next; Working hypothesis not proven; Data care (failed checks / missing 3y).
 
-Do not add finance Net Sales. If channel data is missing, keep the section but mark charts N/A and say what grain is unavailable.`,
+If channel data is missing, keep the section but mark charts N/A and say what grain is unavailable.`,
   },
   {
     id: 'signals',
@@ -198,7 +197,6 @@ Required themes if the data supports them:
 - Franchise strength on {{PRIMARY_SEGMENT}} / {{LINES}} jobs
 - Channel jobs (defend large channel vs feed growth channel)
 - Value/mix vs packs
-- Keep market vs finance clocks apart
 
 B) Recommended actions — 3–5 items, same signal order:
 - step number, tone, title, body with concrete this-month ask
@@ -222,7 +220,7 @@ Steps:
 2) Compute CALC only (category/segment/sub-brand/channel formulas; EVI; white-space; pool vs leak).
 3) Build the story in the fixed section order with the chart playbook (value vs packs; channel drivers; channel movers; attractiveness; competitive ranks; EVI; brand lines; share change slopes).
 4) Close with traffic-light implications and ordered actions.
-5) List gaps as N/A (no 3y, no retailer grain, no finance join, etc.) — never invent.
+5) List gaps as N/A (no 3y, no retailer grain, etc.) — never invent.
 
 Output: executive summary, KPI strip, section-by-section chart specs + insights, implications, actions, and a short data-care note.`,
   },
@@ -244,6 +242,6 @@ Expected story emphasis (validate from CALC, do not assume for other brands):
 - Pool = IBS; growth/leak = Antacids (Gaviscon reference rival)
 - Channel: defend Pharmacies (price-led, large); grow E-commerce (volume-led, most absolute EUR lift)
 - Brand jobs: defend Classic share; put growth on Advance (EVI vs IBS)
-- Do not open a PPI project from this pack; do not join COPA calendar euros into this MAT view`,
+- Do not open a PPI project from this pack`
   },
 ];

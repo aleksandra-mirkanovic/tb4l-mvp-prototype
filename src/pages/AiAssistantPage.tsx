@@ -3,6 +3,7 @@ import { NavLink, Navigate, useParams } from 'react-router-dom';
 import { CopaReport } from '../components/CopaReport';
 import { FinanceMcpAudit } from '../components/FinanceMcpAudit';
 import { M360MarketStory } from '../components/M360MarketStory';
+import { M360MarketStoryV3 } from '../components/M360MarketStoryV3';
 import { M360Report } from '../components/M360Report';
 import { SiriusTip, type SiriusTable } from '../components/SiriusTip';
 import { CALC_FORMULAS, CAGR_3Y_NOTE } from '../data/m360Charts';
@@ -85,11 +86,17 @@ function PromptBlock({ prompt }: { prompt: ReplicationPrompt }) {
   );
 }
 
-export type AiAssistantVariant = 'classic' | 'v2';
+export type AiAssistantVariant = 'classic' | 'v2' | 'v3';
+
+function assistantBase(variant: AiAssistantVariant): string {
+  if (variant === 'v3') return '/ai-assistant-v3';
+  if (variant === 'v2') return '/ai-assistant-v2';
+  return '/ai-assistant';
+}
 
 export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistantVariant }) {
   const { pane } = useParams();
-  const base = variant === 'v2' ? '/ai-assistant-v2' : '/ai-assistant';
+  const base = assistantBase(variant);
   if (pane && pane !== 'market' && pane !== 'finance') {
     return <Navigate to={`${base}/market`} replace />;
   }
@@ -98,19 +105,35 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
   const p = M360_RETRIEVAL_PARAMS;
   const m = M360_METADATA;
   const isV2 = variant === 'v2';
+  const isV3 = variant === 'v3';
+  const isStory = isV2 || isV3;
 
   return (
-    <div className={`ai-assistant-page ai-assistant-page--tables${isV2 ? ' ai-assistant-page--v2' : ''}`}>
+    <div
+      className={`ai-assistant-page ai-assistant-page--tables${isV2 ? ' ai-assistant-page--v2' : ''}${isV3 ? ' ai-assistant-page--v3' : ''}`}
+    >
       <header className="ai-assistant-hero">
         <div className="ai-assistant-hero__copy">
           <p className="ai-assistant-hero__eyebrow">
-            {isV2 ? 'Brand manager report · story redesign' : 'Brand manager report'}
+            {isV3
+              ? 'Brand manager report · story redesign'
+              : isV2
+                ? 'Brand manager report · story redesign'
+                : 'Brand manager report'}
           </p>
-          <h1 className="page-title">{isV2 ? 'AI Assistant v2' : 'AI Assistant'}</h1>
+          <h1 className="page-title">
+            {isV3 ? 'AI Assistant v3' : isV2 ? 'AI Assistant v2' : 'AI Assistant'}
+          </h1>
           <p className="page-subtitle">
-            {isV2
-              ? 'Same Sirius and COPA clocks as AI Assistant. Market follows a Bain-logic drill-down; finance is unchanged. Compare side by side with the classic tab.'
-              : 'Two windows. Market is Sirius sell-out for the latest 12 months. Finance is internal COPA for calendar 2025 versus 2024. Prompt one window at a time — the clocks are different.'}
+            {view === 'market'
+              ? isV3
+                ? 'Market window · sell-out, latest 12 months. Bain-logic drill-down from category to brand and channel.'
+                : isV2
+                  ? 'Same Sirius and COPA clocks as AI Assistant. Market follows a Bain-logic drill-down; finance is unchanged. Compare side by side with the classic tab.'
+                  : 'Two windows. Market is Sirius sell-out for the latest 12 months. Finance is internal COPA for calendar 2025 versus 2024. Prompt one window at a time — the clocks are different.'
+              : isStory
+                ? 'Finance window · internal COPA, calendar 2025 versus 2024. Same finance pack as classic; compare side by side with the classic tab.'
+                : 'Finance window · internal COPA for calendar 2025 versus 2024. Prompt this window separately from Market — the clocks are different.'}
           </p>
         </div>
         <dl className="ai-assistant-params">
@@ -139,7 +162,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
         >
           Market window
-          <span>Sirius · latest 12 months</span>
+          <span>{isV3 ? 'Sell-out · latest 12 months' : 'Sirius · latest 12 months'}</span>
         </NavLink>
         <NavLink
           to={`${base}/finance`}
@@ -153,12 +176,14 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
       {view === 'market' ? (
         <section className="ai-window" aria-label="Market window">
           <header className="ai-window__bar">
-            <p className="ai-window__title">Market{isV2 ? ' · story' : ''}</p>
+            <p className="ai-window__title">Market{isStory ? ' · story' : ''}</p>
             <p className="ai-window__meta">
               {p.country} {p.category} · Iberogast competitive set · MAT ending {m.latest_actual_month}
             </p>
           </header>
-          <div className="ai-window__body">{isV2 ? <M360MarketStory /> : <M360Report />}</div>
+          <div className="ai-window__body">
+            {isV3 ? <M360MarketStoryV3 /> : isV2 ? <M360MarketStory /> : <M360Report />}
+          </div>
         </section>
       ) : (
         <section className="ai-window ai-window--finance" aria-label="Finance window">
@@ -303,6 +328,48 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           For analysts. Brand-manager cards and charts above do not need this to be open.
         </p>
 
+        {isV3 ? (
+          <details className="ai-raw__inner">
+            <summary>Business questions by section</summary>
+            <p className="ai-table-note">
+              Framing questions used to build each Market story section. Kept here so the brand-manager view stays
+              chart-first.
+            </p>
+            <ul className="m360-rep-na">
+              <li>
+                <b>Category overview</b> — How big is the set, how is Bayer doing, and is Iberogast keeping pace with
+                IBS?
+              </li>
+              <li>
+                <b>Category growth</b> — Is growth coming from more packs, or from value (price / mix)?
+              </li>
+              <li>
+                <b>Channel dynamics</b> — Where is set growth coming from by channel (price vs volume), and who is
+                gaining or losing share in each channel?
+              </li>
+              <li>
+                <b>Segment attractiveness</b> — Where to play — how big is each need-state, and is it growing faster
+                than the category?
+              </li>
+              <li>
+                <b>Competitive landscape</b> — Who holds the cash pool and who is winning the share fight in the
+                growth segment?
+              </li>
+              <li>
+                <b>Bayer relative growth</b> — Which Bayer brands outpace or lag their own need-state? (100 = in line;
+                above 100 = faster.)
+              </li>
+              <li>
+                <b>Iberogast position</b> — Defend Classic, grow Advance — or both, with different jobs?
+              </li>
+              <li>
+                <b>Market share performance</b> — Where is Bayer gaining or losing share — change first, not just the
+                level?
+              </li>
+            </ul>
+          </details>
+        ) : null}
+
         <details className="ai-raw__inner">
           <summary>CALC formulas</summary>
           <p className="ai-table-note">
@@ -337,7 +404,8 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
             <li>
               <b>Channel grain still missing</b> — no customer / retailer grain; no drugstore or grocery for
               Germany. Pharmacies + E-commerce (Mail Order) totals, price/volume drivers, and top-brand dynamics
-              are in the extract and shown in AI Assistant v2 · Channel dynamics (see T-ch / T-ch-b below).
+              are in the extract and shown in AI Assistant {isV3 ? 'v3' : 'v2'} · Channel dynamics (see T-ch /
+              T-ch-b below).
             </li>
             <li>
               <b>Innovation bubble</b> — N/A
@@ -348,12 +416,16 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
             <li>
               <b>Monthly Value RSP / share / EVI</b> — N/A (MAT windows only)
             </li>
-            <li>
-              <b>Fiona finance</b> revenue, margin, waterfall, investment, price elasticity — N/A
-            </li>
-            <li>
-              <b>Market vs finance</b> share vs margin, growth vs profit — N/A
-            </li>
+            {!isV3 ? (
+              <>
+                <li>
+                  <b>Fiona finance</b> revenue, margin, waterfall, investment, price elasticity — N/A
+                </li>
+                <li>
+                  <b>Market vs finance</b> share vs margin, growth vs profit — N/A
+                </li>
+              </>
+            ) : null}
             <li>
               <b>3y CAGR</b> — N/A · {CAGR_3Y_NOTE}
             </li>

@@ -38,6 +38,8 @@ function AppRoutes() {
           <Route path="/ai-assistant/:pane" element={<AiAssistantPage key="assistant-classic" variant="classic" />} />
           <Route path="/ai-assistant-v2" element={<Navigate to="/ai-assistant-v2/market" replace />} />
           <Route path="/ai-assistant-v2/:pane" element={<AiAssistantPage key="assistant-v2" variant="v2" />} />
+          <Route path="/ai-assistant-v3" element={<Navigate to="/ai-assistant-v3/market" replace />} />
+          <Route path="/ai-assistant-v3/:pane" element={<AiAssistantPage key="assistant-v3" variant="v3" />} />
           <Route path="/sections/:slug" element={<LegacySectionRedirect />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

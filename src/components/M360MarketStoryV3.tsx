@@ -1,9 +1,9 @@
 /**
- * Bain-logic Market story — AI Assistant v2 (deployed original).
- * AI Assistant v3 uses M360MarketStoryV3. Classic keeps M360Report.
+ * Bain-logic Market story — AI Assistant v3 (stacked chart + reading units).
+ * AI Assistant v2 keeps M360MarketStory (deployed story). Classic keeps M360Report.
  */
 import { useRef, useState, type ReactNode } from 'react';
-import { ASSISTANT_NARRATIVE_V2 } from '../config/assistantNarrative';
+import { ASSISTANT_NARRATIVE_V2, ASSISTANT_STORY_RAIL } from '../config/assistantNarrative';
 import {
   CALC_CATEGORY,
   CALC_IBEROGAST,
@@ -19,6 +19,13 @@ import {
 } from '../data/m360ChannelRetrieval';
 import { M360_METADATA, M360_RETRIEVAL_PARAMS } from '../data/m360Retrieval';
 import { AssistantMarketReadout, buildMarketNarrativeProps } from './AssistantNarrative';
+import {
+  buildStoryAnalyses,
+  MarketSynthesis,
+  type ChartAxBody,
+  type HypCheck,
+  type HypStatus,
+} from './m360StoryAnalyses';
 import './M360Report.css';
 
 type SignalTone = 'good' | 'watch' | 'bad';
@@ -63,7 +70,7 @@ function SignalCard({
       </header>
       <p className="m360-signal__why">{why}</p>
       <p className="m360-signal__evidence">
-        <span className="m360-signal__evidence-lab">From the pack</span>
+        <span className="m360-signal__evidence-lab">Evidence</span>
         {evidence}
       </p>
     </li>
@@ -212,24 +219,132 @@ function ChartCard({
   );
 }
 
+const HYP_STATUS_META: Record<
+  HypStatus,
+  { label: string; mark: string; className: string }
+> = {
+  confirmed: { label: 'Confirmed', mark: '✅', className: 'is-confirmed' },
+  partial: { label: 'Partially confirmed', mark: '⚠️', className: 'is-partial' },
+  rejected: { label: 'Rejected', mark: '❌', className: 'is-rejected' },
+  new: { label: 'New hypothesis emerged', mark: '💡', className: 'is-new' },
+};
+
 function StoryNote({ children }: { children: ReactNode }) {
   return (
     <aside className="m360-story-note">
       <span className="m360-story-note__tag">Insight</span>
-      <p>{children}</p>
+      <div className="m360-story-note__body">{children}</div>
     </aside>
   );
 }
 
-/** Why we dig deeper — logic only; do not name the following section. */
-function StoryBridge({ children }: { children: ReactNode }) {
+/** Fixed TB4L analysis under every chart — same blocks every time. */
+function ChartAnalysis({
+  facts,
+  insights,
+  hypotheses,
+  brandImplications,
+  opportunities,
+  risks,
+}: {
+  facts: ReactNode;
+  insights: ReactNode;
+  hypotheses: HypCheck[];
+  brandImplications: ReactNode;
+  opportunities: ReactNode;
+  risks: ReactNode;
+}) {
   return (
-    <p className="m360-story-bridge">
-      <span className="m360-story-bridge__tag" aria-hidden>
-        Then
-      </span>
-      {children}
-    </p>
+    <aside className="m360-chart-ax" aria-label="Reading this chart">
+      <header className="m360-chart-ax__head">
+        <span className="m360-chart-ax__kicker">Reading this chart</span>
+        <p className="m360-chart-ax__sub">What the numbers mean for the brand</p>
+      </header>
+      <section className="m360-chart-ax__block is-facts">
+        <h4>1 · Key facts / evidence</h4>
+        <ul>{facts}</ul>
+      </section>
+      <section className="m360-chart-ax__block is-insights">
+        <h4>2 · Key insights</h4>
+        <div>{insights}</div>
+      </section>
+      <section className="m360-chart-ax__block is-hyp">
+        <h4>3 · Hypothesis validation</h4>
+        <ul className="m360-hyp-checks">
+          {hypotheses.map((h, i) => {
+            const meta = HYP_STATUS_META[h.status];
+            return (
+              <li key={i} className={meta.className}>
+                <div className="m360-hyp-checks__row">
+                  <span className="m360-hyp-checks__status" title={meta.label}>
+                    <span aria-hidden>{meta.mark}</span> {meta.label}
+                  </span>
+                  <span className="m360-hyp-checks__claim">{h.claim}</span>
+                </div>
+                <p className="m360-hyp-checks__because">{h.because}</p>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+      <section className="m360-chart-ax__block is-brand">
+        <h4>4 · Implications for the brand</h4>
+        <div>{brandImplications}</div>
+      </section>
+      <section className="m360-chart-ax__block is-opp-risk">
+        <h4>5 · Opportunities and risks</h4>
+        <div className="m360-opp-risk">
+          <div>
+            <h5>Opportunities</h5>
+            <ul>{opportunities}</ul>
+          </div>
+          <div>
+            <h5>Risks</h5>
+            <ul>{risks}</ul>
+          </div>
+        </div>
+      </section>
+    </aside>
+  );
+}
+
+/**
+ * Chart full width, then TB4L analysis underneath (stacked — not side-by-side).
+ * ASSISTANT_STORY_RAIL = false → short note only under the chart.
+ */
+function StoryBand({
+  viz,
+  facts,
+  insights,
+  hypotheses,
+  brandImplications,
+  opportunities,
+  risks,
+}: ChartAxBody & { viz: ReactNode }) {
+  if (!ASSISTANT_STORY_RAIL) {
+    return (
+      <>
+        {viz}
+        <StoryNote>
+          <div>{insights}</div>
+          <ul className="m360-story-note__reads">{facts}</ul>
+          <div>{brandImplications}</div>
+        </StoryNote>
+      </>
+    );
+  }
+  return (
+    <div className="m360-story-band is-stacked">
+      <div className="m360-story-band__viz">{viz}</div>
+      <ChartAnalysis
+        facts={facts}
+        insights={insights}
+        hypotheses={hypotheses}
+        brandImplications={brandImplications}
+        opportunities={opportunities}
+        risks={risks}
+      />
+    </div>
   );
 }
 
@@ -705,8 +820,8 @@ function ChannelDriversChart() {
   return (
     <div className="m360-viz m360-channel-drv" ref={wrap} onMouseLeave={hide}>
       <p className="m360-channel-drv__ref">
-        EUR millions added or removed versus last year. Price and volume are Sirius growth-driver
-        fields — not packs from the segment chart above. {M360_CHANNEL_META.note}
+        EUR millions added or removed versus last year. Price and volume are growth-driver fields —
+        not packs from the segment chart above. {M360_CHANNEL_META.note}
       </p>
       <ul className="m360-channel-drv__list">
         {CALC_CHANNELS.map((c) => {
@@ -895,12 +1010,12 @@ function IberogastPosition() {
   );
 }
 
-export function M360MarketStory() {
+export function M360MarketStoryV3() {
   const cat = CALC_CATEGORY;
   const p = M360_RETRIEVAL_PARAMS;
   const m = M360_METADATA;
   const narrative = buildMarketNarrativeProps();
-  const { ibs, ant, classic, advance, gaviscon } = narrative;
+  const { ibs, ant, gas, ppi, classic, advance, gaviscon } = narrative;
   const topIbs = CALC_SUBBRANDS.filter((r) => r.segment === ibs.segment)
     .sort((a, b) => b.valueMat - a.valueMat)
     .slice(0, 6);
@@ -914,405 +1029,396 @@ export function M360MarketStory() {
   const gavisconEcomm = ecommBrands.find((r) => r.brand === 'GAVISCON');
   const iberoPharma = pharmaBrands.find((r) => r.brand === 'IBEROGAST');
   const iberoEcomm = ecommBrands.find((r) => r.brand === 'IBEROGAST');
+  const lefaxEcomm = ecommBrands.find((r) => r.brand === 'LEFAX');
+  const talcidEcomm = ecommBrands.find((r) => r.brand === 'TALCID');
+  const valuePackGap =
+    cat.growth1yPct != null && cat.unitGrowth1yPct != null
+      ? cat.growth1yPct - cat.unitGrowth1yPct
+      : null;
+
+  const ax = buildStoryAnalyses({
+    cat,
+    ibs,
+    ant,
+    gas,
+    ppi,
+    classic,
+    advance,
+    gaviscon,
+    ibero,
+    topIbs,
+    pharma: CALC_CHANNEL_PHARMA,
+    ecomm: CALC_CHANNEL_ECOMM,
+    gavisconPharma,
+    gavisconEcomm,
+    iberoPharma,
+    iberoEcomm,
+    lefaxEcomm,
+    talcidEcomm,
+    valuePackGap,
+  });
 
   return (
     <div
-      className={`m360-rep m360-rep--story-v2${ASSISTANT_NARRATIVE_V2 ? ' m360-rep--narrative-v2' : ''}`}
+      className={`m360-rep m360-rep--story-v2${ASSISTANT_NARRATIVE_V2 ? ' m360-rep--narrative-v2' : ''}${ASSISTANT_STORY_RAIL ? ' m360-rep--story-rail' : ''}`}
     >
       <p className="m360-rep__kicker">
         {p.country} {p.category} · Iberogast competitive set · latest 12 months ending {m.latest_actual_month}
       </p>
 
       {/* 1 · Category overview */}
-      <StorySection
-        id="story-overview"
-        title="Category overview"
-        lede="Headline first: how big is the set, how is Bayer doing, and is Iberogast keeping pace with IBS?"
-      >
+      <StorySection id="story-overview" title="Category overview">
         <AssistantMarketReadout {...narrative} heading="Executive summary" headingLevel={3} />
-        <section className="m360-rep-kpis" aria-label="Three headline measures by scope">
-          <article>
-            <p>Category sales</p>
-            <strong className="m360-num is-key">{fmtM(cat.valueMatM)}</strong>
-            <span>
-              Whole Iberogast competitive set, latest 12 months.{' '}
-              <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num> versus last year. Bayer sales inside this set:{' '}
-              <Num kind="key">{fmtM(cat.bayerValueMatM)}</Num>.
-            </span>
-          </article>
-          <article className={tone(cat.bayerShareChangePp) === 'is-down' ? 'is-soft' : undefined}>
-            <p>Bayer market share</p>
-            <strong className={`m360-num ${tone(cat.bayerShareChangePp) || 'is-key'}`}>
-              {fmtShare(cat.bayerShareMatPct)}
-            </strong>
-            <span>
-              Bayer’s share of the same competitive set (not Iberogast alone).{' '}
-              <Num v={cat.bayerShareChangePp}>{fmtPp(cat.bayerShareChangePp)}</Num> versus last year.
-            </span>
-          </article>
-          <article>
-            <p>Iberogast relative growth</p>
-            <strong className={`m360-num ${tone(ibero?.evolutionIndex ?? null, 100) || 'is-key'}`}>
-              {fmtEvi(ibero?.evolutionIndex ?? null)}
-            </strong>
-            <span>
-              {ibero
-                ? `${ibero.label} versus the IBS need-state only. 100 = growing in line with IBS; above 100 = faster.`
-                : 'Not available.'}
-            </span>
-          </article>
-        </section>
-        <StoryNote>
-          The set is growing (<Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num>) while Bayer share is soft (
-          <Num v={cat.bayerShareChangePp}>{fmtPp(cat.bayerShareChangePp)}</Num>). That tension drives the rest of the
-          pack.
-        </StoryNote>
-        <StoryBridge>
-          So dig into what kind of growth this is — more packs, or value / mix — before picking where to play.
-        </StoryBridge>
+        <StoryBand
+          viz={
+            <section className="m360-rep-kpis" aria-label="Three headline measures by scope">
+              <article>
+                <p>Category sales</p>
+                <strong className="m360-num is-key">{fmtM(cat.valueMatM)}</strong>
+                <span>
+                  Whole Iberogast competitive set, latest 12 months.{' '}
+                  <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num> versus last year. Bayer sales inside this
+                  set: <Num kind="key">{fmtM(cat.bayerValueMatM)}</Num>.
+                </span>
+              </article>
+              <article className={tone(cat.bayerShareChangePp) === 'is-down' ? 'is-soft' : undefined}>
+                <p>Bayer market share</p>
+                <strong className={`m360-num ${tone(cat.bayerShareChangePp) || 'is-key'}`}>
+                  {fmtShare(cat.bayerShareMatPct)}
+                </strong>
+                <span>
+                  Bayer’s share of the same competitive set (not Iberogast alone).{' '}
+                  <Num v={cat.bayerShareChangePp}>{fmtPp(cat.bayerShareChangePp)}</Num> versus last year.
+                </span>
+              </article>
+              <article>
+                <p>Iberogast relative growth</p>
+                <strong className={`m360-num ${tone(ibero?.evolutionIndex ?? null, 100) || 'is-key'}`}>
+                  {fmtEvi(ibero?.evolutionIndex ?? null)}
+                </strong>
+                <span>
+                  {ibero
+                    ? `${ibero.label} versus the IBS need-state only. 100 = growing in line with IBS; above 100 = faster.`
+                    : 'Not available.'}
+                </span>
+              </article>
+            </section>
+          }
+          {...ax.overview}
+        />
       </StorySection>
 
       {/* 2 · Category growth */}
-      <StorySection
-        id="story-growth"
-        title="Category growth"
-        lede="Business question: is growth coming from more packs, or from value (price / mix)?"
-      >
-        <ChartCard
-          id="ch-growth-quality"
-          wide
-          title="Value growth vs pack growth"
-          caption={`Category: value ${fmtPct(cat.growth1yPct)}, packs ${fmtPct(cat.unitGrowth1yPct)}. Solid bars = value; faded = packs. Category first, then each need-state.`}
-        >
-          <GrowthQualityChart />
-        </ChartCard>
-        <StoryNote>
-          Category value is running ahead of packs — price or mix is carrying sales. IBS looks like the opposite mix
-          inside the pool: value <Num v={ibs.growth1yPct}>{fmtPct(ibs.growth1yPct)}</Num> while packs{' '}
-          <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num>.
-        </StoryNote>
-        <StoryBridge>
-          Value versus packs is the category clock — next, which channel is adding the euros, and how (price or volume).
-        </StoryBridge>
+      <StorySection id="story-growth" title="Category growth">
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-growth-quality"
+              wide
+              title="Value growth vs pack growth"
+              caption={`Category: value ${fmtPct(cat.growth1yPct)}, packs ${fmtPct(cat.unitGrowth1yPct)}. Solid bars = value; faded = packs. Category first, then each need-state.`}
+            >
+              <GrowthQualityChart />
+            </ChartCard>
+          }
+          {...ax.growth}
+        />
       </StorySection>
 
       {/* 3 · Channel dynamics */}
-      <StorySection
-        id="story-channel"
-        title="Channel dynamics"
-        lede="Business questions: where is set growth coming from by channel (price vs volume), and who is gaining or losing share in each channel?"
-      >
-        <ChartCard
-          id="ch-channel-drivers"
-          wide
-          title="Channel growth drivers"
-          caption={`Pharmacies ${fmtM(CALC_CHANNEL_PHARMA.valueEurM)} (${fmtShare(CALC_CHANNEL_PHARMA.shareOfSetPct)}) · E-commerce ${fmtM(CALC_CHANNEL_ECOMM.valueEurM)} (${fmtShare(CALC_CHANNEL_ECOMM.shareOfSetPct)}). E-commerce is ${fmtShare(CALC_CHANNEL_ECOMM.pctOfSetAbsGrowth)} of the set’s EUR growth.`}
-        >
-          <ChannelDriversChart />
-        </ChartCard>
-        <StoryNote>
-          Pharmacies are the pool to defend — large, flat, price-led (
-          <Num kind="key">{fmtM(CALC_CHANNEL_PHARMA.priceContribEurM)}</Num> price /{' '}
-          <Num v={CALC_CHANNEL_PHARMA.volumeContribEurM}>{fmtM(CALC_CHANNEL_PHARMA.volumeContribEurM)}</Num> volume).
-          E-commerce is the growth job — volume-led (
-          <Num v={CALC_CHANNEL_ECOMM.volumeContribEurM}>{fmtM(CALC_CHANNEL_ECOMM.volumeContribEurM)}</Num> volume) and{' '}
-          <Num kind="key">{fmtShare(CALC_CHANNEL_ECOMM.pctOfSetAbsGrowth)}</Num> of the set’s absolute EUR lift.
-        </StoryNote>
-        <div className="m360-rep-grid">
-          <ChartCard
-            id="ch-channel-pharma"
-            title="Who is moving in Pharmacies"
-            caption="Sorted by share change (gainers first). Bar = share of Pharmacies. Label = Δ points · value growth."
-          >
-            <ChannelPlayersChart channel="Pharmacies" />
-          </ChartCard>
-          <ChartCard
-            id="ch-channel-ecomm"
-            title="Who is moving in E-commerce"
-            caption="Sorted by share change (gainers first). Bar = share of E-commerce. Label = Δ points · value growth."
-          >
-            <ChannelPlayersChart channel="E-commerce" />
-          </ChartCard>
-        </div>
-        <StoryNote>
-          Gaviscon is the share gainer in both channels (
-          <Num v={gavisconPharma?.shareChangePp}>{fmtPp(gavisconPharma?.shareChangePp ?? null)}</Num> Pharmacies ·{' '}
-          <Num v={gavisconEcomm?.shareChangePp}>{fmtPp(gavisconEcomm?.shareChangePp ?? null)}</Num> E-commerce).
-          Iberogast is soft in Pharmacies (
-          <Num v={iberoPharma?.shareChangePp}>{fmtPp(iberoPharma?.shareChangePp ?? null)}</Num>) and ahead online (
-          <Num v={iberoEcomm?.shareChangePp}>{fmtPp(iberoEcomm?.shareChangePp ?? null)}</Num>). Lefax and Talcid lose
-          share online.
-        </StoryNote>
-        <StoryBridge>
-          Channel jobs set — then size and pace by need-state decide where to play inside the set.
-        </StoryBridge>
+      <StorySection id="story-channel" title="Channel dynamics">
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-channel-drivers"
+              wide
+              title="Channel growth drivers"
+              caption={`Pharmacies ${fmtM(CALC_CHANNEL_PHARMA.valueEurM)} (${fmtShare(CALC_CHANNEL_PHARMA.shareOfSetPct)}) · E-commerce ${fmtM(CALC_CHANNEL_ECOMM.valueEurM)} (${fmtShare(CALC_CHANNEL_ECOMM.shareOfSetPct)}). E-commerce is ${fmtShare(CALC_CHANNEL_ECOMM.pctOfSetAbsGrowth)} of the set’s EUR growth.`}
+            >
+              <ChannelDriversChart />
+            </ChartCard>
+          }
+          {...ax.channelDrivers}
+        />
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-channel-pharma"
+              title="Who is moving in Pharmacies"
+              caption="Sorted by share change (gainers first). Bar = share of Pharmacies. Label = Δ points · value growth."
+            >
+              <ChannelPlayersChart channel="Pharmacies" />
+            </ChartCard>
+          }
+          {...ax.channelPharma}
+        />
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-channel-ecomm"
+              title="Who is moving in E-commerce"
+              caption="Sorted by share change (gainers first). Bar = share of E-commerce. Label = Δ points · value growth."
+            >
+              <ChannelPlayersChart channel="E-commerce" />
+            </ChartCard>
+          }
+          {...ax.channelEcomm}
+        />
       </StorySection>
 
       {/* 4 · Segment attractiveness */}
-      <StorySection
-        id="story-attract"
-        title="Segment attractiveness"
-        lede="Business question: where to play — how big is each need-state, and is it growing faster than the category?"
-      >
-        <ChartCard
-          id="ch-attract"
-          wide
-          title="Need-state size × growth"
-          caption={`Sorted by size. IBS is the pool (${fmtShare(ibs.shareOfCategoryPct)}). Antacids is the growth engine (${fmtPct(ant.growth1yPct)}). White-space candidate = Bayer share under 3% and faster than category.`}
-        >
-          <AttractivenessChart />
-        </ChartCard>
-        <StoryNote>
-          Two jobs, not one category number: defend the large IBS franchise (
-          <Num kind="key">{fmtShare(ibs.shareOfCategoryPct)}</Num> of sales); compete in faster Antacids (
-          <Num v={ant.growth1yPct}>{fmtPct(ant.growth1yPct)}</Num>) where Bayer is soft.
-        </StoryNote>
-        <StoryBridge>
-          So open those two arenas — who owns the cash pool (IBS), and who is winning the growth fight (Antacids).
-        </StoryBridge>
+      <StorySection id="story-attract" title="Segment attractiveness">
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-attract"
+              wide
+              title="Need-state size × growth"
+              caption={`Sorted by size. IBS is the pool (${fmtShare(ibs.shareOfCategoryPct)}). Antacids is the growth engine (${fmtPct(ant.growth1yPct)}). White-space candidate = Bayer share under 3% and faster than category.`}
+            >
+              <AttractivenessChart />
+            </ChartCard>
+          }
+          {...ax.attract}
+        />
       </StorySection>
 
       {/* 4 · Competitive landscape */}
-      <StorySection
-        id="story-comp"
-        title="Competitive landscape"
-        lede="Business question: who holds the cash pool and who is winning the share fight in the growth segment?"
-      >
-        <div className="m360-rep-grid">
-          <ChartCard
-            id="ch-comp-ibs"
-            title="Who holds IBS"
-            caption={
-              topIbs[0]
-                ? `${topIbs[0].label} leads at ${fmtShare(topIbs[0].shareMatPct)} of IBS.`
-                : 'Not available'
-            }
-          >
-            <RankBars
-              rows={topIbs.map((r) => ({ key: r.label, name: r.label, bayer: r.isBayer }))}
-              value={(key) => topIbs.find((r) => r.label === key)?.shareMatPct ?? 0}
-              label={(key) => {
-                const r = topIbs.find((x) => x.label === key);
-                return `${fmtShare(r?.shareMatPct ?? null)} · EVI ${fmtEvi(r?.evolutionIndex ?? null)}`;
-              }}
-              detail={(key) => {
-                const r = topIbs.find((x) => x.label === key);
-                return [
-                  `Market share  ${fmtShare(r?.shareMatPct ?? null)}`,
-                  `Relative growth  ${fmtEvi(r?.evolutionIndex ?? null)}`,
-                  `Sales vs last year  ${fmtPct(r?.growth1yPct ?? null)}`,
-                  r?.isBayer ? 'Bayer' : (r?.manufacturer ?? ''),
-                ];
-              }}
-            />
-          </ChartCard>
-          <ChartCard
-            id="ch-comp-ant"
-            title="Who holds Antacids"
-            caption={
-              gaviscon
-                ? `Gaviscon is ${fmtShare(gaviscon.shareMatPct)} of Antacids. Bayer share ${fmtShare(ant.bayerShareMatPct)} (${fmtPp(ant.bayerShareChangePp)}).`
-                : `Bayer share ${fmtShare(ant.bayerShareMatPct)} (${fmtPp(ant.bayerShareChangePp)}).`
-            }
-          >
-            <RankBars
-              rows={topAnt.map((r) => ({ key: r.label, name: r.label, bayer: r.isBayer }))}
-              value={(key) => topAnt.find((r) => r.label === key)?.shareMatPct ?? 0}
-              label={(key) => {
-                const r = topAnt.find((x) => x.label === key);
-                return `${fmtShare(r?.shareMatPct ?? null)} · EVI ${fmtEvi(r?.evolutionIndex ?? null)}`;
-              }}
-              detail={(key) => {
-                const r = topAnt.find((x) => x.label === key);
-                return [
-                  `Market share  ${fmtShare(r?.shareMatPct ?? null)}`,
-                  `Relative growth  ${fmtEvi(r?.evolutionIndex ?? null)}`,
-                  `Sales vs last year  ${fmtPct(r?.growth1yPct ?? null)}`,
-                  r?.isBayer ? 'Bayer' : (r?.manufacturer ?? ''),
-                ];
-              }}
-            />
-          </ChartCard>
-        </div>
-        <StoryNote>
-          Iberogast still leads IBS. In Antacids, competitors (not IBS) explain the growth Bayer is not capturing —
-          Gaviscon is the reference rival at <Num kind="key">{fmtShare(gaviscon?.shareMatPct ?? null)}</Num> of that
-          need-state.
-        </StoryNote>
-        <StoryBridge>
-          Brand ranks show who wins today. Then check which Bayer brands are keeping pace with their own need-state.
-        </StoryBridge>
+      <StorySection id="story-comp" title="Competitive landscape">
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-comp-ibs"
+              title="Who holds IBS"
+              caption={
+                topIbs[0]
+                  ? `${topIbs[0].label} leads at ${fmtShare(topIbs[0].shareMatPct)} of IBS.`
+                  : 'Not available'
+              }
+            >
+              <RankBars
+                rows={topIbs.map((r) => ({ key: r.label, name: r.label, bayer: r.isBayer }))}
+                value={(key) => topIbs.find((r) => r.label === key)?.shareMatPct ?? 0}
+                label={(key) => {
+                  const r = topIbs.find((x) => x.label === key);
+                  return `${fmtShare(r?.shareMatPct ?? null)} · EVI ${fmtEvi(r?.evolutionIndex ?? null)}`;
+                }}
+                detail={(key) => {
+                  const r = topIbs.find((x) => x.label === key);
+                  return [
+                    `Market share  ${fmtShare(r?.shareMatPct ?? null)}`,
+                    `Relative growth  ${fmtEvi(r?.evolutionIndex ?? null)}`,
+                    `Sales vs last year  ${fmtPct(r?.growth1yPct ?? null)}`,
+                    r?.isBayer ? 'Bayer' : (r?.manufacturer ?? ''),
+                  ];
+                }}
+              />
+            </ChartCard>
+          }
+          {...ax.compIbs}
+        />
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-comp-ant"
+              title="Who holds Antacids"
+              caption={
+                gaviscon
+                  ? `Gaviscon is ${fmtShare(gaviscon.shareMatPct)} of Antacids. Bayer share ${fmtShare(ant.bayerShareMatPct)} (${fmtPp(ant.bayerShareChangePp)}).`
+                  : `Bayer share ${fmtShare(ant.bayerShareMatPct)} (${fmtPp(ant.bayerShareChangePp)}).`
+              }
+            >
+              <RankBars
+                rows={topAnt.map((r) => ({ key: r.label, name: r.label, bayer: r.isBayer }))}
+                value={(key) => topAnt.find((r) => r.label === key)?.shareMatPct ?? 0}
+                label={(key) => {
+                  const r = topAnt.find((x) => x.label === key);
+                  return `${fmtShare(r?.shareMatPct ?? null)} · EVI ${fmtEvi(r?.evolutionIndex ?? null)}`;
+                }}
+                detail={(key) => {
+                  const r = topAnt.find((x) => x.label === key);
+                  return [
+                    `Market share  ${fmtShare(r?.shareMatPct ?? null)}`,
+                    `Relative growth  ${fmtEvi(r?.evolutionIndex ?? null)}`,
+                    `Sales vs last year  ${fmtPct(r?.growth1yPct ?? null)}`,
+                    r?.isBayer ? 'Bayer' : (r?.manufacturer ?? ''),
+                  ];
+                }}
+              />
+            </ChartCard>
+          }
+          {...ax.compAnt}
+        />
       </StorySection>
 
       {/* 5 · Bayer relative growth (portfolio pace → brand zoom) */}
-      <StorySection
-        id="story-evi"
-        title="Bayer relative growth"
-        lede="Business question: which Bayer brands outpace or lag their own need-state? (100 = in line; above 100 = faster.)"
-      >
-        <ChartCard
-          id="ch-evi"
-          wide
-          title="Bayer brands versus their own segment"
-          caption={`${ibero?.label ?? 'Iberogast'} relative growth ${fmtEvi(ibero?.evolutionIndex ?? null)}. 100 = in line with that need-state. Next chart zooms into Classic vs Advance on IBS.`}
-        >
-          <EviChart />
-        </ChartCard>
-        <StoryNote>
-          Advance is ahead of IBS (<Num v={advance?.evolutionIndex} kind="evi">{fmtEvi(advance?.evolutionIndex ?? null)}</Num>
-          ); Classic is near line (
-          <Num v={classic?.evolutionIndex} kind="evi">{fmtEvi(classic?.evolutionIndex ?? null)}</Num>). Antacids Bayer
-          names below 100 belong with the share-leak story — not the Iberogast defend/grow choice.
-        </StoryNote>
-        <StoryBridge>
-          Zoom into the IBS franchise: Classic vs Advance — share plus relative growth on the same need-state.
-        </StoryBridge>
+      <StorySection id="story-evi" title="Bayer relative growth">
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-evi"
+              wide
+              title="Bayer brands versus their own segment"
+              caption={`${ibero?.label ?? 'Iberogast'} relative growth ${fmtEvi(ibero?.evolutionIndex ?? null)}. 100 = in line with that need-state. Next chart zooms into Classic vs Advance on IBS.`}
+            >
+              <EviChart />
+            </ChartCard>
+          }
+          {...ax.evi}
+        />
       </StorySection>
 
       {/* 6 · Iberogast position */}
-      <StorySection
-        id="story-ibero"
-        title="Iberogast position"
-        lede="Business question: defend Classic, grow Advance — or both, with different jobs?"
-      >
-        <ChartCard
-          id="ch-ibero-pos"
-          wide
-          title="Classic vs Advance on IBS"
-          caption={`Classic ${fmtShare(classic?.shareMatPct ?? null)} of IBS · Advance ${fmtShare(advance?.shareMatPct ?? null)}. Share plus relative growth versus IBS only.`}
-        >
-          <IberogastPosition />
-        </ChartCard>
-        <StoryNote>
-          Defend Classic share (relative growth{' '}
-          <Num v={classic?.evolutionIndex} kind="evi">{fmtEvi(classic?.evolutionIndex ?? null)}</Num>). Put growth plans
-          on Advance (<Num v={advance?.evolutionIndex} kind="evi">{fmtEvi(advance?.evolutionIndex ?? null)}</Num>). More of
-          the same Classic volume is a weak bet while IBS packs are{' '}
-          <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num>.
-        </StoryNote>
-        <StoryBridge>
-          Brand jobs set — close on Bayer share change, where the portfolio is leaking points.
-        </StoryBridge>
+      <StorySection id="story-ibero" title="Iberogast position">
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-ibero-pos"
+              wide
+              title="Classic vs Advance on IBS"
+              caption={`Classic ${fmtShare(classic?.shareMatPct ?? null)} of IBS · Advance ${fmtShare(advance?.shareMatPct ?? null)}. Share plus relative growth versus IBS only.`}
+            >
+              <IberogastPosition />
+            </ChartCard>
+          }
+          {...ax.iberoPos}
+        />
       </StorySection>
 
       {/* 7 · Market share performance */}
-      <StorySection
-        id="story-share"
-        title="Market share performance"
-        lede="Business question: where is Bayer gaining or losing share — change first, not just the level?"
-      >
-        <ChartCard
-          id="ch-share"
-          wide
-          title="Bayer share change by need-state"
-          caption={`Set share ${fmtShare(cat.bayerShareMatPct)} (${fmtPp(cat.bayerShareChangePp)} vs last year). Open circle = previous MAT; filled = current. Sorted worst-first — leak is Antacids.`}
-        >
-          <ShareChangeChart />
-        </ChartCard>
-        <StoryNote>
-          Category share softness is an Antacids story (
-          <Num v={ant.bayerShareChangePp}>{fmtPp(ant.bayerShareChangePp)}</Num>). IBS Bayer share{' '}
-          <Num kind="key">{fmtShare(ibs.bayerShareMatPct)}</Num> (
-          <Num v={ibs.bayerShareChangePp}>{fmtPp(ibs.bayerShareChangePp)}</Num>). That locks the two jobs before
-          actions.
-        </StoryNote>
-        <StoryBridge>
-          Pull the thread: pool vs growth, brand jobs, and the Antacids leak — then what to do this month.
-        </StoryBridge>
+      <StorySection id="story-share" title="Market share performance">
+        <StoryBand
+          viz={
+            <ChartCard
+              id="ch-share"
+              wide
+              title="Bayer share change by need-state"
+              caption={`Set share ${fmtShare(cat.bayerShareMatPct)} (${fmtPp(cat.bayerShareChangePp)} vs last year). Open circle = previous MAT; filled = current. Sorted worst-first — leak is Antacids.`}
+            >
+              <ShareChangeChart />
+            </ChartCard>
+          }
+          {...ax.share}
+        />
       </StorySection>
 
-      {/* 8 · Implications */}
+      {/* Synthesis + Key implications (one pack) */}
       <StorySection
-        id="story-implications"
-        title="Key implications"
-        lede="Read the pack as signals: what is working, what needs watching, and what is broken — then act in that order."
+        id="story-synthesis"
+        title="Summary · synthesis & key implications"
+        lede="Synthesize the evidence, then read it as traffic-light signals — then act."
       >
-        <SignalLegend />
-        <ul className="m360-signal-grid">
-          <SignalCard
-            tone="bad"
-            label="Problem"
-            title="Antacids is the competitive wound — Gaviscon is taking the growth"
-            why="Set share softness is not an IBS story. The leak sits in the fastest need-state, in both channels."
-            evidence={
-              <>
-                Bayer Antacids share <Num kind="key">{fmtShare(ant.bayerShareMatPct)}</Num> (
-                <Num v={ant.bayerShareChangePp}>{fmtPp(ant.bayerShareChangePp)}</Num>); need-state{' '}
-                <Num v={ant.growth1yPct}>{fmtPct(ant.growth1yPct)}</Num>. Gaviscon{' '}
-                <Num v={gavisconPharma?.shareChangePp}>{fmtPp(gavisconPharma?.shareChangePp ?? null)}</Num> in
-                Pharmacies and <Num v={gavisconEcomm?.shareChangePp}>{fmtPp(gavisconEcomm?.shareChangePp ?? null)}</Num>{' '}
-                in E-commerce (<Num v={gavisconEcomm?.valueGrowthPct}>{fmtPct(gavisconEcomm?.valueGrowthPct ?? null)}</Num>{' '}
-                online).
-              </>
-            }
-          />
-          <SignalCard
-            tone="good"
-            label="Strength"
-            title="IBS franchise still holds — Advance is the growth line"
-            why="Classic remains the cash pool; Advance is the only Iberogast line clearly ahead of IBS."
-            evidence={
-              <>
-                IBS Bayer share <Num kind="key">{fmtShare(ibs.bayerShareMatPct)}</Num> (
-                <Num v={ibs.bayerShareChangePp}>{fmtPp(ibs.bayerShareChangePp)}</Num>). Classic{' '}
-                <Num kind="key">{fmtShare(classic?.shareMatPct ?? null)}</Num> of IBS · EVI{' '}
-                <Num v={classic?.evolutionIndex} kind="evi">
-                  {fmtEvi(classic?.evolutionIndex ?? null)}
-                </Num>
-                . Advance <Num kind="key">{fmtShare(advance?.shareMatPct ?? null)}</Num> · EVI{' '}
-                <Num v={advance?.evolutionIndex} kind="evi">
-                  {fmtEvi(advance?.evolutionIndex ?? null)}
-                </Num>
-                .
-              </>
-            }
-          />
-          <SignalCard
-            tone="watch"
-            label="Watch"
-            title="Two channel jobs: defend Pharmacies, grow E-commerce"
-            why="Most euros still sit in Pharmacies, but most of the set’s absolute growth sits online — and the brand mix differs by channel."
-            evidence={
-              <>
-                Pharmacies <Num kind="key">{fmtShare(CALC_CHANNEL_PHARMA.shareOfSetPct)}</Num> of set, price-led (
-                <Num kind="key">{fmtM(CALC_CHANNEL_PHARMA.priceContribEurM)}</Num> /{' '}
-                <Num v={CALC_CHANNEL_PHARMA.volumeContribEurM}>{fmtM(CALC_CHANNEL_PHARMA.volumeContribEurM)}</Num>).
-                E-commerce <Num kind="key">{fmtShare(CALC_CHANNEL_ECOMM.pctOfSetAbsGrowth)}</Num> of EUR growth,
-                volume-led. Iberogast <Num v={iberoPharma?.shareChangePp}>{fmtPp(iberoPharma?.shareChangePp ?? null)}</Num>{' '}
-                Pharmacies · <Num v={iberoEcomm?.shareChangePp}>{fmtPp(iberoEcomm?.shareChangePp ?? null)}</Num>{' '}
-                E-commerce.
-              </>
-            }
-          />
-          <SignalCard
-            tone="watch"
-            label="Watch"
-            title="Growth is value and mix — not more packs everywhere"
-            why="Category value runs ahead of packs; IBS packs are soft. Chasing Classic volume alone is a weak bet from this view."
-            evidence={
-              <>
-                Category value <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num> vs packs{' '}
-                <Num v={cat.unitGrowth1yPct}>{fmtPct(cat.unitGrowth1yPct)}</Num>. IBS packs{' '}
-                <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num>. PPIs Bayer share{' '}
-                <Num kind="key">{fmtShare(narrative.ppi.bayerShareMatPct)}</Num> — not a sized entry from this pack.
-              </>
-            }
-          />
-          <SignalCard
-            tone="watch"
-            label="Watch"
-            title="Keep market and finance clocks apart"
-            why="This readout is Sirius sell-out for the latest 12 months. Company COPA euros sit on a different calendar — mixing them looks analytical but is wrong."
-            evidence="Do not add finance Net Sales into this market view until both windows use the same latest 12 months."
-          />
-        </ul>
+        <MarketSynthesis
+          d={{
+            cat,
+            ibs,
+            ant,
+            gas,
+            ppi,
+            classic,
+            advance,
+            gaviscon,
+            ibero,
+            topIbs,
+            pharma: CALC_CHANNEL_PHARMA,
+            ecomm: CALC_CHANNEL_ECOMM,
+            gavisconPharma,
+            gavisconEcomm,
+            iberoPharma,
+            iberoEcomm,
+            lefaxEcomm,
+            talcidEcomm,
+            valuePackGap,
+          }}
+        />
+        <div className="m360-synthesis-signals" id="story-implications">
+          <header className="m360-synthesis-signals__head">
+            <h3>Key implications · signal readout</h3>
+            <p>
+              Same evidence as the synthesis above — scored as Problem / Strength / Watch so the brand team can act in
+              order.
+            </p>
+          </header>
+          <SignalLegend />
+          <ul className="m360-signal-grid">
+            <SignalCard
+              tone="bad"
+              label="Problem"
+              title="Antacids is the competitive wound — Gaviscon is taking the growth"
+              why="Set share softness is not an IBS story. The leak sits in the fastest need-state, in both channels."
+              evidence={
+                <>
+                  Bayer Antacids share <Num kind="key">{fmtShare(ant.bayerShareMatPct)}</Num> (
+                  <Num v={ant.bayerShareChangePp}>{fmtPp(ant.bayerShareChangePp)}</Num>); need-state{' '}
+                  <Num v={ant.growth1yPct}>{fmtPct(ant.growth1yPct)}</Num>. Gaviscon{' '}
+                  <Num v={gavisconPharma?.shareChangePp}>{fmtPp(gavisconPharma?.shareChangePp ?? null)}</Num> in
+                  Pharmacies and{' '}
+                  <Num v={gavisconEcomm?.shareChangePp}>{fmtPp(gavisconEcomm?.shareChangePp ?? null)}</Num> in E-commerce
+                  (<Num v={gavisconEcomm?.valueGrowthPct}>{fmtPct(gavisconEcomm?.valueGrowthPct ?? null)}</Num> online).
+                </>
+              }
+            />
+            <SignalCard
+              tone="good"
+              label="Strength"
+              title="IBS franchise still holds — Advance is the growth line"
+              why="Classic remains the cash pool; Advance is the only Iberogast line clearly ahead of IBS."
+              evidence={
+                <>
+                  IBS Bayer share <Num kind="key">{fmtShare(ibs.bayerShareMatPct)}</Num> (
+                  <Num v={ibs.bayerShareChangePp}>{fmtPp(ibs.bayerShareChangePp)}</Num>). Classic{' '}
+                  <Num kind="key">{fmtShare(classic?.shareMatPct ?? null)}</Num> of IBS · EVI{' '}
+                  <Num v={classic?.evolutionIndex} kind="evi">
+                    {fmtEvi(classic?.evolutionIndex ?? null)}
+                  </Num>
+                  . Advance <Num kind="key">{fmtShare(advance?.shareMatPct ?? null)}</Num> · EVI{' '}
+                  <Num v={advance?.evolutionIndex} kind="evi">
+                    {fmtEvi(advance?.evolutionIndex ?? null)}
+                  </Num>
+                  .
+                </>
+              }
+            />
+            <SignalCard
+              tone="watch"
+              label="Watch"
+              title="Two channel jobs: defend Pharmacies, grow E-commerce"
+              why="Most euros still sit in Pharmacies, but most of the set’s absolute growth sits online — and the brand mix differs by channel."
+              evidence={
+                <>
+                  Pharmacies <Num kind="key">{fmtShare(CALC_CHANNEL_PHARMA.shareOfSetPct)}</Num> of set, price-led (
+                  <Num kind="key">{fmtM(CALC_CHANNEL_PHARMA.priceContribEurM)}</Num> /{' '}
+                  <Num v={CALC_CHANNEL_PHARMA.volumeContribEurM}>{fmtM(CALC_CHANNEL_PHARMA.volumeContribEurM)}</Num>).
+                  E-commerce <Num kind="key">{fmtShare(CALC_CHANNEL_ECOMM.pctOfSetAbsGrowth)}</Num> of EUR growth,
+                  volume-led. Iberogast{' '}
+                  <Num v={iberoPharma?.shareChangePp}>{fmtPp(iberoPharma?.shareChangePp ?? null)}</Num> Pharmacies ·{' '}
+                  <Num v={iberoEcomm?.shareChangePp}>{fmtPp(iberoEcomm?.shareChangePp ?? null)}</Num> E-commerce.
+                </>
+              }
+            />
+            <SignalCard
+              tone="watch"
+              label="Watch"
+              title="Growth is value and mix — not more packs everywhere"
+              why="Category value runs ahead of packs; IBS packs are soft. Chasing Classic volume alone is a weak bet from this view."
+              evidence={
+                <>
+                  Category value <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num> vs packs{' '}
+                  <Num v={cat.unitGrowth1yPct}>{fmtPct(cat.unitGrowth1yPct)}</Num>. IBS packs{' '}
+                  <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num>. PPIs Bayer share{' '}
+                  <Num kind="key">{fmtShare(narrative.ppi.bayerShareMatPct)}</Num> — not a sized entry from this view.
+                </>
+              }
+            />
+          </ul>
+        </div>
       </StorySection>
 
-      {/* 9 · Actions */}
+      {/* Actions — follow from synthesis + signals */}
       <StorySection
         id="story-actions"
         title="Recommended actions"
-        lede="Same signal order as implications — fix the red, protect the green, manage the yellow."
+        lede="From the synthesis and key implications above — fix the red, protect the green, manage the yellow."
       >
         <ol className="m360-action-list">
           <ActionCard
@@ -1325,7 +1431,7 @@ export function M360MarketStory() {
                 <Num v={ant.bayerShareChangePp}>{fmtPp(ant.bayerShareChangePp)}</Num> in a need-state at{' '}
                 <Num v={ant.growth1yPct}>{fmtPct(ant.growth1yPct)}</Num>. Split Pharmacy vs E-commerce — Gaviscon is{' '}
                 <Num v={gavisconEcomm?.valueGrowthPct}>{fmtPct(gavisconEcomm?.valueGrowthPct ?? null)}</Num> online. Ask
-                listings, price and promotions; do not fold in COPA euros yet.
+                listings, price and promotions.
               </>
             }
           />
@@ -1367,7 +1473,7 @@ export function M360MarketStory() {
           <ActionCard
             tone="watch"
             step={4}
-            title="Do not open a PPI project from this pack"
+            title="Do not open a PPI project from this view"
             body={
               <>
                 Bayer share in PPIs is <Num kind="key">{fmtShare(narrative.ppi.bayerShareMatPct)}</Num> and the

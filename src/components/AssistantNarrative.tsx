@@ -293,7 +293,7 @@ function MarketActionsV1({ cat, ibs, ant, ppi, ibero }: MarketNarrativeProps) {
       <ol className="m360-rep-act">
         <li>
           Review Antacids: sales are growing but Bayer share is {fmtPp(ant.bayerShareChangePp)} versus last year. Look at
-          Gaviscon. Finance impact is not available here.
+          Gaviscon.
         </li>
         <li>
           Protect IBS sales ({fmtM(ibs.valueMatM)}). {ibero?.label ?? 'Iberogast'} relative growth is{' '}
@@ -326,12 +326,8 @@ function MarketActionsV2({ ant, ibs, ppi, classic, advance }: MarketNarrativePro
           same Classic volume is a weak bet from this view.
         </li>
         <li>
-          <b>Do not open a PPI project from this pack.</b> Bayer share is {fmtShare(ppi.bayerShareMatPct)} and the
+          <b>Do not open a PPI project from this view.</b> Bayer share is {fmtShare(ppi.bayerShareMatPct)} and the
           need-state is not the fastest grower. There is no entry-size in euros here.
-        </li>
-        <li>
-          <b>Keep clocks apart.</b> Do not add company euros to this sell-out view until finance is on the same latest
-          12 months.
         </li>
       </ol>
     </>
@@ -409,8 +405,7 @@ function MarketReadoutV2({
           ).
         </p>
         <p>
-          <b>What to do next.</b> Antacids vs Gaviscon. Split Classic defend / Advance grow. Leave PPIs. Do not add
-          company euros to this market view.
+          <b>What to do next.</b> Antacids vs Gaviscon. Split Classic defend / Advance grow. Leave PPIs.
         </p>
         <p className="m360-hyp">
           <b>Working hypothesis, not proven.</b> Category value is running ahead of packs (price or mix). Iberogast is

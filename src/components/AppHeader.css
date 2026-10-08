@@ -142,7 +142,8 @@
 }
 
 .main-nav__link--assistant.is-active,
-.main-nav__link--assistant-v2.is-active {
+.main-nav__link--assistant-v2.is-active,
+.main-nav__link--assistant-v3.is-active {
   border-bottom-color: var(--tb4l-purple, #624963);
   color: var(--tb4l-purple, #624963);
 }
