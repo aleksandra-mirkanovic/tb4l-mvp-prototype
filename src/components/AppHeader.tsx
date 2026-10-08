@@ -1,10 +1,13 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import tb4lLogo from '../assets/tb4l-logo-header.png';
 import { ThemeToggle } from './ThemeToggle';
 import { UserProfileMenu } from './UserProfileMenu';
 import './AppHeader.css';
 
 export function AppHeader() {
+  const { pathname } = useLocation();
+  const assistantOn = pathname === '/ai-assistant' || pathname.startsWith('/ai-assistant/');
+  const assistantV2On = pathname === '/ai-assistant-v2' || pathname.startsWith('/ai-assistant-v2/');
   return (
     <header className="app-header" role="banner">
       <div className="app-header__inner">
@@ -52,6 +55,26 @@ export function AppHeader() {
           }
         >
           Hub
+        </NavLink>
+        <NavLink
+          to="/ai-assistant/market"
+          className={
+            assistantOn
+              ? 'main-nav__link main-nav__link--assistant is-active'
+              : 'main-nav__link main-nav__link--assistant'
+          }
+        >
+          AI Assistant
+        </NavLink>
+        <NavLink
+          to="/ai-assistant-v2/market"
+          className={
+            assistantV2On
+              ? 'main-nav__link main-nav__link--assistant-v2 is-active'
+              : 'main-nav__link main-nav__link--assistant-v2'
+          }
+        >
+          AI Assistant v2
         </NavLink>
       </nav>
     </header>

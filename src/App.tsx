@@ -3,6 +3,7 @@ import { AppFooter } from './components/AppFooter';
 import { AppHeader } from './components/AppHeader';
 import { AppProvider } from './context/AppContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { AiAssistantPage } from './pages/AiAssistantPage';
 import { ChatPage } from './pages/ChatPage';
 import { KnowledgeHubBrowsePage } from './pages/KnowledgeHubBrowsePage';
 import { KnowledgeHubPage } from './pages/KnowledgeHubPage';
@@ -33,6 +34,10 @@ function AppRoutes() {
           <Route path="/knowledge-hub/:slug" element={<KnowledgeHubSectionPage />} />
           <Route path="/team" element={<Navigate to="/knowledge-hub/team" replace />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/ai-assistant" element={<Navigate to="/ai-assistant/market" replace />} />
+          <Route path="/ai-assistant/:pane" element={<AiAssistantPage key="assistant-classic" variant="classic" />} />
+          <Route path="/ai-assistant-v2" element={<Navigate to="/ai-assistant-v2/market" replace />} />
+          <Route path="/ai-assistant-v2/:pane" element={<AiAssistantPage key="assistant-v2" variant="v2" />} />
           <Route path="/sections/:slug" element={<LegacySectionRedirect />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

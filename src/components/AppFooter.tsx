@@ -6,8 +6,14 @@ export function AppFooter() {
     <footer className="app-footer" role="contentinfo">
       <div className="app-footer__inner">
         <p className="app-footer__soon">
-          <span className="app-footer__soon-label">Coming soon</span>
-          AIssistant — AI support for brand teams
+          <Link className="app-footer__link" to="/ai-assistant/market">
+            AI Assistant
+          </Link>
+          {' · '}
+          <Link className="app-footer__link" to="/ai-assistant-v2/market">
+            AI Assistant v2
+          </Link>
+          — Brand manager report
         </p>
         <div className="app-footer__meta">
           <Link className="app-footer__link" to="/team">
