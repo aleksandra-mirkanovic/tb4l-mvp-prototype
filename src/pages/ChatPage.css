@@ -216,9 +216,9 @@
 }
 
 .chat-recent-row.is-active {
-  background: var(--bg-selected);
+  background: color-mix(in srgb, var(--color-chat, var(--action-primary)) 10%, var(--bg-sidebar, var(--bg-main)));
   border-color: transparent;
-  border-left-color: var(--accent-selection);
+  border-left-color: var(--color-chat, var(--action-primary));
 }
 
 .chat-recent-row:hover {
@@ -262,7 +262,7 @@
 
 .chat-recent__pin-mark {
   flex-shrink: 0;
-  color: var(--tb4l-teal, #00607e);
+  color: var(--color-chat, var(--action-primary));
   font-size: 0.72rem;
 }
 
@@ -370,7 +370,7 @@
 .chat-recent-rename__input {
   width: 100%;
   min-height: 34px;
-  border: 1px solid var(--accent-selection, var(--tb4l-teal, #00607e));
+  border: 1px solid var(--color-chat, var(--action-primary));
   border-radius: 8px;
   background: var(--bg-main);
   color: var(--text-primary);
@@ -655,11 +655,11 @@
 }
 
 .chat-toolbar__right .btn-ghost {
-  color: var(--accent-focus);
+  color: var(--text-secondary);
 }
 
 .chat-toolbar__right .btn.is-pinned {
-  color: var(--tb4l-teal, #00607e);
+  color: var(--color-chat, var(--action-primary));
 }
 
 .chat-genie-banner {
@@ -831,7 +831,7 @@
 }
 
 .chat-suggestion {
-  border: 1px solid var(--border-chip);
+  border: 1px solid color-mix(in srgb, var(--color-chat, var(--action-primary)) 28%, var(--border-default));
   background: var(--bg-chip);
   color: var(--text-chip);
   border-radius: 999px;
@@ -844,8 +844,8 @@
 }
 
 .chat-suggestion:hover:not(:disabled) {
-  border-color: var(--border-strong);
-  background: var(--tint-selected-hover);
+  border-color: color-mix(in srgb, var(--color-chat, var(--action-primary)) 45%, var(--border-default));
+  background: color-mix(in srgb, var(--color-chat, var(--action-primary)) 8%, var(--bg-elevated, var(--bg-main)));
 }
 
 .chat-suggestion:focus-visible {

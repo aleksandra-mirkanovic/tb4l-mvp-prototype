@@ -45,8 +45,8 @@
   width: auto;
   max-width: min(168px, 42vw);
   object-fit: contain;
-  /* Header is always a dark shell — keep wordmark light for contrast */
-  filter: brightness(0) invert(1);
+  /* Light header → dark wordmark; dark header → light wordmark */
+  filter: none;
 }
 
 [data-theme='dark'] .app-header__logo {
@@ -126,10 +126,25 @@
   border-bottom-color: var(--accent-selection);
 }
 
-.main-nav__link--home.is-active,
-.main-nav__link--hub.is-active,
+.main-nav__link--home.is-active {
+  border-bottom-color: var(--tb4l-teal, #00607e);
+  color: var(--tb4l-teal, #00607e);
+}
+
+.main-nav__link--hub.is-active {
+  border-bottom-color: var(--color-hub, #286436);
+  color: var(--color-hub, #286436);
+}
+
 .main-nav__link--chat.is-active {
-  border-bottom-color: #00607e;
+  border-bottom-color: var(--color-chat, #d30f4b);
+  color: var(--color-chat, #d30f4b);
+}
+
+.main-nav__link--assistant.is-active,
+.main-nav__link--assistant-v2.is-active {
+  border-bottom-color: var(--tb4l-purple, #624963);
+  color: var(--tb4l-purple, #624963);
 }
 
 .main-nav__link:focus-visible {

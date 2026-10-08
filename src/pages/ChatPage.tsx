@@ -817,7 +817,7 @@ export function ChatPage() {
 
         {documentSources.length > 0 || attachedFiles.length > 0 ? (
           <div className="chat-sources-bar" aria-label="Active context">
-            <span className="chat-sources-bar__label">Talking about</span>
+            <span className="chat-sources-bar__label">Grounded on</span>
             {documentSources.map((s) => (
               <span key={s.id} className="chip chip-hub chip-removable">
                 {s.title}

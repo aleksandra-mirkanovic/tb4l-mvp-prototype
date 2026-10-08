@@ -1,0 +1,383 @@
+/*
+ * Premium TB4L color system — active when html[data-color-system='premium'].
+ * Revert via src/config/colorSystem.ts (PREMIUM_TB4L_COLORS = false).
+ *
+ * Brand: #00607E · #10384F · #624963 · #286436 · #D30F4B
+ */
+
+/* —— Smooth theme transitions (respect reduced motion) —— */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-color-system='premium'] body,
+  html[data-color-system='premium'] .app-shell,
+  html[data-color-system='premium'] .app-header,
+  html[data-color-system='premium'] .app-footer,
+  html[data-color-system='premium'] .app-main,
+  html[data-color-system='premium'] .main-nav__link,
+  html[data-color-system='premium'] .card,
+  html[data-color-system='premium'] .panel,
+  html[data-color-system='premium'] .chat-sidebar,
+  html[data-color-system='premium'] .chat-main,
+  html[data-color-system='premium'] .chat-message,
+  html[data-color-system='premium'] .document-card,
+  html[data-color-system='premium'] .btn {
+    transition:
+      background-color 0.22s ease,
+      color 0.22s ease,
+      border-color 0.22s ease,
+      box-shadow 0.22s ease;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK — enterprise AI palette
+   ═══════════════════════════════════════════════════════════════ */
+html[data-color-system='premium'][data-theme='dark'] {
+  --tb4l-dark-blue: #10384f;
+  --tb4l-header: #101b29;
+  --tb4l-teal: #00607e;
+  --tb4l-purple: #624963;
+  --tb4l-green: #286436;
+  --tb4l-magenta: #d30f4b;
+  --tb4l-gray: #a8b3be;
+  --tb4l-ice: #162333;
+
+  --bg-app: #0c1420;
+  --bg-header: #101b29;
+  --bg-sidebar: #101b29;
+  --bg-main: #162333;
+  --bg-elevated: #1b2a3d;
+  --bg-input: #1b2a3d;
+  --bg-callout: #223449;
+  --bg-selected: #223449;
+
+  --border-default: #2a4055;
+  --border-subtle: #243a4f;
+  --border-strong: #355268;
+
+  --text-primary: #ffffff;
+  --text-secondary: #d9d9d9;
+  --text-muted: #a8b3be;
+  --text-disabled: #6b7a88;
+  --text-body: #d9d9d9;
+  --text-on-primary: #ffffff;
+
+  --action-primary: #624963;
+  --action-primary-hover: #735574;
+  --action-primary-active: #523d54;
+
+  --action-secondary: #00607e;
+  --action-secondary-hover: #007694;
+  --action-secondary-active: #005066;
+
+  --accent-focus: #00607e;
+  --accent-selection: #00607e;
+
+  --status-success: #286436;
+  --status-warning: #c4922a;
+  --status-error: #d30f4b;
+
+  --bg-chip: #1b2a3d;
+  --border-chip: #2a4055;
+  --text-chip: #d9d9d9;
+  --focus-ring: #00607e;
+
+  --header-fg: #ffffff;
+  --header-fg-muted: #a8b3be;
+  --header-border: #2a4055;
+  --header-control-bg: transparent;
+  --header-control-border: #2a4055;
+  --header-control-hover: rgba(0, 96, 126, 0.12);
+  --header-mark-bg: #624963;
+
+  --color-shell: #10384f;
+  --color-hub: #00607e;
+  --color-chat: #624963;
+  --color-m360: #286436;
+  --color-success: #286436;
+  --color-danger: #d30f4b;
+  --color-border: #2a4055;
+  --color-action: #00607e;
+
+  --background-primary: var(--bg-app);
+  --background-secondary: var(--bg-main);
+  --surface-primary: #1b2a3d;
+  --surface-elevated: #223449;
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
+
+  --tint-hub: rgba(0, 96, 126, 0.14);
+  --tint-chat: rgba(98, 73, 99, 0.16);
+  --tint-m360: rgba(40, 100, 54, 0.14);
+  --tint-alert: rgba(211, 15, 75, 0.12);
+  --tint-ice: #162333;
+  --tint-secondary-hover: rgba(0, 96, 126, 0.14);
+  --tint-selected-hover: rgba(0, 96, 126, 0.1);
+  --bg-disabled: #1b2a3d;
+
+  --focus-ring-shadow: 0 0 0 3px rgba(0, 96, 126, 0.45);
+  --focus-ring-chat: 0 0 0 3px rgba(98, 73, 99, 0.45);
+  --focus-ring-m360: 0 0 0 3px rgba(40, 100, 54, 0.45);
+
+  --chip-hub-bg: rgba(0, 96, 126, 0.16);
+  --chip-hub-border: rgba(0, 96, 126, 0.42);
+  --chip-hub-text: #9fdcee;
+  --chip-chat-bg: rgba(98, 73, 99, 0.18);
+  --chip-chat-border: rgba(98, 73, 99, 0.42);
+  --chip-chat-text: #e4cce8;
+  --chip-m360-bg: rgba(40, 100, 54, 0.18);
+  --chip-m360-border: rgba(40, 100, 54, 0.42);
+  --chip-m360-text: #bfe8cb;
+  --overlay-scrim: rgba(12, 20, 32, 0.72);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT — brand header, clean surfaces (optional companion)
+   ═══════════════════════════════════════════════════════════════ */
+html[data-color-system='premium'][data-theme='light'] {
+  --tb4l-dark-blue: #10384f;
+  --tb4l-teal: #00607e;
+  --tb4l-purple: #624963;
+  --tb4l-green: #286436;
+  --tb4l-magenta: #d30f4b;
+
+  --bg-app: #f2f5f8;
+  --bg-header: #10384f;
+  --bg-main: #ffffff;
+  --bg-sidebar: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-input: #ffffff;
+  --bg-callout: #eef3f7;
+  --bg-selected: #e6f2f6;
+
+  --border-default: #c5d4de;
+  --border-subtle: #dce6ec;
+  --border-strong: #a8bcc9;
+
+  --text-primary: #10384f;
+  --text-secondary: #3d5568;
+  --text-muted: #5f7383;
+  --text-body: #2a4055;
+
+  --action-primary: #624963;
+  --action-primary-hover: #523d54;
+  --action-secondary: #00607e;
+  --action-secondary-hover: #005066;
+
+  --accent-focus: #00607e;
+  --accent-selection: #00607e;
+
+  --status-success: #286436;
+  --status-error: #d30f4b;
+
+  --header-fg: #ffffff;
+  --header-fg-muted: rgba(255, 255, 255, 0.78);
+  --header-border: rgba(255, 255, 255, 0.14);
+  --header-control-border: rgba(255, 255, 255, 0.22);
+  --header-control-hover: rgba(255, 255, 255, 0.08);
+
+  --color-hub: #00607e;
+  --color-chat: #624963;
+  --color-action: #00607e;
+
+  --surface-primary: #ffffff;
+  --surface-elevated: #ffffff;
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: 0 8px 24px rgba(16, 56, 79, 0.1);
+
+  --tint-hub: rgba(0, 96, 126, 0.08);
+  --tint-chat: rgba(98, 73, 99, 0.08);
+  --tint-selected-hover: rgba(0, 96, 126, 0.06);
+
+  --chip-hub-bg: rgba(0, 96, 126, 0.1);
+  --chip-hub-border: rgba(0, 96, 126, 0.28);
+  --chip-hub-text: #00607e;
+  --chip-chat-bg: rgba(98, 73, 99, 0.08);
+  --chip-chat-border: rgba(98, 73, 99, 0.28);
+  --chip-chat-text: #624963;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Shared premium component polish
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Nav — selected state always brand teal */
+html[data-color-system='premium'] .main-nav__link.is-active,
+html[data-color-system='premium'] .main-nav__link--home.is-active,
+html[data-color-system='premium'] .main-nav__link--hub.is-active,
+html[data-color-system='premium'] .main-nav__link--chat.is-active,
+html[data-color-system='premium'] .main-nav__link--assistant.is-active {
+  border-bottom-color: #00607e !important;
+}
+
+html[data-color-system='premium'] .main-nav__link:hover {
+  color: var(--header-fg);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .main-nav__link:hover {
+  background: rgba(0, 96, 126, 0.1);
+}
+
+/* Cards — subtle borders, no heavy shadows */
+html[data-color-system='premium'] .card,
+html[data-color-system='premium'] .panel,
+html[data-color-system='premium'] .document-card,
+html[data-color-system='premium'] .experience-card,
+html[data-color-system='premium'] .section-tile,
+html[data-color-system='premium'] .welcome-platform__card,
+html[data-color-system='premium'] .welcome-guide__step,
+html[data-color-system='premium'] .welcome-ask--panel,
+html[data-color-system='premium'] .hub-workspace__panel,
+html[data-color-system='premium'] .hub-data-source {
+  box-shadow: none !important;
+  border-color: var(--border-default);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .card,
+html[data-color-system='premium'][data-theme='dark'] .panel,
+html[data-color-system='premium'][data-theme='dark'] .document-card,
+html[data-color-system='premium'][data-theme='dark'] .experience-card,
+html[data-color-system='premium'][data-theme='dark'] .welcome-platform__card,
+html[data-color-system='premium'][data-theme='dark'] .welcome-guide__step,
+html[data-color-system='premium'][data-theme='dark'] .welcome-ask--panel {
+  background: #1b2a3d;
+}
+
+html[data-color-system='premium'][data-theme='dark'] .document-card.is-selected {
+  border-color: #00607e;
+  box-shadow: 0 0 0 1px #00607e !important;
+}
+
+/* Chat — readability */
+html[data-color-system='premium'][data-theme='dark'] .chat-sidebar,
+html[data-color-system='premium'][data-theme='dark'] .chat-main,
+html[data-color-system='premium'][data-theme='dark'] .chat-sidebar-rail {
+  box-shadow: none;
+  border-color: var(--border-default);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .chat-message {
+  background: #1b2a3d;
+  border-color: var(--border-default);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .chat-message--user {
+  background: rgba(98, 73, 99, 0.2);
+  border-color: rgba(98, 73, 99, 0.38);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .chat-message--genie {
+  background: #162333;
+  border-color: rgba(40, 100, 54, 0.42);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .chat-message__body p {
+  color: var(--text-body);
+  line-height: 1.55;
+}
+
+html[data-color-system='premium'][data-theme='dark'] .chat-composer,
+html[data-color-system='premium'][data-theme='dark'] .chat-composer__input-wrap {
+  background: #1b2a3d;
+  border-color: var(--border-default);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .chat-composer__input-wrap:focus-within {
+  border-color: #00607e;
+  box-shadow: var(--focus-ring-shadow);
+}
+
+/* Modals & pickers */
+html[data-color-system='premium'][data-theme='dark'] .sources-picker,
+html[data-color-system='premium'][data-theme='dark'] .welcome-video-modal,
+html[data-color-system='premium'][data-theme='dark'] .summary-panel--premium {
+  background: #223449;
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-lg);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .overlay {
+  background: var(--overlay-scrim);
+}
+
+/* Hub browse / section headers */
+html[data-color-system='premium'][data-theme='dark'] .browse-page__header,
+html[data-color-system='premium'][data-theme='dark'] .section-hero {
+  background: #162333;
+  border-color: var(--border-default);
+  box-shadow: none;
+}
+
+/* Footer */
+html[data-color-system='premium'][data-theme='dark'] .app-footer {
+  background: #101b29;
+  border-color: var(--border-default);
+  color: var(--text-muted);
+}
+
+/* Logo — keep light on dark header shells */
+html[data-color-system='premium'] .app-header__logo {
+  filter: brightness(0) invert(1);
+}
+
+/* TB4L Home — premium dark surfaces */
+html[data-color-system='premium'][data-theme='dark'] .tb4l-home-hero {
+  background: linear-gradient(180deg, #141018 0%, #0f1620 50%, #0c1420 100%);
+  border-bottom-color: var(--border-default);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .tb4l-home-card,
+html[data-color-system='premium'][data-theme='dark'] .tb4l-home-flow__step {
+  background: #1b2a3d;
+  border-color: var(--border-default);
+  box-shadow: none;
+}
+
+html[data-color-system='premium'][data-theme='dark'] .tb4l-home-flow {
+  background: #0c1420;
+}
+
+/* Document selection bar & hub data lists */
+html[data-color-system='premium'][data-theme='dark'] .selected-bar {
+  background: #223449;
+  border-color: #00607e;
+  box-shadow: none;
+}
+
+html[data-color-system='premium'][data-theme='dark'] .hub-data-sources {
+  background: #162333;
+  border-color: var(--border-default);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .hub-data-sources__item {
+  background: #1b2a3d;
+  border-color: var(--border-default);
+}
+
+html[data-color-system='premium'][data-theme='dark'] .hub-data-sources__item:hover {
+  border-color: #355268;
+}
+
+/* Focus states — visible on dark surfaces */
+html[data-color-system='premium'] :focus-visible {
+  outline-color: #00607e;
+}
+
+html[data-color-system='premium'] .btn-primary {
+  background: #00607e;
+}
+
+html[data-color-system='premium'] .btn-primary:hover:not(:disabled) {
+  background: #007694;
+}
+
+html[data-color-system='premium'] .btn-chat {
+  background: #624963;
+}
+
+html[data-color-system='premium'] .btn-chat:hover:not(:disabled) {
+  background: #735574;
+}

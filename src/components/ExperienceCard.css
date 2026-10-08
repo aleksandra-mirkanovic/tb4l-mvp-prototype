@@ -23,11 +23,11 @@
 }
 
 .experience-card--hub::before {
-  background: linear-gradient(180deg, var(--tb4l-dark-blue), var(--tb4l-teal));
+  background: var(--color-hub, var(--tb4l-green, #286436));
 }
 
 .experience-card--chat::before {
-  background: var(--tb4l-purple);
+  background: var(--color-chat, var(--action-primary, #d30f4b));
 }
 
 .experience-card__title {

@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { ASSISTANT_NARRATIVE_V2 } from '../config/assistantNarrative';
 import {
   CALC_COPA_BRANDS,
@@ -36,6 +37,32 @@ function fmtEvi(v: number | null | undefined): string {
 function fmtPp(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return `${v >= 0 ? '+' : ''}${v.toFixed(1)} points`;
+}
+
+function tone(v: number | null | undefined, pivot = 0): 'is-up' | 'is-down' | 'is-flat' | '' {
+  if (v === null || v === undefined || !Number.isFinite(v)) return '';
+  if (v > pivot) return 'is-up';
+  if (v < pivot) return 'is-down';
+  return 'is-flat';
+}
+
+/** Highlight a metric in prose — color only deltas / EVI, not every word. */
+function Num({
+  children,
+  v,
+  pivot = 0,
+  kind = 'delta',
+}: {
+  children: ReactNode;
+  v?: number | null;
+  pivot?: number;
+  kind?: 'delta' | 'evi' | 'key';
+}) {
+  const cls =
+    kind === 'key' || v === null || v === undefined || !Number.isFinite(v)
+      ? 'm360-num is-key'
+      : `m360-num ${tone(v, kind === 'evi' ? 100 : pivot) || 'is-key'}`;
+  return <strong className={cls}>{children}</strong>;
 }
 
 export type MarketNarrativeProps = {
@@ -362,13 +389,24 @@ function MarketReadoutV2({
       <div className="m360-rep-exec">
         <p>
           <b>Market, latest 12 months to {m.latest_actual_month}.</b> Germany Digestive Health, Iberogast competitive
-          set: {fmtM(cat.valueMatM)}, {fmtPct(cat.growth1yPct)}. Packs {fmtPct(cat.unitGrowth1yPct)}. Bayer share{' '}
-          {fmtShare(cat.bayerShareMatPct)} ({fmtPp(cat.bayerShareChangePp)}). IBS is the pool; Antacids is the growth and
-          the share leak.
+          set: <Num kind="key">{fmtM(cat.valueMatM)}</Num>,{' '}
+          <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num>. Packs{' '}
+          <Num v={cat.unitGrowth1yPct}>{fmtPct(cat.unitGrowth1yPct)}</Num>. Bayer share{' '}
+          <Num kind="key">{fmtShare(cat.bayerShareMatPct)}</Num> (
+          <Num v={cat.bayerShareChangePp}>{fmtPp(cat.bayerShareChangePp)}</Num>). IBS is the pool; Antacids is the
+          growth and the share leak.
         </p>
         <p>
-          <b>Iberogast in that market.</b> Classic holds IBS ({fmtShare(classic?.shareMatPct ?? null)}, relative growth{' '}
-          {fmtEvi(classic?.evolutionIndex ?? null)}). Advance is ahead of IBS ({fmtEvi(advance?.evolutionIndex ?? null)}).
+          <b>Iberogast in that market.</b> Classic holds IBS (
+          <Num kind="key">{fmtShare(classic?.shareMatPct ?? null)}</Num>, relative growth{' '}
+          <Num v={classic?.evolutionIndex} kind="evi">
+            {fmtEvi(classic?.evolutionIndex ?? null)}
+          </Num>
+          ). Advance is ahead of IBS (
+          <Num v={advance?.evolutionIndex} kind="evi">
+            {fmtEvi(advance?.evolutionIndex ?? null)}
+          </Num>
+          ).
         </p>
         <p>
           <b>What to do next.</b> Antacids vs Gaviscon. Split Classic defend / Advance grow. Leave PPIs. Do not add

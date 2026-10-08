@@ -96,7 +96,7 @@
 .hub-page--ux-fixes .hub-ws-popular__item-action {
   font-size: 0.72rem;
   font-weight: 650;
-  color: #00607e;
+  color: #286436;
 }
 
 .hub-page--ux-fixes .hub-ws-popular__item.is-on .hub-ws-popular__item-action {
@@ -137,7 +137,7 @@
 }
 
 [data-theme='dark'] .hub-page--ux-fixes .hub-ws-popular__item-action {
-  color: #4fa8c9;
+  color: #5aaa72;
 }
 
 [data-theme='dark'] .hub-page--ux-fixes .hub-ws-popular__item.is-on .hub-ws-popular__item-action {

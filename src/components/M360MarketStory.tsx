@@ -10,13 +10,92 @@ import {
   CALC_SEGMENTS,
   CALC_SUBBRANDS,
 } from '../data/m360Charts';
-import { M360_METADATA, M360_RETRIEVAL_PARAMS } from '../data/m360Retrieval';
 import {
-  AssistantMarketActions,
-  AssistantMarketReadout,
-  buildMarketNarrativeProps,
-} from './AssistantNarrative';
+  CALC_CHANNEL_ECOMM,
+  CALC_CHANNEL_PHARMA,
+  CALC_CHANNELS,
+  M360_CHANNEL_META,
+  channelBrandsByShareChange,
+} from '../data/m360ChannelRetrieval';
+import { M360_METADATA, M360_RETRIEVAL_PARAMS } from '../data/m360Retrieval';
+import { AssistantMarketReadout, buildMarketNarrativeProps } from './AssistantNarrative';
 import './M360Report.css';
+
+type SignalTone = 'good' | 'watch' | 'bad';
+
+function SignalLegend() {
+  return (
+    <ul className="m360-signal-legend" aria-label="How to read signals">
+      <li className="is-good">
+        <i />
+        Strength — protect or build on
+      </li>
+      <li className="is-watch">
+        <i />
+        Watch — needs attention
+      </li>
+      <li className="is-bad">
+        <i />
+        Problem — act on
+      </li>
+    </ul>
+  );
+}
+
+function SignalCard({
+  tone,
+  label,
+  title,
+  why,
+  evidence,
+}: {
+  tone: SignalTone;
+  label: string;
+  title: string;
+  why: string;
+  evidence: ReactNode;
+}) {
+  return (
+    <li className={`m360-signal is-${tone}`}>
+      <header>
+        <span className="m360-signal__badge">{label}</span>
+        <h3>{title}</h3>
+      </header>
+      <p className="m360-signal__why">{why}</p>
+      <p className="m360-signal__evidence">
+        <span className="m360-signal__evidence-lab">From the pack</span>
+        {evidence}
+      </p>
+    </li>
+  );
+}
+
+function ActionCard({
+  tone,
+  step,
+  title,
+  body,
+}: {
+  tone: SignalTone;
+  step: number;
+  title: string;
+  body: ReactNode;
+}) {
+  return (
+    <li className={`m360-action is-${tone}`}>
+      <span className="m360-action__step" aria-hidden>
+        {step}
+      </span>
+      <div>
+        <header>
+          <span className="m360-signal__badge">{tone === 'bad' ? 'Act' : tone === 'watch' ? 'Watch' : 'Protect'}</span>
+          <h3>{title}</h3>
+        </header>
+        <p>{body}</p>
+      </div>
+    </li>
+  );
+}
 
 function fmtM(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
@@ -52,6 +131,26 @@ function tone(v: number | null | undefined, pivot = 0): 'is-up' | 'is-down' | 'i
   if (v > pivot) return 'is-up';
   if (v < pivot) return 'is-down';
   return 'is-flat';
+}
+
+/** Highlight a metric in prose — color only deltas / EVI, not every word. */
+function Num({
+  children,
+  v,
+  pivot = 0,
+  kind = 'delta',
+}: {
+  children: ReactNode;
+  v?: number | null;
+  pivot?: number;
+  /** delta = vs 0; evi = vs 100; key = size/level, no traffic color */
+  kind?: 'delta' | 'evi' | 'key';
+}) {
+  const cls =
+    kind === 'key' || v === null || v === undefined || !Number.isFinite(v)
+      ? 'm360-num is-key'
+      : `m360-num ${tone(v, kind === 'evi' ? 100 : pivot) || 'is-key'}`;
+  return <strong className={cls}>{children}</strong>;
 }
 
 type Tip = { x: number; y: number; title: string; lines: string[]; color?: string };
@@ -114,12 +213,24 @@ function ChartCard({
 }
 
 function StoryNote({ children }: { children: ReactNode }) {
-  return <p className="m360-story-note">{children}</p>;
+  return (
+    <aside className="m360-story-note">
+      <span className="m360-story-note__tag">Insight</span>
+      <p>{children}</p>
+    </aside>
+  );
 }
 
 /** Why we dig deeper — logic only; do not name the following section. */
 function StoryBridge({ children }: { children: ReactNode }) {
-  return <p className="m360-story-bridge">{children}</p>;
+  return (
+    <p className="m360-story-bridge">
+      <span className="m360-story-bridge__tag" aria-hidden>
+        Then
+      </span>
+      {children}
+    </p>
+  );
 }
 
 function StorySection({
@@ -424,7 +535,7 @@ function RankBars({
   );
 }
 
-/** Bayer brands vs own segment — HTML rows (same type size as rest of report; no SVG zoom). */
+/** Bayer brands vs own segment — full-width HTML lollipops (no fixed SVG gutter). */
 function EviChart() {
   const { wrap, tip, show, hide } = useChartTip();
   const [focus, setFocus] = useState<string | null>(null);
@@ -433,41 +544,25 @@ function EviChart() {
   );
   const min = 80;
   const max = 120;
-  const rowH = 36;
-  const W = 520;
-  const L = 176;
-  const R = 48;
-  const T = 8;
-  const H = T + rows.length * rowH + 28;
-  const iw = W - L - R;
-  const xAt = (v: number) => L + ((v - min) / (max - min)) * iw;
-  const x100 = xAt(100);
+  const pctAt = (v: number) => ((Math.min(max, Math.max(min, v)) - min) / (max - min)) * 100;
+  const x100 = pctAt(100);
 
   return (
     <div className="m360-viz m360-evi" ref={wrap} onMouseLeave={hide}>
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        width={W}
-        height={H}
-        role="img"
-        aria-label="Bayer brands versus their own segment"
-      >
-        <line className="m360-viz__ref" x1={x100} x2={x100} y1={T} y2={H - 24} />
-        <text className="m360-viz__tick" x={x100} y={H - 8} textAnchor="middle">
-          Growing with the market (100)
-        </text>
-        {rows.map((r, i) => {
-          const y = T + i * rowH + 18;
+      <p className="m360-evi__axis">Relative growth → · dashed line = growing with the market (100)</p>
+      <ul className="m360-evi__list" role="img" aria-label="Bayer brands versus their own segment">
+        {rows.map((r) => {
           const evi = r.evolutionIndex ?? 100;
-          const x = xAt(Math.min(max, Math.max(min, evi)));
+          const x = pctAt(evi);
           const beat = evi >= 100;
           const id = `${r.segment}-${r.label}`;
           const on = !focus || focus === id;
+          const stemLeft = Math.min(x100, x);
+          const stemWidth = Math.abs(x - x100);
           return (
-            <g
+            <li
               key={id}
-              opacity={on ? 1 : 0.16}
-              className="m360-viz__evi"
+              className={[beat ? 'is-up' : 'is-down', on ? '' : 'is-off'].filter(Boolean).join(' ') || undefined}
               onMouseEnter={() => setFocus(id)}
               onMouseMove={(e) =>
                 show(e, {
@@ -483,24 +578,19 @@ function EviChart() {
               }
               onMouseLeave={() => setFocus(null)}
             >
-              <rect x={0} y={y - 16} width={W} height={32} fill="transparent" />
-              <text className="m360-viz__lab" x={L - 10} y={y + 4} textAnchor="end">
+              <span className="m360-evi__name">
                 {`${shortName(r.segment)} · ${r.label.replace('IBEROGAST ', 'IG ')}`}
-              </text>
-              <line className={beat ? 'm360-viz__stem is-up' : 'm360-viz__stem is-down'} x1={x100} x2={x} y1={y} y2={y} />
-              <circle className={beat ? 'm360-viz__dot is-up' : 'm360-viz__dot is-down'} cx={x} cy={y} r={on && focus ? 8 : 6} />
-              <text
-                className={`m360-viz__val ${beat ? 'is-up' : 'is-down'}`}
-                x={x + (beat ? 10 : -10)}
-                y={y + 4}
-                textAnchor={beat ? 'start' : 'end'}
-              >
-                {fmtEvi(r.evolutionIndex)}
-              </text>
-            </g>
+              </span>
+              <div className="m360-evi__track" aria-hidden>
+                <i className="m360-evi__ref" style={{ left: `${x100}%` }} />
+                <b className="m360-evi__stem" style={{ left: `${stemLeft}%`, width: `${stemWidth}%` }} />
+                <em className="m360-evi__dot" style={{ left: `${x}%` }} />
+              </div>
+              <strong className="m360-evi__val">{fmtEvi(r.evolutionIndex)}</strong>
+            </li>
           );
         })}
-      </svg>
+      </ul>
       <ChartTip tip={tip} />
     </div>
   );
@@ -598,6 +688,153 @@ function ShareChangeChart() {
   );
 }
 
+/** Price vs volume EUR contribution by channel — one driver question. */
+function ChannelDriversChart() {
+  const { wrap, tip, show, hide } = useChartTip();
+  const [focus, setFocus] = useState<string | null>(null);
+  const [showPrice, setShowPrice] = useState(true);
+  const [showVolume, setShowVolume] = useState(true);
+  const maxAbs = Math.max(
+    ...CALC_CHANNELS.flatMap((c) => [
+      showPrice ? Math.abs(c.priceContribEurM) : 0,
+      showVolume ? Math.abs(c.volumeContribEurM) : 0,
+    ]),
+    1,
+  );
+
+  return (
+    <div className="m360-viz m360-channel-drv" ref={wrap} onMouseLeave={hide}>
+      <p className="m360-channel-drv__ref">
+        EUR millions added or removed versus last year. Price and volume are Sirius growth-driver
+        fields — not packs from the segment chart above. {M360_CHANNEL_META.note}
+      </p>
+      <ul className="m360-channel-drv__list">
+        {CALC_CHANNELS.map((c) => {
+          const on = !focus || focus === c.channel;
+          const driver =
+            c.volumeContribEurM > c.priceContribEurM ? 'Volume-led growth' : 'Price-led growth';
+          return (
+            <li
+              key={c.channel}
+              className={on ? undefined : 'is-off'}
+              onMouseEnter={() => setFocus(c.channel)}
+              onMouseMove={(e) =>
+                show(e, {
+                  title: c.channel,
+                  lines: [
+                    `Sales  ${fmtM(c.valueEurM)} · ${fmtShare(c.shareOfSetPct)} of set`,
+                    `Value growth  ${fmtPct(c.valueGrowthPct)} · packs ${fmtPct(c.unitGrowthPct)}`,
+                    `Price effect  ${fmtM(c.priceContribEurM)}`,
+                    `Volume effect  ${fmtM(c.volumeContribEurM)}`,
+                    `Share of set’s EUR growth  ${fmtShare(c.pctOfSetAbsGrowth)}`,
+                    driver,
+                  ],
+                })
+              }
+              onMouseLeave={() => setFocus(null)}
+            >
+              <header>
+                <h4>{c.channel}</h4>
+                <span>
+                  {fmtM(c.valueEurM)} · {fmtShare(c.shareOfSetPct)} of set · {fmtPct(c.valueGrowthPct)}
+                </span>
+              </header>
+              <p className={`m360-channel-drv__pace ${c.volumeContribEurM > c.priceContribEurM ? 'is-up' : ''}`}>
+                {driver} · {fmtShare(c.pctOfSetAbsGrowth)} of set’s EUR growth
+              </p>
+              <div className="m360-channel-drv__metrics">
+                {showPrice ? (
+                  <div>
+                    <span className="m360-channel-drv__lab">Price effect</span>
+                    <div className="m360-channel-drv__bar-wrap">
+                      <i className="m360-channel-drv__zero" />
+                      <b
+                        className={`m360-channel-drv__bar is-price ${c.priceContribEurM < 0 ? 'is-neg' : ''}`}
+                        style={{
+                          width: `${(Math.abs(c.priceContribEurM) / maxAbs) * 50}%`,
+                          [c.priceContribEurM < 0 ? 'right' : 'left']: '50%',
+                        }}
+                      />
+                    </div>
+                    <strong className={tone(c.priceContribEurM)}>{fmtM(c.priceContribEurM)}</strong>
+                  </div>
+                ) : null}
+                {showVolume ? (
+                  <div>
+                    <span className="m360-channel-drv__lab">Volume effect</span>
+                    <div className="m360-channel-drv__bar-wrap">
+                      <i className="m360-channel-drv__zero" />
+                      <b
+                        className={`m360-channel-drv__bar is-vol ${c.volumeContribEurM < 0 ? 'is-neg' : ''}`}
+                        style={{
+                          width: `${(Math.abs(c.volumeContribEurM) / maxAbs) * 50}%`,
+                          [c.volumeContribEurM < 0 ? 'right' : 'left']: '50%',
+                        }}
+                      />
+                    </div>
+                    <strong className={tone(c.volumeContribEurM)}>{fmtM(c.volumeContribEurM)}</strong>
+                  </div>
+                ) : null}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <ul className="m360-viz__legend">
+        <li>
+          <button
+            type="button"
+            className={showPrice ? 'is-on' : 'is-off'}
+            aria-pressed={showPrice}
+            onClick={() => setShowPrice((v) => (showVolume || !v ? !v : v))}
+          >
+            <i className="is-mat" />
+            Price effect
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            className={showVolume ? 'is-on' : 'is-off'}
+            aria-pressed={showVolume}
+            onClick={() => setShowVolume((v) => (showPrice || !v ? !v : v))}
+          >
+            <i className="is-ya" />
+            Volume effect
+          </button>
+        </li>
+      </ul>
+      <ChartTip tip={tip} />
+    </div>
+  );
+}
+
+function ChannelPlayersChart({ channel }: { channel: 'Pharmacies' | 'E-commerce' }) {
+  const rows = channelBrandsByShareChange(channel);
+  return (
+    <RankBars
+      rows={rows.map((r) => ({ key: r.brand, name: r.brand, bayer: r.isBayer }))}
+      value={(key) => rows.find((r) => r.brand === key)?.shareOfChannelPct ?? 0}
+      label={(key) => {
+        const r = rows.find((x) => x.brand === key);
+        return `${fmtPp(r?.shareChangePp ?? null)} · ${fmtPct(r?.valueGrowthPct ?? null)}`;
+      }}
+      detail={(key) => {
+        const r = rows.find((x) => x.brand === key);
+        if (!r) return [];
+        return [
+          `Share of ${channel}  ${fmtShare(r.shareOfChannelPct)}`,
+          `Share change  ${fmtPp(r.shareChangePp)}`,
+          `Value growth  ${fmtPct(r.valueGrowthPct)}`,
+          `Pack growth  ${fmtPct(r.unitGrowthPct)}`,
+          `Sales  ${fmtM(r.valueEurM)}`,
+          r.isBayer ? 'Bayer' : 'Competitor',
+        ];
+      }}
+    />
+  );
+}
+
 function IberogastPosition() {
   const { wrap, tip, show, hide } = useChartTip();
   const [focus, setFocus] = useState<string | null>(null);
@@ -671,6 +908,12 @@ export function M360MarketStory() {
     .sort((a, b) => b.valueMat - a.valueMat)
     .slice(0, 6);
   const ibero = CALC_IBEROGAST[0];
+  const pharmaBrands = channelBrandsByShareChange('Pharmacies');
+  const ecommBrands = channelBrandsByShareChange('E-commerce');
+  const gavisconPharma = pharmaBrands.find((r) => r.brand === 'GAVISCON');
+  const gavisconEcomm = ecommBrands.find((r) => r.brand === 'GAVISCON');
+  const iberoPharma = pharmaBrands.find((r) => r.brand === 'IBEROGAST');
+  const iberoEcomm = ecommBrands.find((r) => r.brand === 'IBEROGAST');
 
   return (
     <div
@@ -690,23 +933,28 @@ export function M360MarketStory() {
         <section className="m360-rep-kpis" aria-label="Three headline measures by scope">
           <article>
             <p>Category sales</p>
-            <strong>{fmtM(cat.valueMatM)}</strong>
+            <strong className="m360-num is-key">{fmtM(cat.valueMatM)}</strong>
             <span>
-              Whole Iberogast competitive set, latest 12 months. {fmtPct(cat.growth1yPct)} versus last year. Bayer sales
-              inside this set: {fmtM(cat.bayerValueMatM)}.
+              Whole Iberogast competitive set, latest 12 months.{' '}
+              <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num> versus last year. Bayer sales inside this set:{' '}
+              <Num kind="key">{fmtM(cat.bayerValueMatM)}</Num>.
             </span>
           </article>
-          <article>
+          <article className={tone(cat.bayerShareChangePp) === 'is-down' ? 'is-soft' : undefined}>
             <p>Bayer market share</p>
-            <strong>{fmtShare(cat.bayerShareMatPct)}</strong>
+            <strong className={`m360-num ${tone(cat.bayerShareChangePp) || 'is-key'}`}>
+              {fmtShare(cat.bayerShareMatPct)}
+            </strong>
             <span>
-              Bayer’s share of the same competitive set (not Iberogast alone). {fmtPp(cat.bayerShareChangePp)} versus
-              last year.
+              Bayer’s share of the same competitive set (not Iberogast alone).{' '}
+              <Num v={cat.bayerShareChangePp}>{fmtPp(cat.bayerShareChangePp)}</Num> versus last year.
             </span>
           </article>
           <article>
             <p>Iberogast relative growth</p>
-            <strong>{fmtEvi(ibero?.evolutionIndex ?? null)}</strong>
+            <strong className={`m360-num ${tone(ibero?.evolutionIndex ?? null, 100) || 'is-key'}`}>
+              {fmtEvi(ibero?.evolutionIndex ?? null)}
+            </strong>
             <span>
               {ibero
                 ? `${ibero.label} versus the IBS need-state only. 100 = growing in line with IBS; above 100 = faster.`
@@ -715,8 +963,9 @@ export function M360MarketStory() {
           </article>
         </section>
         <StoryNote>
-          <b>So what?</b> The set is growing ({fmtPct(cat.growth1yPct)}) while Bayer share is soft (
-          {fmtPp(cat.bayerShareChangePp)}). That is the tension the rest of the pack unpacks.
+          The set is growing (<Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num>) while Bayer share is soft (
+          <Num v={cat.bayerShareChangePp}>{fmtPp(cat.bayerShareChangePp)}</Num>). That tension drives the rest of the
+          pack.
         </StoryNote>
         <StoryBridge>
           So dig into what kind of growth this is — more packs, or value / mix — before picking where to play.
@@ -738,15 +987,68 @@ export function M360MarketStory() {
           <GrowthQualityChart />
         </ChartCard>
         <StoryNote>
-          <b>Insight.</b> Category value is running ahead of packs — price or mix is carrying sales. IBS looks like the
-          opposite mix inside the pool: value {fmtPct(ibs.growth1yPct)} while packs {fmtPct(ibs.unitGrowth1yPct)}.
+          Category value is running ahead of packs — price or mix is carrying sales. IBS looks like the opposite mix
+          inside the pool: value <Num v={ibs.growth1yPct}>{fmtPct(ibs.growth1yPct)}</Num> while packs{' '}
+          <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num>.
         </StoryNote>
         <StoryBridge>
-          Growth quality differs by need-state — so size and pace by segment decide where the two jobs sit.
+          Value versus packs is the category clock — next, which channel is adding the euros, and how (price or volume).
         </StoryBridge>
       </StorySection>
 
-      {/* 3 · Segment attractiveness */}
+      {/* 3 · Channel dynamics */}
+      <StorySection
+        id="story-channel"
+        title="Channel dynamics"
+        lede="Business questions: where is set growth coming from by channel (price vs volume), and who is gaining or losing share in each channel?"
+      >
+        <ChartCard
+          id="ch-channel-drivers"
+          wide
+          title="Channel growth drivers"
+          caption={`Pharmacies ${fmtM(CALC_CHANNEL_PHARMA.valueEurM)} (${fmtShare(CALC_CHANNEL_PHARMA.shareOfSetPct)}) · E-commerce ${fmtM(CALC_CHANNEL_ECOMM.valueEurM)} (${fmtShare(CALC_CHANNEL_ECOMM.shareOfSetPct)}). E-commerce is ${fmtShare(CALC_CHANNEL_ECOMM.pctOfSetAbsGrowth)} of the set’s EUR growth.`}
+        >
+          <ChannelDriversChart />
+        </ChartCard>
+        <StoryNote>
+          Pharmacies are the pool to defend — large, flat, price-led (
+          <Num kind="key">{fmtM(CALC_CHANNEL_PHARMA.priceContribEurM)}</Num> price /{' '}
+          <Num v={CALC_CHANNEL_PHARMA.volumeContribEurM}>{fmtM(CALC_CHANNEL_PHARMA.volumeContribEurM)}</Num> volume).
+          E-commerce is the growth job — volume-led (
+          <Num v={CALC_CHANNEL_ECOMM.volumeContribEurM}>{fmtM(CALC_CHANNEL_ECOMM.volumeContribEurM)}</Num> volume) and{' '}
+          <Num kind="key">{fmtShare(CALC_CHANNEL_ECOMM.pctOfSetAbsGrowth)}</Num> of the set’s absolute EUR lift.
+        </StoryNote>
+        <div className="m360-rep-grid">
+          <ChartCard
+            id="ch-channel-pharma"
+            title="Who is moving in Pharmacies"
+            caption="Sorted by share change (gainers first). Bar = share of Pharmacies. Label = Δ points · value growth."
+          >
+            <ChannelPlayersChart channel="Pharmacies" />
+          </ChartCard>
+          <ChartCard
+            id="ch-channel-ecomm"
+            title="Who is moving in E-commerce"
+            caption="Sorted by share change (gainers first). Bar = share of E-commerce. Label = Δ points · value growth."
+          >
+            <ChannelPlayersChart channel="E-commerce" />
+          </ChartCard>
+        </div>
+        <StoryNote>
+          Gaviscon is the share gainer in both channels (
+          <Num v={gavisconPharma?.shareChangePp}>{fmtPp(gavisconPharma?.shareChangePp ?? null)}</Num> Pharmacies ·{' '}
+          <Num v={gavisconEcomm?.shareChangePp}>{fmtPp(gavisconEcomm?.shareChangePp ?? null)}</Num> E-commerce).
+          Iberogast is soft in Pharmacies (
+          <Num v={iberoPharma?.shareChangePp}>{fmtPp(iberoPharma?.shareChangePp ?? null)}</Num>) and ahead online (
+          <Num v={iberoEcomm?.shareChangePp}>{fmtPp(iberoEcomm?.shareChangePp ?? null)}</Num>). Lefax and Talcid lose
+          share online.
+        </StoryNote>
+        <StoryBridge>
+          Channel jobs set — then size and pace by need-state decide where to play inside the set.
+        </StoryBridge>
+      </StorySection>
+
+      {/* 4 · Segment attractiveness */}
       <StorySection
         id="story-attract"
         title="Segment attractiveness"
@@ -761,9 +1063,9 @@ export function M360MarketStory() {
           <AttractivenessChart />
         </ChartCard>
         <StoryNote>
-          <b>Insight.</b> Two jobs, not one category number: defend the large IBS franchise (
-          {fmtShare(ibs.shareOfCategoryPct)} of sales); compete in faster Antacids ({fmtPct(ant.growth1yPct)}) where
-          Bayer is soft.
+          Two jobs, not one category number: defend the large IBS franchise (
+          <Num kind="key">{fmtShare(ibs.shareOfCategoryPct)}</Num> of sales); compete in faster Antacids (
+          <Num v={ant.growth1yPct}>{fmtPct(ant.growth1yPct)}</Num>) where Bayer is soft.
         </StoryNote>
         <StoryBridge>
           So open those two arenas — who owns the cash pool (IBS), and who is winning the growth fight (Antacids).
@@ -833,8 +1135,9 @@ export function M360MarketStory() {
           </ChartCard>
         </div>
         <StoryNote>
-          <b>Insight.</b> Iberogast still leads IBS. In Antacids, competitors (not IBS) explain the growth Bayer is not
-          capturing — Gaviscon is the reference rival.
+          Iberogast still leads IBS. In Antacids, competitors (not IBS) explain the growth Bayer is not capturing —
+          Gaviscon is the reference rival at <Num kind="key">{fmtShare(gaviscon?.shareMatPct ?? null)}</Num> of that
+          need-state.
         </StoryNote>
         <StoryBridge>
           Brand ranks show who wins today. Then check which Bayer brands are keeping pace with their own need-state.
@@ -856,9 +1159,10 @@ export function M360MarketStory() {
           <EviChart />
         </ChartCard>
         <StoryNote>
-          <b>Insight.</b> Advance is ahead of IBS ({fmtEvi(advance?.evolutionIndex ?? null)}); Classic is near line (
-          {fmtEvi(classic?.evolutionIndex ?? null)}). Antacids Bayer names below 100 belong with the share-leak story —
-          not the Iberogast defend/grow choice.
+          Advance is ahead of IBS (<Num v={advance?.evolutionIndex} kind="evi">{fmtEvi(advance?.evolutionIndex ?? null)}</Num>
+          ); Classic is near line (
+          <Num v={classic?.evolutionIndex} kind="evi">{fmtEvi(classic?.evolutionIndex ?? null)}</Num>). Antacids Bayer
+          names below 100 belong with the share-leak story — not the Iberogast defend/grow choice.
         </StoryNote>
         <StoryBridge>
           Zoom into the IBS franchise: Classic vs Advance — share plus relative growth on the same need-state.
@@ -880,9 +1184,11 @@ export function M360MarketStory() {
           <IberogastPosition />
         </ChartCard>
         <StoryNote>
-          <b>Insight.</b> Defend Classic share (relative growth {fmtEvi(classic?.evolutionIndex ?? null)}). Put growth
-          plans on Advance ({fmtEvi(advance?.evolutionIndex ?? null)}). More of the same Classic volume is a weak bet
-          while IBS packs are {fmtPct(ibs.unitGrowth1yPct)}.
+          Defend Classic share (relative growth{' '}
+          <Num v={classic?.evolutionIndex} kind="evi">{fmtEvi(classic?.evolutionIndex ?? null)}</Num>). Put growth plans
+          on Advance (<Num v={advance?.evolutionIndex} kind="evi">{fmtEvi(advance?.evolutionIndex ?? null)}</Num>). More of
+          the same Classic volume is a weak bet while IBS packs are{' '}
+          <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num>.
         </StoryNote>
         <StoryBridge>
           Brand jobs set — close on Bayer share change, where the portfolio is leaking points.
@@ -904,39 +1210,175 @@ export function M360MarketStory() {
           <ShareChangeChart />
         </ChartCard>
         <StoryNote>
-          <b>Insight.</b> Category share softness is an Antacids story ({fmtPp(ant.bayerShareChangePp)}). IBS Bayer share{' '}
-          {fmtShare(ibs.bayerShareMatPct)} ({fmtPp(ibs.bayerShareChangePp)}). That locks the two jobs before actions.
+          Category share softness is an Antacids story (
+          <Num v={ant.bayerShareChangePp}>{fmtPp(ant.bayerShareChangePp)}</Num>). IBS Bayer share{' '}
+          <Num kind="key">{fmtShare(ibs.bayerShareMatPct)}</Num> (
+          <Num v={ibs.bayerShareChangePp}>{fmtPp(ibs.bayerShareChangePp)}</Num>). That locks the two jobs before
+          actions.
         </StoryNote>
         <StoryBridge>
           Pull the thread: pool vs growth, brand jobs, and the Antacids leak — then what to do this month.
         </StoryBridge>
       </StorySection>
 
-      {/* 8 · Implications → Recommendations */}
+      {/* 8 · Implications */}
       <StorySection
         id="story-implications"
         title="Key implications"
-        lede="Conclusion from the drill-down — two jobs, one leak, clocks kept apart."
+        lede="Read the pack as signals: what is working, what needs watching, and what is broken — then act in that order."
       >
-        <ul className="m360-rep-ins">
-          <li>
-            <h3>IBS = defend the pool · Antacids = contest the growth</h3>
-            <p>
-              One category number hides two jobs. Do not open a PPI project from this pack — Bayer share{' '}
-              {fmtShare(narrative.ppi.bayerShareMatPct)} and the need-state is not the fastest grower.
-            </p>
-          </li>
-          <li>
-            <h3>Keep clocks apart</h3>
-            <p>
-              This is Sirius sell-out for the latest 12 months. Do not fold calendar COPA euros into this view until
-              finance is on the same clock.
-            </p>
-          </li>
+        <SignalLegend />
+        <ul className="m360-signal-grid">
+          <SignalCard
+            tone="bad"
+            label="Problem"
+            title="Antacids is the competitive wound — Gaviscon is taking the growth"
+            why="Set share softness is not an IBS story. The leak sits in the fastest need-state, in both channels."
+            evidence={
+              <>
+                Bayer Antacids share <Num kind="key">{fmtShare(ant.bayerShareMatPct)}</Num> (
+                <Num v={ant.bayerShareChangePp}>{fmtPp(ant.bayerShareChangePp)}</Num>); need-state{' '}
+                <Num v={ant.growth1yPct}>{fmtPct(ant.growth1yPct)}</Num>. Gaviscon{' '}
+                <Num v={gavisconPharma?.shareChangePp}>{fmtPp(gavisconPharma?.shareChangePp ?? null)}</Num> in
+                Pharmacies and <Num v={gavisconEcomm?.shareChangePp}>{fmtPp(gavisconEcomm?.shareChangePp ?? null)}</Num>{' '}
+                in E-commerce (<Num v={gavisconEcomm?.valueGrowthPct}>{fmtPct(gavisconEcomm?.valueGrowthPct ?? null)}</Num>{' '}
+                online).
+              </>
+            }
+          />
+          <SignalCard
+            tone="good"
+            label="Strength"
+            title="IBS franchise still holds — Advance is the growth line"
+            why="Classic remains the cash pool; Advance is the only Iberogast line clearly ahead of IBS."
+            evidence={
+              <>
+                IBS Bayer share <Num kind="key">{fmtShare(ibs.bayerShareMatPct)}</Num> (
+                <Num v={ibs.bayerShareChangePp}>{fmtPp(ibs.bayerShareChangePp)}</Num>). Classic{' '}
+                <Num kind="key">{fmtShare(classic?.shareMatPct ?? null)}</Num> of IBS · EVI{' '}
+                <Num v={classic?.evolutionIndex} kind="evi">
+                  {fmtEvi(classic?.evolutionIndex ?? null)}
+                </Num>
+                . Advance <Num kind="key">{fmtShare(advance?.shareMatPct ?? null)}</Num> · EVI{' '}
+                <Num v={advance?.evolutionIndex} kind="evi">
+                  {fmtEvi(advance?.evolutionIndex ?? null)}
+                </Num>
+                .
+              </>
+            }
+          />
+          <SignalCard
+            tone="watch"
+            label="Watch"
+            title="Two channel jobs: defend Pharmacies, grow E-commerce"
+            why="Most euros still sit in Pharmacies, but most of the set’s absolute growth sits online — and the brand mix differs by channel."
+            evidence={
+              <>
+                Pharmacies <Num kind="key">{fmtShare(CALC_CHANNEL_PHARMA.shareOfSetPct)}</Num> of set, price-led (
+                <Num kind="key">{fmtM(CALC_CHANNEL_PHARMA.priceContribEurM)}</Num> /{' '}
+                <Num v={CALC_CHANNEL_PHARMA.volumeContribEurM}>{fmtM(CALC_CHANNEL_PHARMA.volumeContribEurM)}</Num>).
+                E-commerce <Num kind="key">{fmtShare(CALC_CHANNEL_ECOMM.pctOfSetAbsGrowth)}</Num> of EUR growth,
+                volume-led. Iberogast <Num v={iberoPharma?.shareChangePp}>{fmtPp(iberoPharma?.shareChangePp ?? null)}</Num>{' '}
+                Pharmacies · <Num v={iberoEcomm?.shareChangePp}>{fmtPp(iberoEcomm?.shareChangePp ?? null)}</Num>{' '}
+                E-commerce.
+              </>
+            }
+          />
+          <SignalCard
+            tone="watch"
+            label="Watch"
+            title="Growth is value and mix — not more packs everywhere"
+            why="Category value runs ahead of packs; IBS packs are soft. Chasing Classic volume alone is a weak bet from this view."
+            evidence={
+              <>
+                Category value <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num> vs packs{' '}
+                <Num v={cat.unitGrowth1yPct}>{fmtPct(cat.unitGrowth1yPct)}</Num>. IBS packs{' '}
+                <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num>. PPIs Bayer share{' '}
+                <Num kind="key">{fmtShare(narrative.ppi.bayerShareMatPct)}</Num> — not a sized entry from this pack.
+              </>
+            }
+          />
+          <SignalCard
+            tone="watch"
+            label="Watch"
+            title="Keep market and finance clocks apart"
+            why="This readout is Sirius sell-out for the latest 12 months. Company COPA euros sit on a different calendar — mixing them looks analytical but is wrong."
+            evidence="Do not add finance Net Sales into this market view until both windows use the same latest 12 months."
+          />
         </ul>
       </StorySection>
 
-      <AssistantMarketActions {...narrative} />
+      {/* 9 · Actions */}
+      <StorySection
+        id="story-actions"
+        title="Recommended actions"
+        lede="Same signal order as implications — fix the red, protect the green, manage the yellow."
+      >
+        <ol className="m360-action-list">
+          <ActionCard
+            tone="bad"
+            step={1}
+            title="Antacids vs Gaviscon — this month"
+            body={
+              <>
+                One page for Gaviscon, Talcid and Rennie: Bayer share{' '}
+                <Num v={ant.bayerShareChangePp}>{fmtPp(ant.bayerShareChangePp)}</Num> in a need-state at{' '}
+                <Num v={ant.growth1yPct}>{fmtPct(ant.growth1yPct)}</Num>. Split Pharmacy vs E-commerce — Gaviscon is{' '}
+                <Num v={gavisconEcomm?.valueGrowthPct}>{fmtPct(gavisconEcomm?.valueGrowthPct ?? null)}</Num> online. Ask
+                listings, price and promotions; do not fold in COPA euros yet.
+              </>
+            }
+          />
+          <ActionCard
+            tone="good"
+            step={2}
+            title="Iberogast — split Classic defend / Advance grow"
+            body={
+              <>
+                Defend Classic share in IBS (
+                <Num kind="key">{fmtShare(classic?.shareMatPct ?? null)}</Num>, EVI{' '}
+                <Num v={classic?.evolutionIndex} kind="evi">
+                  {fmtEvi(classic?.evolutionIndex ?? null)}
+                </Num>
+                ). Put incremental growth plans on Advance (EVI{' '}
+                <Num v={advance?.evolutionIndex} kind="evi">
+                  {fmtEvi(advance?.evolutionIndex ?? null)}
+                </Num>
+                ). IBS packs <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num> — more of the same Classic
+                volume is a weak bet.
+              </>
+            }
+          />
+          <ActionCard
+            tone="watch"
+            step={3}
+            title="Channel plan — protect Pharma, feed E-commerce"
+            body={
+              <>
+                Pharmacies are <Num kind="key">{fmtShare(CALC_CHANNEL_PHARMA.shareOfSetPct)}</Num> of the set and
+                price-led — protect Iberogast share there (
+                <Num v={iberoPharma?.shareChangePp}>{fmtPp(iberoPharma?.shareChangePp ?? null)}</Num>). E-commerce is{' '}
+                <Num kind="key">{fmtShare(CALC_CHANNEL_ECOMM.pctOfSetAbsGrowth)}</Num> of EUR growth — Iberogast is
+                already <Num v={iberoEcomm?.shareChangePp}>{fmtPp(iberoEcomm?.shareChangePp ?? null)}</Num>; watch
+                Lefax/Talcid share loss online.
+              </>
+            }
+          />
+          <ActionCard
+            tone="watch"
+            step={4}
+            title="Do not open a PPI project from this pack"
+            body={
+              <>
+                Bayer share in PPIs is <Num kind="key">{fmtShare(narrative.ppi.bayerShareMatPct)}</Num> and the
+                need-state is not the growth engine (
+                <Num v={narrative.ppi.growth1yPct}>{fmtPct(narrative.ppi.growth1yPct)}</Num> vs category{' '}
+                <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num>). There is no entry-size in euros here.
+              </>
+            }
+          />
+        </ol>
+      </StorySection>
     </div>
   );
 }

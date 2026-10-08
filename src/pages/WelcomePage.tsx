@@ -21,55 +21,43 @@ const HUB_CAPABILITIES = [
   'Access trusted knowledge assets',
 ];
 
-type OrbitPillar = {
-  id: 'knowledge' | 'conversation' | 'data' | 'decisions';
-  title: string;
-  items: string[];
-  place: 'east' | 'west' | 'north' | 'south';
-  /** User journey step (1–4), clockwise from Hub knowledge */
-  step: number;
-  link?: 'hub' | 'chat';
-};
-
-const ORBIT_PILLARS: OrbitPillar[] = [
+const FEATURE_CARDS = [
+  {
+    id: 'cognitive',
+    eyebrow: 'Cognitive synthesis',
+    title: 'Turn questions into trusted guidance',
+    body: 'Ask in natural language and get answers grounded in approved TB4L content.',
+    tone: 'chat' as const,
+  },
   {
     id: 'knowledge',
-    title: 'Trusted Knowledge',
-    items: ['Playbooks', 'Templates', 'Training', 'Glossary'],
-    place: 'east',
-    step: 1,
-    link: 'hub',
+    eyebrow: 'Knowledge graph',
+    title: 'Browse curated brand assets',
+    body: 'Playbooks, frames, training, and templates live in one searchable Hub.',
+    tone: 'hub' as const,
   },
   {
     id: 'data',
-    title: 'Data & Insights',
-    items: ['M360', 'BHT', 'FICO', 'MMM'],
-    place: 'south',
-    step: 2,
-  },
-  {
-    id: 'conversation',
-    title: 'AI Conversation',
-    items: ['Ask Questions', 'Explore Ideas', 'Learn Faster'],
-    place: 'west',
-    step: 3,
-    link: 'chat',
-  },
-  {
-    id: 'decisions',
-    title: 'Better Decisions',
-    items: ['Prioritize', 'Plan', 'Execute', 'Grow'],
-    place: 'north',
-    step: 4,
+    eyebrow: 'Connected data',
+    title: 'Bring M360 and sources into Chat',
+    body: 'Attach Hub documents or connect data sources when you need evidence.',
+    tone: 'data' as const,
   },
 ];
 
-/** Legend / path order matches the user journey. */
-const PATH_ORDER: OrbitPillar['id'][] = [
-  'knowledge',
-  'data',
-  'conversation',
-  'decisions',
+type OrbitPillar = {
+  id: 'knowledge' | 'conversation' | 'data' | 'decisions';
+  title: string;
+  place: 'east' | 'west' | 'north' | 'south';
+  link?: 'hub' | 'chat';
+  emphasis: 'primary' | 'secondary';
+};
+
+const ORBIT_PILLARS: OrbitPillar[] = [
+  { id: 'knowledge', title: 'Trusted Knowledge', place: 'east', link: 'hub', emphasis: 'primary' },
+  { id: 'data', title: 'Data & Insights', place: 'south', emphasis: 'secondary' },
+  { id: 'conversation', title: 'Chat', place: 'west', link: 'chat', emphasis: 'primary' },
+  { id: 'decisions', title: 'Better Decisions', place: 'north', emphasis: 'secondary' },
 ];
 
 function PillarIcon({ id }: { id: OrbitPillar['id'] }) {
@@ -121,7 +109,7 @@ function PillarIcon({ id }: { id: OrbitPillar['id'] }) {
 
 export function WelcomePage() {
   const [showIntro, setShowIntro] = useState(false);
-  const legendItems = PATH_ORDER.map((id) => ORBIT_PILLARS.find((p) => p.id === id)!);
+  const firstName = MOCK_ENTRA_USER.givenName;
 
   return (
     <div className="tb4l-home">
@@ -129,24 +117,53 @@ export function WelcomePage() {
         <div className="tb4l-home-hero__canvas" aria-hidden="true" />
         <div className="tb4l-home-hero__inner">
           <div className="tb4l-home-hero__copy">
-            <p className="tb4l-home-hero__greeting">Welcome, {MOCK_ENTRA_USER.givenName}</p>
+            <p className="tb4l-home-hero__greeting">Welcome back, {firstName}</p>
             <h1 id="tb4l-home-heading" className="tb4l-home-hero__title">
-              Trusted Brands for Life AI Workspace
+              <span className="tb4l-home-hero__title-brand">Trusted Brands for Life</span>
+              <span className="tb4l-home-hero__title-accent">AI Workspace</span>
             </h1>
             <p className="tb4l-home-hero__lede">
-              Access trusted TB4L knowledge through curated content and AI-powered assistance.
+              Your AI-powered workspace for trusted TB4L knowledge — ask questions, browse curated
+              Hub content, and move faster from insight to decision.
             </p>
+            <div className="tb4l-home-hero__actions">
+              <button
+                type="button"
+                className="tb4l-home-cta tb4l-home-cta--intro"
+                onClick={() => setShowIntro(true)}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                Watch TB4L Intro
+              </button>
+              <Link className="tb4l-home-cta tb4l-home-cta--ghost" to="/knowledge-hub">
+                Explore Framework
+              </Link>
+            </div>
           </div>
-          <button
-            type="button"
-            className="tb4l-home-cta tb4l-home-cta--intro"
-            onClick={() => setShowIntro(true)}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            Watch TB4L Intro
-          </button>
+
+          <div className="tb4l-home-hero__visual" aria-hidden="true">
+            <div className="tb4l-home-hero__stack">
+              <div className="tb4l-home-hero__panel tb4l-home-hero__panel--back">
+                <span className="tb4l-home-hero__panel-label">Brand workshop</span>
+              </div>
+              <div className="tb4l-home-hero__panel tb4l-home-hero__panel--mid">
+                <span className="tb4l-home-hero__panel-label">Knowledge Hub</span>
+              </div>
+              <div className="tb4l-home-hero__panel tb4l-home-hero__panel--front">
+                <span className="tb4l-home-hero__panel-label">TB4L Chat</span>
+              </div>
+            </div>
+            <div className="tb4l-home-hero__float tb4l-home-hero__float--hub">
+              <span className="tb4l-home-hero__float-dot" />
+              Secured Hub
+            </div>
+            <div className="tb4l-home-hero__float tb4l-home-hero__float--accuracy">
+              <strong>98.4%</strong>
+              <span>Answer accuracy</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -182,7 +199,7 @@ export function WelcomePage() {
                 {ORBIT_LAYOUT === 'wrap' ? (
                   <span className="tb4l-home-card__wrap" aria-hidden="true" />
                 ) : null}
-                <p className="tb4l-home-card__badge">TB4L CHAT</p>
+                <p className="tb4l-home-card__badge">TB4L Chat</p>
                 <h3 className="tb4l-home-card__title">Ask questions and get trusted answers</h3>
                 <p className="tb4l-home-card__desc">
                   TB4L Chat helps Brand Managers and teams navigate the TB4L framework faster. Ask
@@ -200,43 +217,27 @@ export function WelcomePage() {
               </Link>
             </article>
 
-            <aside className="tb4l-home-orbit" aria-labelledby="tb4l-orbit-heading">
+            <aside
+              className="tb4l-home-orbit"
+              aria-labelledby="tb4l-orbit-heading"
+              aria-describedby="tb4l-orbit-path"
+            >
               <div className="tb4l-home-orbit__stage">
                 <div className="tb4l-home-orbit__rings" aria-hidden="true">
                   <span className="tb4l-home-orbit__ring tb4l-home-orbit__ring--outer" />
                   <span className="tb4l-home-orbit__ring tb4l-home-orbit__ring--mid" />
-                  <span className="tb4l-home-orbit__ring tb4l-home-orbit__ring--inner" />
                 </div>
 
-                {/* Highlighted user path: Knowledge → Data → Chat → Decisions */}
-                <svg
-                  className="tb4l-home-orbit__path"
-                  viewBox="0 0 100 100"
-                  aria-hidden="true"
-                >
+                <svg className="tb4l-home-orbit__path" viewBox="0 0 100 100" aria-hidden="true">
                   <defs>
-                    <linearGradient id="orbitPathGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#286436" />
-                      <stop offset="33%" stopColor="#286436" />
-                      <stop offset="66%" stopColor="#d30f4b" />
-                      <stop offset="100%" stopColor="#00607e" />
+                    <linearGradient id="orbitPathGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+                      <stop offset="0%" stopColor="var(--home-hub)" />
+                      <stop offset="40%" stopColor="var(--home-data)" />
+                      <stop offset="70%" stopColor="var(--home-chat)" />
+                      <stop offset="100%" stopColor="var(--home-nav)" />
                     </linearGradient>
                   </defs>
-                  <circle
-                    className="tb4l-home-orbit__path-track"
-                    cx="50"
-                    cy="50"
-                    r="38"
-                    fill="none"
-                  />
-                  <circle
-                    className="tb4l-home-orbit__path-glow"
-                    cx="50"
-                    cy="50"
-                    r="38"
-                    fill="none"
-                    stroke="url(#orbitPathGrad)"
-                  />
+                  <circle className="tb4l-home-orbit__path-track" cx="50" cy="50" r="38" fill="none" />
                   <circle
                     className="tb4l-home-orbit__path-flow"
                     cx="50"
@@ -256,7 +257,7 @@ export function WelcomePage() {
                 {ORBIT_PILLARS.map((pillar) => (
                   <div
                     key={pillar.id}
-                    className={`tb4l-home-orbit__node tb4l-home-orbit__node--${pillar.place} tb4l-home-orbit__node--${pillar.id}`}
+                    className={`tb4l-home-orbit__node tb4l-home-orbit__node--${pillar.place} tb4l-home-orbit__node--${pillar.id} tb4l-home-orbit__node--${pillar.emphasis}`}
                     title={pillar.title}
                   >
                     <span className="tb4l-home-orbit__bubble">
@@ -272,7 +273,7 @@ export function WelcomePage() {
                 {ORBIT_LAYOUT === 'wrap' ? (
                   <span className="tb4l-home-card__wrap" aria-hidden="true" />
                 ) : null}
-                <p className="tb4l-home-card__badge">TB4L HUB</p>
+                <p className="tb4l-home-card__badge">TB4L Hub</p>
                 <h3 className="tb4l-home-card__title">Discover trusted knowledge</h3>
                 <p className="tb4l-home-card__desc">
                   TB4L Hub is the central knowledge repository containing approved playbooks,
@@ -291,31 +292,29 @@ export function WelcomePage() {
             </article>
           </div>
 
-          <div className="tb4l-home-orbit-legend">
-            <p className="tb4l-home-orbit-legend__promise">
-              Your path: Hub knowledge → data → Chat → better brand decisions
-            </p>
-            <ul className="tb4l-home-orbit-legend__grid">
-              {legendItems.map((pillar) => (
-                <li
-                  key={`legend-${pillar.id}`}
-                  className={`tb4l-home-orbit-legend__item tb4l-home-orbit-legend__item--${pillar.id}`}
-                >
-                  <span className="tb4l-home-orbit-legend__step" aria-hidden="true">
-                    {pillar.step}
-                  </span>
-                  <span className="tb4l-home-orbit-legend__icon" aria-hidden="true">
-                    <PillarIcon id={pillar.id} />
-                  </span>
-                  <div className="tb4l-home-orbit-legend__copy">
-                    <p className="tb4l-home-orbit-legend__title">
-                      {pillar.title}
-                    </p>
-                    <p className="tb4l-home-orbit-legend__items">{pillar.items.join(' · ')}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+          <p id="tb4l-orbit-path" className="tb4l-home-orbit-legend">
+            Knowledge → Data → Chat → Decisions
+          </p>
+        </div>
+      </section>
+
+      <section className="tb4l-home-features" aria-labelledby="tb4l-features-heading">
+        <div className="tb4l-home-features__inner">
+          <header className="tb4l-home-features__intro">
+            <h2 id="tb4l-features-heading">Built for brand teams</h2>
+            <p>Three ways TB4L helps you move from knowledge to action.</p>
+          </header>
+          <div className="tb4l-home-features__grid">
+            {FEATURE_CARDS.map((card) => (
+              <article
+                key={card.id}
+                className={`tb4l-home-feature tb4l-home-feature--${card.tone}`}
+              >
+                <p className="tb4l-home-feature__eyebrow">{card.eyebrow}</p>
+                <h3 className="tb4l-home-feature__title">{card.title}</h3>
+                <p className="tb4l-home-feature__body">{card.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

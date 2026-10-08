@@ -4,10 +4,10 @@
  */
 
 .hub-page--overview {
-  --ov-teal: #4aa8c8;
-  --ov-teal-deep: #00607e;
+  --ov-teal: #286436;
+  --ov-teal-deep: #1f4f2a;
   --ov-navy: #10384f;
-  --ov-purple: #624963;
+  --ov-purple: #10384f;
   --ov-green: #286436;
   --ov-berry: #d30f4b;
   --ov-surface: var(--bg-main);
@@ -199,8 +199,8 @@
 }
 
 .hub-ov-popular__card.is-selected {
-  border-color: color-mix(in srgb, var(--accent-selection, var(--ov-teal-deep)) 55%, var(--ov-line));
-  background: color-mix(in srgb, var(--accent-selection, var(--ov-teal)) 10%, var(--ov-surface));
+  border-color: color-mix(in srgb, var(--color-hub, var(--ov-green)) 55%, var(--ov-line));
+  background: color-mix(in srgb, var(--color-hub, var(--ov-green)) 10%, var(--ov-surface));
 }
 
 .hub-ov-popular__card:focus-visible {
@@ -225,8 +225,8 @@
 }
 
 .hub-ov-popular__card.is-selected .hub-ov-popular__check {
-  border-color: var(--ov-teal-deep);
-  background: var(--ov-teal-deep);
+  border-color: var(--color-hub, var(--ov-green));
+  background: var(--color-hub, var(--ov-green));
   color: #fff;
 }
 
@@ -295,8 +295,8 @@ button.hub-ov-source-card {
 }
 
 .hub-ov-source-card.is-selected {
-  border-color: color-mix(in srgb, var(--accent-selection, var(--ov-teal-deep)) 55%, var(--ov-line));
-  background: color-mix(in srgb, var(--accent-selection, var(--ov-teal)) 10%, var(--ov-surface));
+  border-color: color-mix(in srgb, var(--color-hub, var(--ov-green)) 55%, var(--ov-line));
+  background: color-mix(in srgb, var(--color-hub, var(--ov-green)) 10%, var(--ov-surface));
 }
 
 .hub-ov-source-card:focus-visible {
@@ -424,15 +424,15 @@ button.hub-ov-source-card {
 }
 
 .hub-ov-card--teal {
-  --card-accent: #00607e;
+  --card-accent: #286436;
 }
 
 .hub-ov-card--blue {
-  --card-accent: #3d6f8c;
+  --card-accent: #10384f;
 }
 
 .hub-ov-card--purple {
-  --card-accent: #624963;
+  --card-accent: #10384f;
 }
 
 .hub-ov-card--green {
@@ -482,10 +482,10 @@ button.hub-ov-source-card {
 
 /* —— Dark theme (screenshot look) —— */
 [data-theme='dark'] .hub-page--overview {
-  --ov-teal: #6bb8d4;
-  --ov-teal-deep: #4aa8c8;
+  --ov-teal: #5aaa72;
+  --ov-teal-deep: #286436;
   --ov-navy: #e8eef1;
-  --ov-purple: #c9a3cc;
+  --ov-purple: #8aa0ad;
   --ov-green: #5aaa72;
   --ov-berry: #ff6b8a;
   --ov-surface: #102b37;
@@ -501,7 +501,7 @@ button.hub-ov-source-card {
 }
 
 [data-theme='dark'] .hub-ov-hero__eyebrow {
-  color: #4aa8c8;
+  color: #5aaa72;
 }
 
 [data-theme='dark'] .hub-ov-steps {
@@ -509,16 +509,16 @@ button.hub-ov-source-card {
 }
 
 [data-theme='dark'] .hub-ov-steps__num {
-  background: #4aa8c8;
-  color: #081318;
+  background: #286436;
+  color: #fff;
 }
 
 [data-theme='dark'] .hub-ov-browse-link {
-  color: #6bb8d4;
+  color: #5aaa72;
 }
 
 [data-theme='dark'] .hub-ov-browse-link:hover {
-  color: #9fd0e4;
+  color: #7fbf90;
 }
 
 [data-theme='dark'] .hub-ov-source-card,
@@ -529,8 +529,8 @@ button.hub-ov-source-card {
 }
 
 [data-theme='dark'] .hub-ov-popular__card.is-selected {
-  background: rgba(74, 168, 200, 0.14);
-  border-color: rgba(74, 168, 200, 0.45);
+  background: rgba(90, 154, 110, 0.16);
+  border-color: rgba(90, 154, 110, 0.5);
 }
 
 [data-theme='dark'] .hub-ov-popular__check {
@@ -539,9 +539,9 @@ button.hub-ov-source-card {
 }
 
 [data-theme='dark'] .hub-ov-popular__card.is-selected .hub-ov-popular__check {
-  background: #4aa8c8;
-  border-color: #4aa8c8;
-  color: #081318;
+  background: #286436;
+  border-color: #286436;
+  color: #fff;
 }
 
 [data-theme='dark'] .hub-ov-source-card.is-live {
@@ -550,8 +550,8 @@ button.hub-ov-source-card {
 }
 
 [data-theme='dark'] .hub-ov-source-card.is-selected {
-  background: rgba(74, 168, 200, 0.14);
-  border-color: rgba(74, 168, 200, 0.45);
+  background: rgba(90, 154, 110, 0.16);
+  border-color: rgba(90, 154, 110, 0.5);
 }
 
 [data-theme='dark'] .hub-ov-source-card__badge--live {
@@ -566,21 +566,21 @@ button.hub-ov-source-card {
 }
 
 [data-theme='dark'] .hub-ov-source-card.is-selected .hub-ov-source-card__check {
-  background: #4aa8c8;
-  border-color: #4aa8c8;
-  color: #081318;
+  background: #286436;
+  border-color: #286436;
+  color: #fff;
 }
 
 [data-theme='dark'] .hub-ov-card--teal {
-  --card-accent: #4aa8c8;
+  --card-accent: #5aaa72;
 }
 
 [data-theme='dark'] .hub-ov-card--blue {
-  --card-accent: #6a9eb8;
+  --card-accent: #8aa0ad;
 }
 
 [data-theme='dark'] .hub-ov-card--purple {
-  --card-accent: #b896bc;
+  --card-accent: #8aa0ad;
 }
 
 [data-theme='dark'] .hub-ov-card--green {

@@ -378,7 +378,7 @@ export const CALC_COPA_SCORECARD: CalcCopaScorecard[] = brandsByRevenue.map((b, 
 });
 
 export const CALC_COPA_SCORECARD_NOTE =
-  'Bain scorecard on OAuth COPA brand grain. Revenue = Net Sales. Mix change = current revenue share − prior share. Roles: Declining → Growth Driver → Profit Driver → Rationalize → Maintain.';
+  'Portfolio scorecard on OAuth COPA brand grain — split into growth ranking, margin quality, and contribution bars (no bubble matrix). Revenue = Net Sales. Mix change = current revenue share − prior share. Roles: Declining → Growth Driver → Profit Driver → Rationalize → Maintain.';
 
 export const CALC_COPA_SCORECARD_META = {
   portfolioGrowthPct: CALC_COPA_SET.growth1yPct,
@@ -411,7 +411,7 @@ export const CALC_COPA_CLASSIFICATION = ROLE_ORDER.map((role) => ({
 }));
 
 export const CALC_COPA_CLASSIFICATION_NOTE =
-  'First match: Declining → Growth Driver → Profit Driver → Rationalize → Maintain. Positioning matrix plots revenue growth % × EBIT margin %.';
+  'First match: Declining → Growth Driver → Profit Driver → Rationalize → Maintain. Role cards only — growth and margin detail sit in the scorecard charts above.';
 
 /** Profit Pool — Gross Profit share of the four-brand set (OAuth COPA). */
 export type CalcCopaProfitPool = {

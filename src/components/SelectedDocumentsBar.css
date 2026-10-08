@@ -15,8 +15,8 @@
   align-items: stretch;
   padding: 16px 18px 16px;
   background: var(--surface-elevated, var(--bg-main));
-  border: 1px solid color-mix(in srgb, var(--tb4l-teal) 22%, var(--border-default));
-  border-left: 3px solid var(--tb4l-teal);
+  border: 1px solid color-mix(in srgb, var(--color-hub, var(--tb4l-green, #286436)) 22%, var(--border-default));
+  border-left: 3px solid var(--color-hub, var(--tb4l-green, #286436));
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(16, 56, 79, 0.08);
   animation: contextBarIn 0.24s ease;
@@ -53,7 +53,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--tb4l-teal);
+  color: var(--color-hub, var(--tb4l-green, #286436));
 }
 
 .selected-bar__title {
@@ -199,7 +199,7 @@
 }
 
 .selected-bar__cta:focus-visible {
-  outline: 3px solid var(--accent-focus, #00607e);
+  outline: 3px solid var(--accent-focus, #10384f);
   outline-offset: 2px;
 }
 
@@ -233,7 +233,7 @@
 
 [data-theme='dark'] .selected-bar--context {
   background: var(--bg-sidebar);
-  border-color: color-mix(in srgb, var(--tb4l-teal) 28%, var(--border-default));
+  border-color: color-mix(in srgb, var(--color-hub, var(--tb4l-green, #286436)) 28%, var(--border-default));
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
 }
 

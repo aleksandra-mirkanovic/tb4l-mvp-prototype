@@ -8,6 +8,7 @@
  * Segment unit growth 1y         units_mat / units_ya - 1                             T1
  * Segment 3y CAGR                (value_mat / value_3ya)^(1/3) - 1                    T1 (null if value_3ya null)
  * Category growth 1y             SUM(value_mat) / SUM(value_ya) - 1                   T1
+ * Category unit growth 1y        SUM(units_mat) / SUM(units_ya) - 1                   T1
  * Bayer share of segment         bayer_value_mat / value_mat (YA, 3YA same)           T1
  * Bayer share change             share_mat - share_ya, in pp                          T1
  * Bayer € change                 bayer_value_mat - bayer_value_ya                     T1
@@ -30,6 +31,7 @@ export const CALC_FORMULAS: { metric: string; formula: string; from: string }[] 
     from: 'T1',
   },
   { metric: 'Category growth 1y', formula: 'SUM(value_mat) / SUM(value_ya) − 1', from: 'T1' },
+  { metric: 'Category unit growth 1y', formula: 'SUM(units_mat) / SUM(units_ya) − 1', from: 'T1' },
   {
     metric: 'Bayer share of segment',
     formula: 'bayer_value_mat / value_mat (and same for YA, 3YA)',

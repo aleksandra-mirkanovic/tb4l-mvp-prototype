@@ -10,7 +10,6 @@ import {
   CALC_COPA_PROFIT_POOL_META,
   CALC_COPA_SCORECARD,
   CALC_COPA_SCORECARD_META,
-  CALC_COPA_SCORECARD_NOTE,
   CALC_COPA_SET,
   CALC_COPA_STACK,
   CALC_COPA_STACK_META,
@@ -358,185 +357,266 @@ function MarginKpiTable() {
   );
 }
 
-function BainScorecard() {
+/** Net Sales growth % by brand — one KPI, portfolio average as reference. */
+function GrowthRankingChart() {
   const { wrap, tip, show, hide } = useChartTip();
   const [focus, setFocus] = useState<string | null>(null);
-  const rows = CALC_COPA_SCORECARD;
-  const meta = CALC_COPA_SCORECARD_META;
-  const gs = rows.map((r) => r.revenueGrowthPct ?? 0);
-  const gms = rows.map((r) => r.grossMarginPct ?? 0);
-  const xmin = Math.min(-6, ...gs) - 2;
-  const xmax = Math.max(14, ...gs) + 2;
-  const ymin = Math.min(70, ...gms) - 3;
-  const ymax = Math.max(92, ...gms) + 3;
-  const W = 640;
-  const H = 300;
-  const L = 52;
-  const R = 20;
-  const T = 28;
-  const B = 40;
+  const rows = [...CALC_COPA_SCORECARD].sort(
+    (a, b) => (b.revenueGrowthPct ?? 0) - (a.revenueGrowthPct ?? 0),
+  );
+  const portfolio = CALC_COPA_SCORECARD_META.portfolioGrowthPct ?? 0;
+  const vals = rows.map((r) => r.revenueGrowthPct ?? 0);
+  const maxAbs = Math.max(...vals.map((v) => Math.abs(v)), Math.abs(portfolio), 4);
+  const W = 560;
+  const H = 220;
+  const L = 88;
+  const R = 52;
+  const T = 16;
+  const B = 28;
   const iw = W - L - R;
   const ih = H - T - B;
-  const xAt = (v: number) => L + ((v - xmin) / (xmax - xmin)) * iw;
-  const yAt = (v: number) => T + ih - ((v - ymin) / (ymax - ymin)) * ih;
-  const rAt = (contrib: number) => 12 + Math.sqrt(Math.max(contrib, 1)) * 2.4;
-  const gx = meta.portfolioGrowthPct ?? 0;
-  const gy = meta.portfolioGmPct ?? 0;
+  const rowH = ih / rows.length;
+  const x0 = L + iw / 2;
+  const xAt = (v: number) => x0 + (v / maxAbs) * (iw / 2);
 
   return (
-    <div>
-      <p className="m360-rep__lede">{CALC_COPA_SCORECARD_NOTE}</p>
-      <p className="m360-rep__lede">
-        Portfolio growth {fmtPct(meta.portfolioGrowthPct)} · portfolio GM {fmtShare(meta.portfolioGmPct)} · portfolio
-        EBIT {fmtShare(meta.portfolioEbitPct)}. Bubble size = revenue contribution %.
+    <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
+      <p className="copa-simple__ref">
+        Portfolio growth {fmtPct(portfolio)} — dashed line. Bars are Net Sales growth % versus prior calendar year.
       </p>
-      <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Bain portfolio scorecard matrix">
-          <rect x={L} y={T} width={iw} height={ih} className="copa-bain__bg" />
-          <line className="m360-viz__grid" x1={L} x2={W - R} y1={yAt(gy)} y2={yAt(gy)} strokeDasharray="4 4" />
-          <line className="m360-viz__grid" x1={xAt(gx)} x2={xAt(gx)} y1={T} y2={T + ih} strokeDasharray="4 4" />
-          <text className="copa-bain__q" x={xAt((gx + xmax) / 2)} y={T + 14}>
-            Growth / rich
-          </text>
-          <text className="copa-bain__q" x={xAt((xmin + gx) / 2)} y={T + 14}>
-            Slow / rich
-          </text>
-          <text className="copa-bain__q" x={xAt((gx + xmax) / 2)} y={T + ih - 8}>
-            Growth / thin
-          </text>
-          <text className="copa-bain__q" x={xAt((xmin + gx) / 2)} y={T + ih - 8}>
-            Slow / thin
-          </text>
-          {rows.map((r) => {
-            const g = r.revenueGrowthPct ?? 0;
-            const gm = r.grossMarginPct ?? 0;
-            const on = !focus || focus === r.name;
-            const color = BRAND_COLOR[r.name];
-            return (
-              <g
-                key={r.name}
-                opacity={on ? 1 : 0.2}
-                onMouseEnter={() => setFocus(r.name)}
-                onMouseMove={(e) =>
-                  show(e, {
-                    color,
-                    title: `${r.name} · ${r.role}`,
-                    lines: [
-                      `Revenue growth  ${fmtPct(r.revenueGrowthPct)}`,
-                      `Gross margin  ${fmtShare(r.grossMarginPct)}`,
-                      `EBIT margin  ${fmtShare(r.ebitMarginPct)}`,
-                      `Rev. contrib.  ${fmtShare(r.revenueContribPct)}`,
-                      `Profit contrib.  ${fmtShare(r.profitContribPct)}`,
-                      `Mix change  ${fmtPp(r.mixChangePp)}`,
-                      `Rank ${r.revenueRank} · Pareto ${r.paretoCategory}`,
-                    ],
-                  })
-                }
-                onMouseLeave={() => setFocus(null)}
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Revenue growth ranking by brand">
+        <line className="m360-viz__ref" x1={x0} x2={x0} y1={T} y2={T + ih} />
+        <line
+          className="m360-viz__grid"
+          x1={xAt(portfolio)}
+          x2={xAt(portfolio)}
+          y1={T}
+          y2={T + ih}
+          strokeDasharray="4 4"
+        />
+        <text className="m360-viz__tick" x={xAt(portfolio)} y={H - 8} textAnchor="middle">
+          Portfolio {fmtPct(portfolio)}
+        </text>
+        {rows.map((r, i) => {
+          const g = r.revenueGrowthPct ?? 0;
+          const y = T + i * rowH;
+          const x = xAt(g);
+          const barX = Math.min(x, x0);
+          const barW = Math.max(2, Math.abs(x - x0));
+          const on = !focus || focus === r.name;
+          const color = BRAND_COLOR[r.name];
+          return (
+            <g
+              key={r.name}
+              opacity={on ? 1 : 0.2}
+              onMouseEnter={() => setFocus(r.name)}
+              onMouseMove={(e) =>
+                show(e, {
+                  color,
+                  title: r.name,
+                  lines: [
+                    `Revenue growth  ${fmtPct(r.revenueGrowthPct)}`,
+                    `Versus portfolio  ${fmtPct(g - portfolio)}`,
+                    `Role  ${r.role}`,
+                  ],
+                })
+              }
+              onMouseLeave={() => setFocus(null)}
+            >
+              <text className="m360-viz__tick" x={L - 8} y={y + rowH / 2 + 4} textAnchor="end">
+                {r.name}
+              </text>
+              <rect
+                className="m360-viz__bar"
+                x={barX}
+                y={y + 6}
+                width={barW}
+                height={Math.max(10, rowH - 14)}
+                rx="3"
+                fill={color}
+              />
+              <text
+                className={`m360-viz__tick ${tone(g)}`}
+                x={g >= 0 ? barX + barW + 6 : barX - 6}
+                y={y + rowH / 2 + 4}
+                textAnchor={g >= 0 ? 'start' : 'end'}
               >
-                <circle cx={xAt(g)} cy={yAt(gm)} r={rAt(r.revenueContribPct)} fill={color} opacity="0.85" />
-                <text className="copa-bain__label" x={xAt(g)} y={yAt(gm) + rAt(r.revenueContribPct) + 12} textAnchor="middle">
-                  {r.name}
-                </text>
-              </g>
-            );
-          })}
-          <text className="m360-viz__tick" x={L + iw / 2} y={H - 8} textAnchor="middle">
-            Revenue growth % →
-          </text>
-          <text
-            className="m360-viz__tick"
-            x={14}
-            y={T + ih / 2}
-            textAnchor="middle"
-            transform={`rotate(-90 14 ${T + ih / 2})`}
-          >
-            Gross margin % →
-          </text>
-        </svg>
-        <ChartTip tip={tip} />
-      </div>
+                {fmtPct(r.revenueGrowthPct)}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <ChartTip tip={tip} />
+    </div>
+  );
+}
 
-      <div className="copa-stack__table-wrap">
-        <table className="copa-stack__table copa-score">
-          <thead>
-            <tr>
-              <th>Brand</th>
-              <th>Bain role</th>
-              <th>Rev. contrib.</th>
-              <th>Profit contrib.</th>
-              <th>Rev. growth</th>
-              <th>GM %</th>
-              <th>EBIT %</th>
-              <th>Mix change</th>
-              <th>Rank</th>
-              <th>Pareto</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.name}>
-                <td>{r.name}</td>
-                <td>
-                  <span className={`copa-role copa-role--${r.role.replace(/\s+/g, '-').toLowerCase()}`}>{r.role}</span>
-                </td>
-                <td>{fmtShare(r.revenueContribPct)}</td>
-                <td>{fmtShare(r.profitContribPct)}</td>
-                <td className={tone(r.revenueGrowthPct)}>{fmtPct(r.revenueGrowthPct)}</td>
-                <td>{fmtShare(r.grossMarginPct)}</td>
-                <td>{fmtShare(r.ebitMarginPct)}</td>
-                <td className={tone(r.mixChangePp)}>{fmtPp(r.mixChangePp)}</td>
-                <td>{r.revenueRank}</td>
-                <td>{r.paretoCategory}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+/** Gross margin % and EBIT % — two simple bar columns, not a matrix. */
+function MarginQualityChart() {
+  const { wrap, tip, show, hide } = useChartTip();
+  const [focus, setFocus] = useState<string | null>(null);
+  const rows = [...CALC_COPA_SCORECARD].sort(
+    (a, b) => (b.grossMarginPct ?? 0) - (a.grossMarginPct ?? 0),
+  );
+  const meta = CALC_COPA_SCORECARD_META;
+  const maxGm = Math.max(...rows.map((r) => r.grossMarginPct ?? 0), meta.portfolioGmPct ?? 0, 1);
+  const maxEbit = Math.max(...rows.map((r) => r.ebitMarginPct ?? 0), meta.portfolioEbitPct ?? 0, 1);
+
+  return (
+    <div className="m360-viz copa-margin-simple" ref={wrap} onMouseLeave={hide}>
+      <p className="copa-simple__ref">
+        Portfolio GM {fmtShare(meta.portfolioGmPct)} · portfolio EBIT {fmtShare(meta.portfolioEbitPct)}. Sorted by
+        gross margin.
+      </p>
+      <ul className="copa-margin-simple__list">
+        {rows.map((r) => {
+          const on = !focus || focus === r.name;
+          const color = BRAND_COLOR[r.name];
+          return (
+            <li
+              key={r.name}
+              className={on ? undefined : 'is-off'}
+              style={{ ['--brand' as string]: color }}
+              onMouseEnter={() => setFocus(r.name)}
+              onMouseMove={(e) =>
+                show(e, {
+                  color,
+                  title: r.name,
+                  lines: [
+                    `Gross margin  ${fmtShare(r.grossMarginPct)}`,
+                    `EBIT margin  ${fmtShare(r.ebitMarginPct)}`,
+                    `Role  ${r.role}`,
+                  ],
+                })
+              }
+              onMouseLeave={() => setFocus(null)}
+            >
+              <header>
+                <h4>{r.name}</h4>
+                <span className={`copa-role copa-role--${r.role.replace(/\s+/g, '-').toLowerCase()}`}>{r.role}</span>
+              </header>
+              <div className="copa-margin-simple__metrics">
+                <div>
+                  <span className="copa-margin-simple__lab">Gross margin %</span>
+                  <div className="copa-margin-simple__bar-wrap">
+                    <b style={{ width: `${((r.grossMarginPct ?? 0) / maxGm) * 100}%` }} />
+                  </div>
+                  <strong>{fmtShare(r.grossMarginPct)}</strong>
+                </div>
+                <div>
+                  <span className="copa-margin-simple__lab">EBIT margin %</span>
+                  <div className="copa-margin-simple__bar-wrap">
+                    <b className="is-ebit" style={{ width: `${((r.ebitMarginPct ?? 0) / maxEbit) * 100}%` }} />
+                  </div>
+                  <strong>{fmtShare(r.ebitMarginPct)}</strong>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <ChartTip tip={tip} />
+    </div>
+  );
+}
+
+/** Revenue share vs profit share — two bars per brand, one contribution question. */
+function ContributionSplitChart() {
+  const { wrap, tip, show, hide } = useChartTip();
+  const [focus, setFocus] = useState<string | null>(null);
+  const [showRev, setShowRev] = useState(true);
+  const [showProfit, setShowProfit] = useState(true);
+  const rows = [...CALC_COPA_SCORECARD].sort((a, b) => b.revenueContribPct - a.revenueContribPct);
+  const maxShare = Math.max(
+    ...rows.flatMap((r) => [showRev ? r.revenueContribPct : 0, showProfit ? r.profitContribPct : 0]),
+    1,
+  );
+
+  return (
+    <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
+      <ul className="copa-contrib">
+        {rows.map((r) => {
+          const on = !focus || focus === r.name;
+          const color = BRAND_COLOR[r.name];
+          return (
+            <li
+              key={r.name}
+              className={on ? undefined : 'is-off'}
+              onMouseEnter={() => setFocus(r.name)}
+              onMouseMove={(e) =>
+                show(e, {
+                  color,
+                  title: `${r.name} · ${r.role}`,
+                  lines: [
+                    `Revenue share  ${fmtShare(r.revenueContribPct)}`,
+                    `Profit share  ${fmtShare(r.profitContribPct)}`,
+                    `Mix change  ${fmtPp(r.mixChangePp)}`,
+                  ],
+                })
+              }
+              onMouseLeave={() => setFocus(null)}
+            >
+              <span>{r.name}</span>
+              <div className="copa-contrib__bars">
+                {showRev ? (
+                  <div className="copa-contrib__row">
+                    <i className="is-rev" style={{ width: `${(r.revenueContribPct / maxShare) * 100}%`, background: color }} />
+                    <small>Rev {fmtShare(r.revenueContribPct)}</small>
+                  </div>
+                ) : null}
+                {showProfit ? (
+                  <div className="copa-contrib__row">
+                    <i
+                      className="is-profit"
+                      style={{ width: `${(r.profitContribPct / maxShare) * 100}%`, background: color }}
+                    />
+                    <small>Profit {fmtShare(r.profitContribPct)}</small>
+                  </div>
+                ) : null}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <ul className="m360-viz__legend">
+        <li>
+          <button
+            type="button"
+            className={showRev ? 'is-on' : 'is-off'}
+            aria-pressed={showRev}
+            onClick={() => setShowRev((v) => (showProfit || !v ? !v : v))}
+          >
+            <i className="is-mat" />
+            Revenue share
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            className={showProfit ? 'is-on' : 'is-off'}
+            aria-pressed={showProfit}
+            onClick={() => setShowProfit((v) => (showRev || !v ? !v : v))}
+          >
+            <i className="is-ya" />
+            Profit share
+          </button>
+        </li>
+      </ul>
       <ul className="copa-score__why">
-        {rows.map((r) => (
+        {CALC_COPA_SCORECARD.map((r) => (
           <li key={`${r.name}-why`}>
             <b>{r.name}.</b> {r.roleWhy}
           </li>
         ))}
       </ul>
+      <ChartTip tip={tip} />
     </div>
   );
 }
 
-const ROLE_MATRIX_COLOR: Record<string, string> = {
-  'Growth Driver': '#286436',
-  'Profit Driver': '#00607e',
-  Maintain: '#8aa0ad',
-  Declining: '#d30f4b',
-  Rationalize: '#c45c26',
-};
-
-function PositioningMatrix() {
-  const { wrap, tip, show, hide } = useChartTip();
-  const [focus, setFocus] = useState<string | null>(null);
-  const rows = CALC_COPA_SCORECARD;
-  const meta = CALC_COPA_SCORECARD_META;
-  const gs = rows.map((r) => r.revenueGrowthPct ?? 0);
-  const es = rows.map((r) => r.ebitMarginPct ?? 0);
-  const xmin = Math.min(-6, ...gs) - 2;
-  const xmax = Math.max(14, ...gs) + 2;
-  const ymin = Math.min(40, ...es) - 4;
-  const ymax = Math.max(70, ...es) + 4;
-  const W = 640;
-  const H = 300;
-  const L = 52;
-  const R = 20;
-  const T = 28;
-  const B = 40;
-  const iw = W - L - R;
-  const ih = H - T - B;
-  const xAt = (v: number) => L + ((v - xmin) / (xmax - xmin)) * iw;
-  const yAt = (v: number) => T + ih - ((v - ymin) / (ymax - ymin)) * ih;
-  const rAt = (contrib: number) => 11 + Math.sqrt(Math.max(contrib, 1)) * 2.2;
-  const gx = meta.portfolioGrowthPct ?? 0;
-  const ey = meta.portfolioEbitPct ?? 0;
-
+/** Role cards only — no bubble matrix. */
+function ClassificationRoles() {
   return (
     <div>
       <p className="m360-rep__lede">{CALC_COPA_CLASSIFICATION_NOTE}</p>
@@ -553,7 +633,7 @@ function PositioningMatrix() {
                   <li key={b.name}>
                     <b>{b.name}</b>
                     <span>
-                      {fmtPct(b.revenueGrowthPct)} · GM {fmtShare(b.grossMarginPct)} · EBIT {fmtShare(b.ebitMarginPct)}
+                      Growth {fmtPct(b.revenueGrowthPct)} · GM {fmtShare(b.grossMarginPct)}
                     </span>
                   </li>
                 ))
@@ -561,107 +641,6 @@ function PositioningMatrix() {
             </ul>
           </article>
         ))}
-      </div>
-
-      <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Portfolio positioning matrix">
-          <rect
-            x={L}
-            y={T}
-            width={Math.max(0, xAt(gx) - L)}
-            height={Math.max(0, yAt(ey) - T)}
-            className="copa-pos__zone copa-pos__zone--slow-rich"
-          />
-          <rect
-            x={xAt(gx)}
-            y={T}
-            width={Math.max(0, W - R - xAt(gx))}
-            height={Math.max(0, yAt(ey) - T)}
-            className="copa-pos__zone copa-pos__zone--fast-rich"
-          />
-          <rect
-            x={L}
-            y={yAt(ey)}
-            width={Math.max(0, xAt(gx) - L)}
-            height={Math.max(0, T + ih - yAt(ey))}
-            className="copa-pos__zone copa-pos__zone--slow-thin"
-          />
-          <rect
-            x={xAt(gx)}
-            y={yAt(ey)}
-            width={Math.max(0, W - R - xAt(gx))}
-            height={Math.max(0, T + ih - yAt(ey))}
-            className="copa-pos__zone copa-pos__zone--fast-thin"
-          />
-          <line className="m360-viz__grid" x1={L} x2={W - R} y1={yAt(ey)} y2={yAt(ey)} strokeDasharray="4 4" />
-          <line className="m360-viz__grid" x1={xAt(gx)} x2={xAt(gx)} y1={T} y2={T + ih} strokeDasharray="4 4" />
-          <text className="copa-bain__q" x={xAt((gx + xmax) / 2)} y={T + 14}>
-            Above portfolio growth
-          </text>
-          <text className="copa-bain__q" x={xAt((xmin + gx) / 2)} y={T + 14}>
-            Below portfolio growth
-          </text>
-          {rows.map((r) => {
-            const g = r.revenueGrowthPct ?? 0;
-            const e = r.ebitMarginPct ?? 0;
-            const on = !focus || focus === r.name;
-            const color = ROLE_MATRIX_COLOR[r.role] ?? BRAND_COLOR[r.name];
-            return (
-              <g
-                key={r.name}
-                opacity={on ? 1 : 0.2}
-                onMouseEnter={() => setFocus(r.name)}
-                onMouseMove={(e) =>
-                  show(e, {
-                    color,
-                    title: `${r.name} · ${r.role}`,
-                    lines: [
-                      `Class  ${r.role}`,
-                      `Revenue growth  ${fmtPct(r.revenueGrowthPct)}`,
-                      `EBIT margin  ${fmtShare(r.ebitMarginPct)}`,
-                      `Gross margin  ${fmtShare(r.grossMarginPct)}`,
-                      `Rev. contrib.  ${fmtShare(r.revenueContribPct)}`,
-                      r.roleWhy,
-                    ],
-                  })
-                }
-                onMouseLeave={() => setFocus(null)}
-              >
-                <circle cx={xAt(g)} cy={yAt(e)} r={rAt(r.revenueContribPct)} fill={color} opacity="0.9" />
-                <text
-                  className="copa-bain__label"
-                  x={xAt(g)}
-                  y={yAt(e) + rAt(r.revenueContribPct) + 12}
-                  textAnchor="middle"
-                >
-                  {r.name}
-                </text>
-              </g>
-            );
-          })}
-          <text className="m360-viz__tick" x={L + iw / 2} y={H - 8} textAnchor="middle">
-            Revenue growth % →
-          </text>
-          <text
-            className="m360-viz__tick"
-            x={14}
-            y={T + ih / 2}
-            textAnchor="middle"
-            transform={`rotate(-90 14 ${T + ih / 2})`}
-          >
-            EBIT margin % →
-          </text>
-        </svg>
-        <ul className="m360-viz__legend">
-          {CALC_COPA_CLASSIFICATION.map((c) => (
-            <li key={c.role}>
-              <i style={{ background: ROLE_MATRIX_COLOR[c.role] }} />
-              {c.role}
-              {c.brands.length ? ` (${c.brands.map((b) => b.name).join(', ')})` : ''}
-            </li>
-          ))}
-        </ul>
-        <ChartTip tip={tip} />
       </div>
     </div>
   );
@@ -1103,28 +1082,68 @@ export function CopaReport() {
         Portfolio Scorecard
       </h3>
       <p className="m360-rep__lede">
-        Bain-style view from OAuth COPA. Bubbles sit on revenue growth × gross margin versus the portfolio averages.
-        Table holds contribution, EBIT margin, mix change, rank and Pareto.
+        Same Bain roles from OAuth COPA, split into three simple views: growth ranking, margin quality, then revenue
+        versus profit contribution. No bubble matrix.
       </p>
       <div className="copa-chart-stack">
         <ChartWithHypotheses
           wide
-          title="Bain Scorecard"
-          caption="Dashed lines are portfolio growth and portfolio average GM %. Bubble size is revenue contribution %. Roles use Declining → Growth Driver → Profit Driver → Rationalize → Maintain."
+          title="Growth ranking"
+          caption={`Net Sales growth % by brand. Dashed line is portfolio growth ${fmtPct(CALC_COPA_SCORECARD_META.portfolioGrowthPct)}.`}
           hypotheses={[
             {
-              title: `${h.growthDriver?.name ?? 'Growth Driver'} sits in the growth / rich quadrant`,
-              see: `What we see. ${h.growthDriver?.name ?? '—'} role ${h.growthDriver?.role ?? '—'}: growth ${fmtPct(h.growthDriver?.revenueGrowthPct ?? null)}, GM ${fmtShare(h.growthDriver?.grossMarginPct ?? null)}, mix change ${fmtPp(h.growthDriver?.mixChangePp ?? null)}.`,
-              hyp: 'The Bain map says the portfolio’s growth job and a large bubble are the same brand. Diversifying growth away from that bubble is not visible in this extract.',
+              title: `${h.growthDriver?.name ?? 'Growth Driver'} leads the growth ranking (${fmtPct(h.growthDriver?.revenueGrowthPct ?? null)})`,
+              see: `What we see. Sorted by growth: ${h.growthDriver?.name ?? '—'} is above portfolio ${fmtPct(CALC_COPA_SCORECARD_META.portfolioGrowthPct)}. ${h.declining?.name ?? '—'} is ${fmtPct(h.declining?.revenueGrowthPct ?? null)}.`,
+              hyp: 'The growth job in this set sits on one brand. If that brand slows, set growth weakens at once — the ranking makes the concentration obvious without a matrix.',
             },
             {
-              title: `${h.profitDriver?.name ?? 'Profit Driver'} is rich but slow; ${h.declining?.name ?? 'Declining'} is rich and down`,
-              see: `What we see. ${h.profitDriver?.name ?? '—'} ${h.profitDriver?.role ?? '—'} with GM ${fmtShare(h.profitDriver?.grossMarginPct ?? null)}. ${h.declining?.name ?? '—'} ${h.declining?.role ?? '—'} with growth ${fmtPct(h.declining?.revenueGrowthPct ?? null)}. ${h.maintain?.name ?? '—'} is ${h.maintain?.role ?? 'Maintain'}.`,
-              hyp: 'High GM does not protect top-line. One rich brand is still declining; another is profit-dense but not the growth driver. Roles on the scorecard are different jobs, not one ranking.',
+              title: `${h.declining?.name ?? 'Declining brand'} is the only negative bar`,
+              see: `What we see. ${h.declining?.name ?? '—'} growth ${fmtPct(h.declining?.revenueGrowthPct ?? null)} versus portfolio ${fmtPct(CALC_COPA_SCORECARD_META.portfolioGrowthPct)}.`,
+              hyp: 'Negative growth is a top-line job of its own. Do not average it into a “Digestive is fine” story.',
             },
           ]}
         >
-          <BainScorecard />
+          <GrowthRankingChart />
+        </ChartWithHypotheses>
+
+        <ChartWithHypotheses
+          wide
+          title="Margin quality"
+          caption={`Gross margin % and EBIT margin % by brand versus portfolio GM ${fmtShare(CALC_COPA_SCORECARD_META.portfolioGmPct)} and EBIT ${fmtShare(CALC_COPA_SCORECARD_META.portfolioEbitPct)}.`}
+          hypotheses={[
+            {
+              title: `${h.profitDriver?.name ?? 'Profit Driver'} is rich on GM (${fmtShare(h.profitDriver?.grossMarginPct ?? null)}) but not the growth leader`,
+              see: `What we see. ${h.profitDriver?.name ?? '—'} GM ${fmtShare(h.profitDriver?.grossMarginPct ?? null)}, EBIT ${fmtShare(h.profitDriver?.ebitMarginPct ?? null)}. ${h.growthDriver?.name ?? '—'} is the growth brand, not always the richest margin.`,
+              hyp: 'Margin quality and growth are different jobs. A rich bar here does not mean that brand is carrying set growth.',
+            },
+            {
+              title: `${h.declining?.name ?? 'Declining brand'} stays rich on EBIT while growth is negative`,
+              see: `What we see. ${h.declining?.name ?? '—'} EBIT ${fmtShare(h.declining?.ebitMarginPct ?? null)} versus portfolio ${fmtShare(CALC_COPA_SCORECARD_META.portfolioEbitPct)}.`,
+              hyp: 'High EBIT % with negative growth is shrink-and-keep-quality until volume or price proves otherwise — not “healthy growth.”',
+            },
+          ]}
+        >
+          <MarginQualityChart />
+        </ChartWithHypotheses>
+
+        <ChartWithHypotheses
+          wide
+          title="Revenue vs profit contribution"
+          caption="Share of set Net Sales versus share of set Gross Profit. Toggle series. Role notes sit under the bars."
+          hypotheses={[
+            {
+              title: `${h.growthDriver?.name ?? 'Iberogast'} owns both revenue and profit weight`,
+              see: `What we see. ${h.growthDriver?.name ?? '—'} rev ${fmtShare(h.growthDriver?.revenueContribPct ?? null)}, profit ${fmtShare(h.growthDriver?.profitContribPct ?? null)}.`,
+              hyp: 'Concentration risk: one brand carries size and profit density together. Losing that bar redraws the whole contribution story.',
+            },
+            {
+              title: `Lefax revenue share (${fmtShare(h.lefax.revenueContribPct)}) exceeds profit share (${fmtShare(h.lefax.profitContribPct)})`,
+              see: 'What we see. On the paired bars Lefax is longer on revenue than on profit.',
+              hyp: 'Lefax dilutes portfolio margin quality even inside the large revenue band — contribution mismatch is the issue, not missing size.',
+            },
+          ]}
+        >
+          <ContributionSplitChart />
         </ChartWithHypotheses>
       </div>
 
@@ -1133,27 +1152,27 @@ export function CopaReport() {
       </h3>
       <p className="m360-rep__lede">
         OAuth COPA roles for this four-brand set. Growth Driver, Profit Driver, Maintain, Declining, Rationalize —
-        calculated first-match from Net Sales growth and Gross Margin versus the portfolio.
+        first-match from Net Sales growth and Gross Margin versus the portfolio. Cards only — no positioning bubble.
       </p>
       <div className="copa-chart-stack">
         <ChartWithHypotheses
           wide
-          title="Positioning Matrix"
-          caption="Bubbles on revenue growth % × EBIT margin %. Dashed lines are portfolio growth and portfolio average EBIT %. Colour = classification. Size = revenue contribution %."
+          title="Role cards"
+          caption="Each card is one role rule and the brands that match. Growth and GM on the card; EBIT stays in Margin quality above."
           hypotheses={[
             {
-              title: 'Classes split the map: growth job ≠ margin job ≠ maintain job',
+              title: 'Classes split the jobs: growth ≠ margin ≠ maintain ≠ decline',
               see: `What we see. Growth Driver ${h.growthDriver?.name ?? 'none'}; Profit Driver ${h.profitDriver?.name ?? 'none'}; Maintain ${h.maintain?.name ?? 'none'}; Declining ${h.declining?.name ?? 'none'}; Rationalize none in this set.`,
-              hyp: 'Treating the four brands as one “Digestive” story hides three different positions on growth × EBIT. Actions should follow class, not average the bubbles.',
+              hyp: 'Treating the four brands as one “Digestive” story hides different roles. Actions should follow class, not an average.',
             },
             {
-              title: `${h.declining?.name ?? 'Declining brand'} sits below zero growth with high EBIT margin`,
-              see: `What we see. ${h.declining?.name ?? '—'} EBIT ${fmtShare(h.declining?.ebitMarginPct ?? null)} versus portfolio EBIT ${fmtShare(CALC_COPA_SCORECARD_META.portfolioEbitPct)}.`,
-              hyp: 'Declining with a rich EBIT % is a shrink-and-keep-quality pattern until volume or price proves otherwise. Do not read high EBIT as “healthy growth.”',
+              title: `${h.declining?.name ?? 'Declining brand'} is Declining while ${h.profitDriver?.name ?? 'Profit Driver'} is Profit Driver`,
+              see: `What we see. ${h.declining?.name ?? '—'} growth ${fmtPct(h.declining?.revenueGrowthPct ?? null)}. ${h.profitDriver?.name ?? '—'} GM ${fmtShare(h.profitDriver?.grossMarginPct ?? null)}.`,
+              hyp: 'Rich margin and declining top-line are different cards. Do not read high GM as permission to ignore negative growth.',
             },
           ]}
         >
-          <PositioningMatrix />
+          <ClassificationRoles />
         </ChartWithHypotheses>
       </div>
 

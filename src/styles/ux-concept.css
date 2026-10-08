@@ -1,0 +1,353 @@
+/*
+ * UX concept styles — html[data-ux='concept']
+ * Revert: src/config/uxConcept.ts → UX_CONCEPT = false
+ *
+ * Chat (familiar) → purple #624963
+ * Hub (new)       → teal #00607E
+ * AI primary ask  → magenta #D30F4B (sparingly)
+ * Data / M360     → green #286436
+ */
+
+/* ── Semantic role flip vs earlier Hub=purple experiment ── */
+html[data-ux='concept'] {
+  --color-hub: #00607e;
+  --color-chat: #624963;
+  --tb4l-teal: #00607e;
+  --tb4l-purple: #624963;
+
+  --action-primary: #624963;
+  --action-primary-hover: #735574;
+  --action-primary-active: #523d54;
+  --action-secondary: #00607e;
+  --action-secondary-hover: #007694;
+
+  --chip-hub-bg: rgba(0, 96, 126, 0.12);
+  --chip-hub-border: rgba(0, 96, 126, 0.35);
+  --chip-hub-text: #00607e;
+
+  --chip-chat-bg: rgba(98, 73, 99, 0.12);
+  --chip-chat-border: rgba(98, 73, 99, 0.35);
+  --chip-chat-text: #624963;
+
+  --tint-hub: rgba(0, 96, 126, 0.1);
+  --tint-chat: rgba(98, 73, 99, 0.12);
+}
+
+html[data-ux='concept'][data-theme='dark'] {
+  --color-hub: #4db0c9;
+  --color-chat: #c9a3cc;
+  --chip-hub-bg: rgba(0, 96, 126, 0.22);
+  --chip-hub-border: #00607e;
+  --chip-hub-text: #9fdcee;
+  --chip-chat-bg: rgba(98, 73, 99, 0.28);
+  --chip-chat-border: #624963;
+  --chip-chat-text: #e4d4e6;
+  --tint-hub: rgba(0, 96, 126, 0.16);
+  --tint-chat: rgba(98, 73, 99, 0.2);
+}
+
+/* Chat chrome → purple (familiar product identity) */
+html[data-ux='concept'] .btn-chat,
+html[data-ux='concept'] .chat-sidebar__new,
+html[data-ux='concept'] .chat-sidebar-rail__btn--primary,
+html[data-ux='concept'] .welcome-ask__send {
+  background: #624963 !important;
+  border-color: #624963 !important;
+  color: #fff !important;
+}
+
+html[data-ux='concept'] .btn-chat:hover:not(:disabled),
+html[data-ux='concept'] .chat-sidebar__new:hover:not(:disabled),
+html[data-ux='concept'] .chat-sidebar-rail__btn--primary:hover,
+html[data-ux='concept'] .welcome-ask__send:hover:not(:disabled) {
+  background: #735574 !important;
+  border-color: #735574 !important;
+}
+
+html[data-ux='concept'] .chat-composer-wrap {
+  border-color: rgba(98, 73, 99, 0.45) !important;
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-ux='concept'] .chat-composer-wrap:focus-within {
+  border-color: #624963 !important;
+  box-shadow: 0 0 0 3px rgba(98, 73, 99, 0.25);
+}
+
+html[data-ux='concept'] .chat-recent-row.is-active {
+  background: var(--tint-chat);
+  border-left-color: #624963;
+}
+
+html[data-ux='concept'] .welcome-hero__greeting,
+html[data-ux='concept'] .badge-chat {
+  color: var(--chip-chat-text);
+}
+
+html[data-ux='concept'] .badge-chat {
+  background: var(--chip-chat-bg);
+  border-color: var(--chip-chat-border);
+}
+
+html[data-ux='concept'] .main-nav__link--chat.is-active {
+  background: rgba(98, 73, 99, 0.35) !important;
+  box-shadow: inset 0 -2px 0 #624963;
+}
+
+/* Hub chrome → teal (new experience identity) */
+html[data-ux='concept'] .app-main--hub .hub-workspace__track--docs {
+  border-top-color: #00607e;
+  background: color-mix(in srgb, #00607e 8%, var(--bg-elevated));
+}
+
+html[data-ux='concept'] .app-main--hub .hub-loop__num,
+html[data-ux='concept'] .app-main--hub .hub-section-nav__link.is-active,
+html[data-ux='concept'] .app-main--hub .section-tile__cta,
+html[data-ux='concept'] .app-main--hub .document-card__select input:checked + .document-card__check {
+  background: #00607e !important;
+  border-color: #00607e !important;
+  color: #fff !important;
+}
+
+html[data-ux='concept'] .app-main--hub .document-card__check {
+  border-color: #00607e;
+}
+
+html[data-ux='concept'] .app-main--hub .document-card.is-selected {
+  border-color: #00607e !important;
+  box-shadow: 0 0 0 1px #00607e, var(--shadow-sm) !important;
+  background: color-mix(in srgb, #00607e 10%, var(--surface-primary));
+}
+
+html[data-ux='concept'] .app-main--hub .selected-bar {
+  border-color: #00607e;
+  background: color-mix(in srgb, #00607e 8%, var(--surface-elevated));
+}
+
+html[data-ux='concept'] .app-main--hub .selected-bar__info strong {
+  color: var(--chip-hub-text);
+}
+
+/* Ask-in-Chat CTA stays Chat purple (hand-off to familiar product) */
+html[data-ux='concept'] .app-main--hub .selected-bar__cta,
+html[data-ux='concept'] .app-main--hub .selected-bar .btn-primary {
+  background: #624963 !important;
+  border-color: transparent !important;
+}
+
+html[data-ux='concept'] .app-main--hub .browse-page__header,
+html[data-ux='concept'] .app-main--hub .section-hero,
+html[data-ux='concept'] .app-main--hub .hub-section-nav {
+  background: var(--tint-hub);
+  border-color: var(--chip-hub-border);
+  border-left-color: #00607e;
+}
+
+html[data-ux='concept'] .app-main--hub .section-tile {
+  border-left-color: #00607e;
+}
+
+html[data-ux='concept'] .app-main--hub .hub-section-nav__link.is-active:hover {
+  background: #005066 !important;
+  border-color: #005066 !important;
+  color: #fff !important;
+}
+
+html[data-ux='concept'] .main-nav__link--hub.is-active {
+  background: rgba(0, 96, 126, 0.35) !important;
+  box-shadow: inset 0 -2px 0 #00607e;
+}
+
+html[data-ux='concept'] .summary-cover {
+  background: linear-gradient(145deg, #00607e 0%, #10384f 100%);
+}
+
+html[data-ux='concept'] .badge-hub {
+  background: var(--chip-hub-bg);
+  border-color: var(--chip-hub-border);
+  color: var(--chip-hub-text);
+}
+
+/* Homepage concept layout helpers */
+html[data-ux='concept'] .welcome-hero__cta-primary {
+  background: #00607e;
+  box-shadow: 0 4px 14px rgba(0, 96, 126, 0.28);
+}
+
+html[data-ux='concept'] .welcome-hero__cta-primary:hover {
+  background: #007694;
+}
+
+html[data-ux='concept'] .welcome-hero__cta-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border-default);
+  background: var(--surface-primary);
+  color: var(--text-primary) !important;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none !important;
+}
+
+html[data-ux='concept'] .welcome-hero__cta-secondary:hover {
+  background: var(--bg-elevated);
+  text-decoration: none !important;
+}
+
+html[data-ux='concept'] .welcome-new-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: rgba(0, 96, 126, 0.14);
+  color: #00607e;
+  border: 1px solid rgba(0, 96, 126, 0.28);
+  vertical-align: middle;
+}
+
+html[data-ux='concept'][data-theme='dark'] .welcome-new-badge {
+  color: #9fdcee;
+  background: rgba(0, 96, 126, 0.22);
+  border-color: rgba(0, 96, 126, 0.4);
+}
+
+html[data-ux='concept'] .welcome-platform__card--hub {
+  border-top-color: #00607e !important;
+}
+
+html[data-ux='concept'] .welcome-platform__card--chat {
+  border-top-color: #624963 !important;
+}
+
+html[data-ux='concept'] .welcome-platform__card--hub .welcome-platform__cta {
+  color: var(--color-hub) !important;
+}
+
+html[data-ux='concept'] .welcome-platform__card--chat .welcome-platform__cta {
+  color: var(--color-chat) !important;
+}
+
+html[data-ux='concept'] .welcome-guide__eyebrow,
+html[data-ux='concept'] .welcome-guide__num {
+  color: #fff;
+}
+
+html[data-ux='concept'] .welcome-guide__eyebrow {
+  color: #00607e;
+}
+
+html[data-ux='concept'] .welcome-guide__num {
+  background: #00607e;
+}
+
+html[data-ux='concept'] .welcome-improved-list {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-body);
+}
+
+/* Hub overview — section grid */
+html[data-ux='concept'] .hub-sections-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: var(--space-5);
+}
+
+html[data-ux='concept'] .hub-page__new-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #00607e;
+}
+
+html[data-ux='concept'] .chat-empty__whats-new {
+  display: block;
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--tint-hub);
+  border: 1px solid var(--chip-hub-border);
+  text-align: left;
+  max-width: 420px;
+}
+
+html[data-ux='concept'][data-theme='dark'] .hub-page__new-label {
+  color: #9fdcee;
+}
+
+html[data-ux='concept'] .chat-empty__whats-new strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-hub);
+  margin-bottom: 6px;
+}
+
+html[data-ux='concept'] .chat-empty__whats-new ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+html[data-ux='concept'] .welcome-hero__shell,
+html[data-ux='concept'] .welcome-platform__inner,
+html[data-ux='concept'] .welcome-guide__inner,
+html[data-ux='concept'] .welcome-ask--panel {
+  width: min(1120px, calc(100% - 40px));
+  margin-inline: auto;
+}
+
+html[data-ux='concept'] .app-main--hub {
+  max-width: 1200px;
+}
+
+html[data-ux='concept'] .app-main--hub .section-hero,
+html[data-ux='concept'] .app-main--hub .hub-workspace,
+html[data-ux='concept'] .app-main--hub .hub-sections-block,
+html[data-ux='concept'] .app-main--hub .hub-section-nav,
+html[data-ux='concept'] .app-main--hub .browse-page__header {
+  width: 100%;
+}
+
+html[data-ux='concept'] .welcome-platform__grid {
+  align-items: stretch;
+}
+
+html[data-ux='concept'] .welcome-platform__card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+html[data-ux='concept'] .welcome-platform__cta {
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+html[data-ux='concept'] .hub-sections-grid .section-tile {
+  min-height: 72px;
+  align-items: center;
+}
+

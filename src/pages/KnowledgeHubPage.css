@@ -1,10 +1,10 @@
-/* TB4L Hub workspace — Knowledge #624963 · Data #286436 · Chat #D30F4B · Nav #00607E */
+/* TB4L Hub workspace — Knowledge green · Chat pink · Platform navy */
 
 .hub-page--workspace {
-  --hub-knowledge: #624963;
+  --hub-knowledge: #286436;
   --hub-data: #286436;
   --hub-chat: #d30f4b;
-  --hub-nav: #00607e;
+  --hub-nav: #10384f;
 }
 
 .hub-page .hub-section-nav {
@@ -444,10 +444,10 @@
 }
 
 [data-theme='dark'] .hub-page--workspace {
-  --hub-knowledge: #c9a3cc;
-  --hub-data: #6dd99a;
+  --hub-knowledge: #5aaa72;
+  --hub-data: #5aaa72;
   --hub-chat: #ff6b8a;
-  --hub-nav: #4fa8c9;
+  --hub-nav: #8aa0ad;
 }
 
 [data-theme='dark'] .hub-workspace-hero__eyebrow,

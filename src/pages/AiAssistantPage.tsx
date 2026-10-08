@@ -1,12 +1,24 @@
+import { useState } from 'react';
 import { NavLink, Navigate, useParams } from 'react-router-dom';
 import { CopaReport } from '../components/CopaReport';
 import { FinanceMcpAudit } from '../components/FinanceMcpAudit';
 import { M360MarketStory } from '../components/M360MarketStory';
 import { M360Report } from '../components/M360Report';
-import { SiriusTip } from '../components/SiriusTip';
+import { SiriusTip, type SiriusTable } from '../components/SiriusTip';
 import { CALC_FORMULAS, CAGR_3Y_NOTE } from '../data/m360Charts';
+import {
+  CALC_CHANNEL_FORMULAS,
+  M360_CHANNEL_BRANDS,
+  M360_CHANNEL_META,
+  M360_CHANNELS,
+} from '../data/m360ChannelRetrieval';
 import { COPA_FORMULAS, COPA_MISSING } from '../data/copaCharts';
 import { COPA_BRAND_YEARS, COPA_RETRIEVAL_PARAMS } from '../data/copaRetrieval';
+import {
+  M360_PROMPT_PLACEHOLDERS,
+  M360_REPLICATION_PROMPTS,
+  type ReplicationPrompt,
+} from '../data/m360ReplicationPrompts';
 import {
   M360_METADATA,
   M360_RETRIEVAL_PARAMS,
@@ -17,12 +29,14 @@ import {
 } from '../data/m360Retrieval';
 import './AiAssistantPage.css';
 
+const MARKET_CALC_FORMULAS = [...CALC_FORMULAS, ...CALC_CHANNEL_FORMULAS];
+
 function Td({
   table,
   field,
   children,
 }: {
-  table: 'T1' | 'T2' | 'T3' | 'T4';
+  table: SiriusTable;
   field: string;
   children: string | number;
 }) {
@@ -42,6 +56,33 @@ function cell(value: NullableNumber | string | number | undefined): string {
     return value.toLocaleString('en-US', { maximumFractionDigits: 2 });
   }
   return String(value);
+}
+
+function PromptBlock({ prompt }: { prompt: ReplicationPrompt }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(prompt.body);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1400);
+    } catch {
+      setCopied(false);
+    }
+  }
+  return (
+    <article className="ai-prompt">
+      <header className="ai-prompt__head">
+        <div>
+          <h3 className="ai-prompt__title">{prompt.title}</h3>
+          <p className="ai-prompt__purpose">{prompt.purpose}</p>
+        </div>
+        <button type="button" className="btn btn-ghost btn-sm" onClick={copy}>
+          {copied ? 'Copied' : 'Copy'}
+        </button>
+      </header>
+      <pre className="ai-prompt__body">{prompt.body}</pre>
+    </article>
+  );
 }
 
 export type AiAssistantVariant = 'classic' | 'v2';
@@ -257,7 +298,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
       </details>
       ) : (
       <details className="ai-raw">
-        <summary>Technical appendix — formulas, gaps, Sirius tables</summary>
+        <summary>Technical appendix — formulas, gaps, prompts, Sirius tables</summary>
         <p className="ai-raw__lede">
           For analysts. Brand-manager cards and charts above do not need this to be open.
         </p>
@@ -265,7 +306,8 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
         <details className="ai-raw__inner">
           <summary>CALC formulas</summary>
           <p className="ai-table-note">
-            Insights and the report only read these results. They do not compute extra metrics.
+            Insights and the report only read these results (T1/T2 segment metrics plus T-ch / T-ch-b channel
+            metrics). They do not compute extra metrics beyond this list.
           </p>
           <div className="ai-table-wrap">
             <table className="ai-table">
@@ -277,8 +319,8 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
                 </tr>
               </thead>
               <tbody>
-                {CALC_FORMULAS.map((row) => (
-                  <tr key={row.metric}>
+                {MARKET_CALC_FORMULAS.map((row) => (
+                  <tr key={`${row.from} · ${row.metric}`}>
                     <td>{row.metric}</td>
                     <td>{row.formula}</td>
                     <td>{row.from}</td>
@@ -293,7 +335,9 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           <summary>Not in this Sirius extract</summary>
           <ul className="m360-rep-na">
             <li>
-              <b>Channel stacked bar</b> Pharmacy / e-commerce / retail — N/A
+              <b>Channel grain still missing</b> — no customer / retailer grain; no drugstore or grocery for
+              Germany. Pharmacies + E-commerce (Mail Order) totals, price/volume drivers, and top-brand dynamics
+              are in the extract and shown in AI Assistant v2 · Channel dynamics (see T-ch / T-ch-b below).
             </li>
             <li>
               <b>Innovation bubble</b> — N/A
@@ -320,7 +364,43 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
         </details>
 
         <details className="ai-raw__inner">
-          <summary>Sirius retrieval tables T1–T4</summary>
+          <summary>Prompts — replicate this Market story for another brand</summary>
+          <p className="ai-table-note">
+            Use with an LLM that can call Sirius / CHDAA (or paste retrieval tables). Replace{' '}
+            <code>{'{{PLACEHOLDERS}}'}</code> first. Prompt 1 is system instructions (story order + chart
+            playbook). Prompt 8 is the one-shot. Prompt 9 shows the Iberogast fill used in this report.
+          </p>
+          <div className="ai-table-wrap">
+            <table className="ai-table">
+              <thead>
+                <tr>
+                  <th>Placeholder</th>
+                  <th>Meaning</th>
+                  <th>This report</th>
+                </tr>
+              </thead>
+              <tbody>
+                {M360_PROMPT_PLACEHOLDERS.map((row) => (
+                  <tr key={row.key}>
+                    <td>
+                      <code>{row.key}</code>
+                    </td>
+                    <td>{row.meaning}</td>
+                    <td>{row.example}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="ai-prompt-list">
+            {M360_REPLICATION_PROMPTS.map((prompt) => (
+              <PromptBlock key={prompt.id} prompt={prompt} />
+            ))}
+          </div>
+        </details>
+
+        <details className="ai-raw__inner">
+          <summary>Sirius retrieval tables T1–T4 · channels</summary>
         <section aria-labelledby="t3-heading">
         <h2 id="t3-heading" className="section-title">
           Table 3 · Metadata
@@ -482,6 +562,104 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
                     </SiriusTip>
                   </td>
                   <Td table="T4" field={`${row.id} · values`}>{row.values}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="tch-heading">
+        <h2 id="tch-heading" className="section-title">
+          Table · Channels
+        </h2>
+        <p className="ai-table-note">
+          {M360_CHANNEL_META.country} · {M360_CHANNEL_META.scope} · MAT ending {M360_CHANNEL_META.matEnd}.{' '}
+          {M360_CHANNEL_META.note} Source: {M360_CHANNEL_META.source}.
+        </p>
+        <div className="ai-table-wrap">
+          <table className="ai-table">
+            <thead>
+              <tr>
+                <th>channel</th>
+                <th>local_channel</th>
+                <th>value_eur_m</th>
+                <th>share_of_set_pct</th>
+                <th>value_growth_pct</th>
+                <th>unit_growth_pct</th>
+                <th>price_contrib_eur_m</th>
+                <th>volume_contrib_eur_m</th>
+                <th>new_pack_eur_m</th>
+                <th>new_product_eur_m</th>
+                <th>intersection_eur_m</th>
+                <th>abs_change_eur_m</th>
+                <th>pct_of_set_abs_growth</th>
+              </tr>
+            </thead>
+            <tbody>
+              {M360_CHANNELS.map((row) => (
+                <tr key={row.channel}>
+                  <Td table="T-ch" field={`${row.channel} · channel`}>{row.channel}</Td>
+                  <Td table="T-ch" field={`${row.channel} · local_channel`}>{row.localChannel}</Td>
+                  <Td table="T-ch" field={`${row.channel} · value_eur_m`}>{cell(row.valueEurM)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · share_of_set_pct`}>{cell(row.shareOfSetPct)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · value_growth_pct`}>{cell(row.valueGrowthPct)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · unit_growth_pct`}>{cell(row.unitGrowthPct)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · price_contrib_eur_m`}>{cell(row.priceContribEurM)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · volume_contrib_eur_m`}>{cell(row.volumeContribEurM)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · new_pack_eur_m`}>{cell(row.newPackEurM)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · new_product_eur_m`}>{cell(row.newProductEurM)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · intersection_eur_m`}>{cell(row.intersectionEurM)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · abs_change_eur_m`}>{cell(row.absChangeEurM)}</Td>
+                  <Td table="T-ch" field={`${row.channel} · pct_of_set_abs_growth`}>{cell(row.pctOfSetAbsGrowth)}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="tchb-heading">
+        <h2 id="tchb-heading" className="section-title">
+          Table · Channel brands (top 8 by value)
+        </h2>
+        <div className="ai-table-wrap">
+          <table className="ai-table">
+            <thead>
+              <tr>
+                <th>channel</th>
+                <th>rank</th>
+                <th>brand</th>
+                <th>is_bayer</th>
+                <th>value_eur_m</th>
+                <th>share_of_channel_pct</th>
+                <th>share_change_pp</th>
+                <th>value_growth_pct</th>
+                <th>unit_growth_pct</th>
+              </tr>
+            </thead>
+            <tbody>
+              {M360_CHANNEL_BRANDS.map((row) => (
+                <tr key={`${row.channel}-${row.rank}-${row.brand}`}>
+                  <Td table="T-ch-b" field={`${row.channel} · ${row.brand} · channel`}>{row.channel}</Td>
+                  <Td table="T-ch-b" field={`${row.channel} · ${row.brand} · rank`}>{row.rank}</Td>
+                  <Td table="T-ch-b" field={`${row.channel} · ${row.brand}`}>{row.brand}</Td>
+                  <Td table="T-ch-b" field={`${row.channel} · ${row.brand} · is_bayer`}>
+                    {row.isBayer ? 'Y' : 'N'}
+                  </Td>
+                  <Td table="T-ch-b" field={`${row.channel} · ${row.brand} · value_eur_m`}>{cell(row.valueEurM)}</Td>
+                  <Td table="T-ch-b" field={`${row.channel} · ${row.brand} · share_of_channel_pct`}>
+                    {cell(row.shareOfChannelPct)}
+                  </Td>
+                  <Td table="T-ch-b" field={`${row.channel} · ${row.brand} · share_change_pp`}>
+                    {cell(row.shareChangePp)}
+                  </Td>
+                  <Td table="T-ch-b" field={`${row.channel} · ${row.brand} · value_growth_pct`}>
+                    {cell(row.valueGrowthPct)}
+                  </Td>
+                  <Td table="T-ch-b" field={`${row.channel} · ${row.brand} · unit_growth_pct`}>
+                    {cell(row.unitGrowthPct)}
+                  </Td>
                 </tr>
               ))}
             </tbody>

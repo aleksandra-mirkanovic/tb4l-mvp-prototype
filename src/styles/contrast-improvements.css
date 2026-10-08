@@ -1,0 +1,182 @@
+/*
+ * Contrast / readability improvements — active when html[data-contrast='improved'].
+ * Revert via src/config/contrastImprovements.ts (CONTRAST_IMPROVEMENTS = false).
+ *
+ * Goals:
+ * - Muted / metadata text ≥ ~4.5:1 on surfaces
+ * - White label on filled buttons ≥ ~4.5:1
+ * - Clearer borders & disabled states (not color-only, not ultra-faint)
+ * - Slightly stronger surface hierarchy without restyling the product
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   Soft / default light theme token fixes
+   ═══════════════════════════════════════════════════════════════ */
+html[data-contrast='improved']:not([data-color-system='premium']):not([data-theme='dark']) {
+  --tb4l-dark-blue: #10384f;
+  --tb4l-teal: #00607e;
+  --tb4l-green: #286436;
+
+  --text-primary: #243038;
+  --text-body: #2f3a42;
+  --text-secondary: #4a5660;
+  --text-muted: #5a6670;
+  --text-disabled: #6b7680;
+
+  --border-default: #c5c0ba;
+  --border-subtle: #d9d4ce;
+  --border-strong: #a8a29c;
+
+  --action-secondary: #00607e;
+  --action-secondary-hover: #005066;
+  --action-secondary-active: #004457;
+  --color-action: #00607e;
+  --color-hub: #00607e;
+
+  --header-fg-muted: #4a5560;
+
+  --chip-hub-text: #005066;
+  --status-success: #286436;
+  --color-m360: #286436;
+  --color-success: #286436;
+}
+
+/* Soft / default dark — fix failing white-on-teal / soft purple buttons */
+html[data-contrast='improved']:not([data-color-system='premium'])[data-theme='dark'] {
+  --tb4l-teal: #3aa88f;
+  --tb4l-purple: #c895d4;
+  --tb4l-green: #5ec98a;
+
+  --text-muted: #b0b8c2;
+  --text-disabled: #8b949e;
+  --text-secondary: #d0d5db;
+
+  --border-default: #4a525c;
+  --border-subtle: #3a4149;
+  --border-strong: #636b75;
+
+  /* Darken fills so white button text passes AA */
+  --action-primary: #7a5688;
+  --action-primary-hover: #8d689c;
+  --action-primary-active: #6a4a76;
+  --action-secondary: #1f7a66;
+  --action-secondary-hover: #269178;
+  --action-secondary-active: #1a6756;
+  --color-action: #1f7a66;
+  --color-hub: #3aa88f;
+  --header-mark-bg: #7a5688;
+}
+
+/* Premium light — nudge muted + borders without changing brand */
+html[data-contrast='improved'][data-color-system='premium']:not([data-theme='dark']) {
+  --text-muted: #4f6373;
+  --text-disabled: #5f7383;
+  --border-default: #b7c7d2;
+  --border-subtle: #d0dbe3;
+  --border-strong: #94a8b8;
+  --header-fg-muted: rgba(255, 255, 255, 0.88);
+}
+
+/* Premium dark — clearer muted + borders */
+html[data-contrast='improved'][data-color-system='premium'][data-theme='dark'] {
+  --text-muted: #b8c4d0;
+  --text-disabled: #8494a4;
+  --border-default: #355268;
+  --border-subtle: #2a4055;
+  --border-strong: #45657c;
+  --header-fg-muted: #c5d0da;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Shared component readability
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Stronger disabled buttons — still obviously disabled, but readable */
+html[data-contrast='improved'] .btn:disabled,
+html[data-contrast='improved'] .btn-chat:disabled,
+html[data-contrast='improved'] .btn-ghost:disabled {
+  color: var(--text-disabled);
+  opacity: 1;
+}
+
+/* Placeholders — use muted token, no extra washout */
+html[data-contrast='improved'] input::placeholder,
+html[data-contrast='improved'] textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+/* Subtle surface lift so cards don’t dissolve into the page */
+html[data-contrast='improved'] .card,
+html[data-contrast='improved'] .panel,
+html[data-contrast='improved'] .document-card,
+html[data-contrast='improved'] .experience-card,
+html[data-contrast='improved'] .section-tile,
+html[data-contrast='improved'] .welcome-platform__card,
+html[data-contrast='improved'] .welcome-guide__step,
+html[data-contrast='improved'] .welcome-ask--panel,
+html[data-contrast='improved'] .hub-data-source {
+  box-shadow: var(--shadow-sm) !important;
+  border-color: var(--border-default);
+}
+
+html[data-contrast='improved'][data-theme='dark'] .card,
+html[data-contrast='improved'][data-theme='dark'] .panel,
+html[data-contrast='improved'][data-theme='dark'] .document-card,
+html[data-contrast='improved'][data-theme='dark'] .experience-card,
+html[data-contrast='improved'][data-theme='dark'] .welcome-platform__card,
+html[data-contrast='improved'][data-theme='dark'] .welcome-guide__step,
+html[data-contrast='improved'][data-theme='dark'] .welcome-ask--panel {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), var(--shadow-sm) !important;
+}
+
+/* Metadata / hints that rely on muted color */
+html[data-contrast='improved'] .page-subtitle,
+html[data-contrast='improved'] .meta,
+html[data-contrast='improved'] .chat-sidebar__hint,
+html[data-contrast='improved'] .chat-sidebar__label,
+html[data-contrast='improved'] .empty-state__body,
+html[data-contrast='improved'] .welcome-hero__job {
+  color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Welcome-specific faint UI
+   ═══════════════════════════════════════════════════════════════ */
+html[data-contrast='improved'] .welcome-ask__composer input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+html[data-contrast='improved'] .welcome-ask__send:disabled {
+  opacity: 1;
+  background: var(--bg-disabled);
+  color: var(--text-disabled);
+  box-shadow: none;
+}
+
+html[data-contrast='improved'] .welcome-capabilities__label {
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+html[data-contrast='improved'] .welcome-capabilities__link {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+html[data-contrast='improved'] a.welcome-capabilities__link:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+/* Light header muted nav (soft theme) */
+html[data-contrast='improved']:not([data-color-system='premium']) .main-nav__link,
+html[data-contrast='improved']:not([data-color-system='premium']) .app-header__meta {
+  color: var(--header-fg-muted);
+}
+
+html[data-contrast='improved']:not([data-color-system='premium']) .main-nav__link.is-active,
+html[data-contrast='improved']:not([data-color-system='premium']) .main-nav__link:hover {
+  color: var(--header-fg);
+}

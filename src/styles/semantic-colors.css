@@ -2,82 +2,84 @@
  * Semantic color system — only active when <html class="semantic-colors">
  * Revert: set SEMANTIC_COLORS = false in src/config/semanticColors.ts
  *
- * Navy+Teal = Platform · Green = Knowledge · Magenta = AI/Chat · Purple = Accent
+ * Magenta = Chat · Green = Hub · Teal = welcome/nav · Navy = structure
+ * Aligned with light/dark platform visual references.
  */
 
 /* —— Global token remaps (light) —— */
 html.semantic-colors,
 html.semantic-colors[data-theme='light'] {
-  /* Chat / AI actions (was purple primary) */
   --action-primary: #d30f4b;
   --action-primary-hover: #b80d41;
   --action-primary-active: #9a0b36;
 
-  /* Platform secondary / filled secondary stays teal family */
-  --action-secondary: #00607e;
-  --action-secondary-hover: #004e66;
-  --action-secondary-active: #003d50;
+  --action-secondary: #10384f;
+  --action-secondary-hover: #0c2c3e;
+  --action-secondary-active: #081f2c;
 
   --accent-focus: #00607e;
-  /* Purple stays decorative selection tint, not primary CTA */
-  --accent-selection: #624963;
+  --accent-selection: #00607e;
 
-  --color-action: #00607e;
+  --color-action: #10384f;
   --color-hub: #286436;
   --color-chat: #d30f4b;
   --color-m360: #286436;
 
-  --tint-hub: rgba(40, 100, 54, 0.1);
-  --tint-chat: rgba(211, 15, 75, 0.1);
-  --tint-m360: rgba(40, 100, 54, 0.1);
+  --tb4l-teal: #00607e;
+  --tb4l-purple: #624963;
+  --tb4l-green: #286436;
+
+  --tint-hub: rgba(40, 100, 54, 0.08);
+  --tint-chat: rgba(211, 15, 75, 0.08);
+  --tint-m360: rgba(40, 100, 54, 0.08);
 
   --chip-hub-bg: rgba(40, 100, 54, 0.08);
-  --chip-hub-border: rgba(40, 100, 54, 0.35);
+  --chip-hub-border: rgba(40, 100, 54, 0.28);
   --chip-hub-text: #286436;
 
   --chip-chat-bg: rgba(211, 15, 75, 0.08);
-  --chip-chat-border: rgba(211, 15, 75, 0.35);
+  --chip-chat-border: rgba(211, 15, 75, 0.28);
   --chip-chat-text: #d30f4b;
 
-  --bg-selected: rgba(211, 15, 75, 0.06);
+  --bg-selected: rgba(40, 100, 54, 0.08);
 }
 
-/* —— Global token remaps (dark) ——
- * Knowledge: brand forest for fills; mid green for text/accents (not mint neon).
- */
+/* —— Global token remaps (dark) —— */
 html.semantic-colors[data-theme='dark'] {
-  --action-primary: #ff6b8a;
-  --action-primary-hover: #ff8aa3;
-  --action-primary-active: #e85774;
+  --action-primary: #ff4d6d;
+  --action-primary-hover: #ff6b85;
+  --action-primary-active: #e63e5c;
 
-  --action-secondary: #4fa8c9;
-  --action-secondary-hover: #6bb8d4;
-  --action-secondary-active: #3d91b0;
+  --action-secondary: #8aa0ad;
+  --action-secondary-hover: #a8b9c4;
+  --action-secondary-active: #6f8796;
 
-  --accent-focus: #4fa8c9;
-  --accent-selection: #c9a3cc;
+  --accent-focus: #2dd4bf;
+  --accent-selection: #2dd4bf;
 
-  --tb4l-green: #5aaa72;
-  --status-success: #5aaa72;
+  --tb4l-teal: #2dd4bf;
+  --tb4l-purple: #a855f7;
+  --tb4l-green: #4ade80;
+  --status-success: #4ade80;
 
-  --color-action: #4fa8c9;
-  --color-hub: #5aaa72;
-  --color-chat: #ff6b8a;
-  --color-m360: #5aaa72;
+  --color-action: #8aa0ad;
+  --color-hub: #4ade80;
+  --color-chat: #ff4d6d;
+  --color-m360: #4ade80;
 
-  --tint-hub: rgba(40, 100, 54, 0.22);
-  --tint-chat: rgba(211, 15, 75, 0.16);
-  --tint-m360: rgba(40, 100, 54, 0.22);
+  --tint-hub: rgba(74, 222, 128, 0.12);
+  --tint-chat: rgba(255, 77, 109, 0.12);
+  --tint-m360: rgba(74, 222, 128, 0.12);
 
-  --chip-hub-bg: rgba(40, 100, 54, 0.22);
-  --chip-hub-border: rgba(90, 170, 114, 0.45);
-  --chip-hub-text: #5aaa72;
+  --chip-hub-bg: rgba(74, 222, 128, 0.12);
+  --chip-hub-border: rgba(74, 222, 128, 0.35);
+  --chip-hub-text: #4ade80;
 
-  --chip-chat-bg: rgba(255, 107, 138, 0.12);
-  --chip-chat-border: rgba(255, 107, 138, 0.4);
-  --chip-chat-text: #ff6b8a;
+  --chip-chat-bg: rgba(255, 77, 109, 0.12);
+  --chip-chat-border: rgba(255, 77, 109, 0.35);
+  --chip-chat-text: #ff4d6d;
 
-  --bg-selected: rgba(255, 107, 138, 0.1);
+  --bg-selected: rgba(74, 222, 128, 0.14);
 }
 
 /* —— Home: Hub = Knowledge green (not purple) —— */
@@ -97,17 +99,24 @@ html.semantic-colors .tb4l-home-cta--hub:hover {
 
 html.semantic-colors .tb4l-home-hero__canvas {
   background:
-    radial-gradient(ellipse 50% 80% at 0% 50%, rgba(211, 15, 75, 0.1), transparent 58%),
+    radial-gradient(ellipse 50% 80% at 0% 50%, color-mix(in srgb, var(--home-chat) 10%, transparent), transparent 58%),
     radial-gradient(ellipse 45% 75% at 100% 50%, rgba(0, 96, 126, 0.1), transparent 55%),
     radial-gradient(ellipse 40% 60% at 70% 20%, rgba(98, 73, 99, 0.06), transparent 50%);
 }
 
 html.semantic-colors[data-theme='dark'] .tb4l-home {
-  /* Accents (badge, bullets, labels) — readable mid green */
-  --home-hub: #5aaa72;
-  --home-data: #c9a3cc;
-  --home-nav: #4fa8c9;
-  --home-structure: #e8eef1;
+  --home-chat: #ff4d6d;
+  --home-hub: #4ade80;
+  --home-data: #a855f7;
+  --home-nav: #2dd4bf;
+  --home-structure: #f8fafc;
+}
+
+html.semantic-colors[data-theme='dark'] .tb4l-home-hero__canvas {
+  background:
+    radial-gradient(ellipse 55% 70% at 0% 40%, color-mix(in srgb, var(--home-chat) 18%, transparent), transparent 58%),
+    radial-gradient(ellipse 50% 65% at 100% 55%, rgba(98, 73, 99, 0.22), transparent 55%),
+    radial-gradient(ellipse 40% 45% at 55% 100%, rgba(40, 100, 54, 0.1), transparent 60%);
 }
 
 /* Filled Hub CTA stays brand forest (not mint) */
@@ -123,16 +132,67 @@ html.semantic-colors[data-theme='dark'] .tb4l-home-cta--hub:hover {
   color: #fff;
 }
 
-/* Orbit: Knowledge = green · Data (step 2) = TB4L purple accent */
+html.semantic-colors[data-theme='dark'] .tb4l-home-cta--chat {
+  background: var(--home-chat);
+  border-color: var(--home-chat);
+  color: #081318;
+}
+
+html.semantic-colors[data-theme='dark'] .tb4l-home-cta--chat:hover {
+  background: #ff8aa3;
+  border-color: #ff8aa3;
+  color: #081318;
+}
+
+html.semantic-colors[data-theme='dark'] .tb4l-home-hero__greeting {
+  color: var(--home-chat);
+}
+
+html.semantic-colors .tb4l-home-orbit-legend__item--knowledge.tb4l-home-orbit-legend__item--primary {
+  border-color: color-mix(in srgb, var(--home-hub) 35%, var(--border-default));
+  background: color-mix(in srgb, var(--home-hub) 4%, var(--bg-main));
+}
+
+html.semantic-colors .tb4l-home-orbit-legend__item--conversation.tb4l-home-orbit-legend__item--primary {
+  border-color: color-mix(in srgb, var(--home-chat) 35%, var(--border-default));
+  background: color-mix(in srgb, var(--home-chat) 4%, var(--bg-main));
+}
+
+html.semantic-colors .tb4l-home-orbit__node--knowledge .tb4l-home-orbit__step,
+html.semantic-colors .tb4l-home-orbit-legend__item--knowledge .tb4l-home-orbit-legend__step {
+  background: #286436;
+  color: #fff;
+}
+
+html.semantic-colors .tb4l-home-orbit__node--knowledge .tb4l-home-orbit__label {
+  color: var(--home-hub);
+}
+
+html.semantic-colors .tb4l-home-orbit__node--conversation .tb4l-home-orbit__label {
+  color: var(--home-chat);
+}
+
 html.semantic-colors .tb4l-home-orbit__node--knowledge .tb4l-home-orbit__bubble,
 html.semantic-colors .tb4l-home-orbit-legend__item--knowledge .tb4l-home-orbit-legend__icon {
-  background: linear-gradient(145deg, #2f7344, #286436);
+  background: #286436;
+  color: #fff;
+}
+
+html.semantic-colors .tb4l-home-orbit__node--conversation .tb4l-home-orbit__bubble,
+html.semantic-colors .tb4l-home-orbit-legend__item--conversation .tb4l-home-orbit-legend__icon {
+  background: var(--home-chat);
+  color: #fff;
+}
+
+html.semantic-colors .tb4l-home-orbit__node--conversation .tb4l-home-orbit__step,
+html.semantic-colors .tb4l-home-orbit-legend__item--conversation .tb4l-home-orbit-legend__step {
+  background: var(--home-chat);
   color: #fff;
 }
 
 html.semantic-colors .tb4l-home-orbit__node--data .tb4l-home-orbit__bubble,
 html.semantic-colors .tb4l-home-orbit-legend__item--data .tb4l-home-orbit-legend__icon {
-  background: linear-gradient(145deg, #7a5a7c, #624963);
+  background: #624963;
   color: #fff;
 }
 
@@ -143,50 +203,49 @@ html.semantic-colors .tb4l-home-orbit-legend__item--data .tb4l-home-orbit-legend
 }
 
 html.semantic-colors[data-theme='dark'] .tb4l-home-orbit__node--knowledge .tb4l-home-orbit__bubble,
-html.semantic-colors[data-theme='dark'] .tb4l-home-orbit-legend__item--knowledge .tb4l-home-orbit-legend__icon {
-  background: #286436;
-  color: #fff;
-}
-
-html.semantic-colors[data-theme='dark'] .tb4l-home-orbit__node--data .tb4l-home-orbit__bubble,
-html.semantic-colors[data-theme='dark'] .tb4l-home-orbit-legend__item--data .tb4l-home-orbit-legend__icon {
-  background: #624963;
-  color: #fff;
-}
-
+html.semantic-colors[data-theme='dark'] .tb4l-home-orbit-legend__item--knowledge .tb4l-home-orbit-legend__icon,
 html.semantic-colors[data-theme='dark'] .tb4l-home-orbit__node--knowledge .tb4l-home-orbit__step,
 html.semantic-colors[data-theme='dark'] .tb4l-home-orbit-legend__item--knowledge .tb4l-home-orbit-legend__step {
   background: #286436;
   color: #fff;
 }
 
+html.semantic-colors[data-theme='dark'] .tb4l-home-orbit__node--conversation .tb4l-home-orbit__bubble,
+html.semantic-colors[data-theme='dark'] .tb4l-home-orbit-legend__item--conversation .tb4l-home-orbit-legend__icon,
+html.semantic-colors[data-theme='dark'] .tb4l-home-orbit__node--conversation .tb4l-home-orbit__step,
+html.semantic-colors[data-theme='dark'] .tb4l-home-orbit-legend__item--conversation .tb4l-home-orbit-legend__step {
+  background: var(--home-chat);
+  color: #081318;
+}
+
+html.semantic-colors[data-theme='dark'] .tb4l-home-orbit__node--data .tb4l-home-orbit__bubble,
+html.semantic-colors[data-theme='dark'] .tb4l-home-orbit-legend__item--data .tb4l-home-orbit-legend__icon,
 html.semantic-colors[data-theme='dark'] .tb4l-home-orbit__node--data .tb4l-home-orbit__step,
 html.semantic-colors[data-theme='dark'] .tb4l-home-orbit-legend__item--data .tb4l-home-orbit-legend__step {
   background: #624963;
   color: #fff;
 }
 
-/* —— Legacy Hub workspace tokens: knowledge = green —— */
+/* —— Hub workspace —— */
 html.semantic-colors .hub-page--workspace {
   --hub-knowledge: #286436;
   --hub-data: #286436;
   --hub-chat: #d30f4b;
-  --hub-nav: #00607e;
+  --hub-nav: #10384f;
 }
 
 html.semantic-colors[data-theme='dark'] .hub-page--workspace {
   --hub-knowledge: #5aaa72;
   --hub-data: #5aaa72;
   --hub-chat: #ff6b8a;
-  --hub-nav: #4fa8c9;
+  --hub-nav: #8aa0ad;
 }
 
-/* —— Hub ecosystem: aliases + unified category green —— */
 html.semantic-colors .hub-page--ecosystem {
   --hub: var(--knowledge);
   --hub-soft: var(--knowledge-soft);
   --hub-line: var(--line);
-  --nav: var(--teal);
+  --nav: #10384f;
   --chat: var(--ai);
   --data: var(--knowledge);
 }
@@ -222,7 +281,6 @@ html.semantic-colors[data-theme='dark'] .hub-ws-cat--team {
   --cat-soft: rgba(90, 170, 114, 0.16);
 }
 
-/* Subtle hover differentiation without rainbow */
 html.semantic-colors .hub-ws-cat:hover {
   border-color: color-mix(in srgb, #286436 40%, var(--line, #d9e2e7));
   box-shadow: 0 4px 16px rgba(40, 100, 54, 0.12);
@@ -233,17 +291,14 @@ html.semantic-colors[data-theme='dark'] .hub-ws-cat:hover {
   box-shadow: 0 4px 16px rgba(40, 100, 54, 0.2);
 }
 
-/* Connected data: status semantics */
+/* Connected data: green = live; slate = pending (no purple/teal) */
 html.semantic-colors .hub-ws-source--connected {
   border-left-color: #286436;
 }
 
-html.semantic-colors .hub-ws-source--coming_soon {
-  border-left-color: #00607e;
-}
-
+html.semantic-colors .hub-ws-source--coming_soon,
 html.semantic-colors .hub-ws-source--planned {
-  border-left-color: #624963;
+  border-left-color: #10384f;
 }
 
 html.semantic-colors .hub-ws-source--unavailable {
@@ -255,95 +310,82 @@ html.semantic-colors .hub-ws-source__status--connected {
   color: #286436;
 }
 
-html.semantic-colors .hub-ws-source__status--coming_soon {
-  background: rgba(0, 96, 126, 0.1);
-  color: #00607e;
-}
-
+html.semantic-colors .hub-ws-source__status--coming_soon,
 html.semantic-colors .hub-ws-source__status--planned {
-  background: rgba(98, 73, 99, 0.1);
-  color: #624963;
+  background: rgba(16, 56, 79, 0.08);
+  color: #10384f;
 }
 
 html.semantic-colors[data-theme='dark'] .hub-ws-source--connected {
   border-left-color: #5aaa72;
 }
 
-html.semantic-colors[data-theme='dark'] .hub-ws-source--coming_soon {
-  border-left-color: #4fa8c9;
-}
-
+html.semantic-colors[data-theme='dark'] .hub-ws-source--coming_soon,
 html.semantic-colors[data-theme='dark'] .hub-ws-source--planned {
-  border-left-color: #c9a3cc;
+  border-left-color: #8aa0ad;
 }
 
 html.semantic-colors[data-theme='dark'] .hub-ws-source__status--connected {
-  background: rgba(40, 100, 54, 0.28);
+  background: rgba(90, 170, 114, 0.16);
   color: #5aaa72;
 }
 
-html.semantic-colors[data-theme='dark'] .hub-ws-source__status--coming_soon {
-  background: rgba(79, 168, 201, 0.16);
-  color: #4fa8c9;
-}
-
+html.semantic-colors[data-theme='dark'] .hub-ws-source__status--coming_soon,
 html.semantic-colors[data-theme='dark'] .hub-ws-source__status--planned {
-  background: rgba(201, 163, 204, 0.14);
-  color: #c9a3cc;
+  background: rgba(138, 160, 173, 0.14);
+  color: #8aa0ad;
 }
 
-/* Section pages: knowledge green accents instead of purple-as-primary */
+/* Section pages: all Hub sections use knowledge green */
 html.semantic-colors .section-page--purple .section-hero,
 html.semantic-colors .section-page--blue .section-hero,
-html.semantic-colors .section-page--teal .section-hero {
-  border-left-color: #286436;
-}
-
+html.semantic-colors .section-page--teal .section-hero,
 html.semantic-colors .section-page--green .section-hero {
-  border-left-color: #286436;
+  border-left-color: var(--color-hub);
 }
 
 html.semantic-colors .section-page--purple .section-hero__eyebrow,
 html.semantic-colors .section-page--blue .section-hero__eyebrow,
 html.semantic-colors .section-page--teal .section-hero__eyebrow,
-html.semantic-colors .section-page--purple .section-kicker {
-  color: #286436;
+html.semantic-colors .section-page--purple .section-kicker,
+html.semantic-colors .section-page--blue .section-kicker,
+html.semantic-colors .section-page--teal .section-kicker {
+  color: var(--color-hub);
 }
 
 html.semantic-colors[data-theme='dark'] .section-page--purple .section-hero,
 html.semantic-colors[data-theme='dark'] .section-page--blue .section-hero,
-html.semantic-colors[data-theme='dark'] .section-page--teal .section-hero,
-html.semantic-colors[data-theme='dark'] .section-page--green .section-hero {
-  border-left-color: #5aaa72;
+html.semantic-colors[data-theme='dark'] .section-page--teal .section-hero {
+  border-left-color: var(--color-hub);
 }
 
 html.semantic-colors[data-theme='dark'] .section-page--purple .section-hero__eyebrow,
 html.semantic-colors[data-theme='dark'] .section-page--blue .section-hero__eyebrow,
 html.semantic-colors[data-theme='dark'] .section-page--teal .section-hero__eyebrow,
 html.semantic-colors[data-theme='dark'] .section-page--purple .section-kicker {
-  color: #5aaa72;
+  color: var(--color-hub);
 }
 
-/* Hub section nav active stays platform teal */
+/* Hub section nav active = knowledge green */
 html.semantic-colors .hub-section-nav__link.is-active {
-  background: #00607e;
-  border-color: #00607e;
+  background: var(--color-hub, #286436);
+  border-color: var(--color-hub, #286436);
   color: #ffffff;
 }
 
 html.semantic-colors[data-theme='dark'] .hub-section-nav__link.is-active {
-  background: #4fa8c9;
-  border-color: #4fa8c9;
-  color: #081318;
+  background: var(--color-hub, #5aaa72);
+  border-color: var(--color-hub, #5aaa72);
+  color: #fff;
 }
 
-/* Doc summary covers: platform + knowledge (no per-category rainbow) */
+/* Doc summary covers: foundation + knowledge */
 html.semantic-colors .summary-cover,
 html.semantic-colors .summary-cover[data-category] {
-  background: linear-gradient(145deg, #10384f, #286436) !important;
+  background: linear-gradient(145deg, #10384f 0%, #286436 100%);
 }
 
 html.semantic-colors[data-theme='dark'] .summary-cover,
 html.semantic-colors[data-theme='dark'] .summary-cover[data-category] {
-  background: linear-gradient(145deg, #0e1b23, #1a4a3a) !important;
+  background: linear-gradient(145deg, #0e1b23 0%, #1f4f2a 100%);
 }

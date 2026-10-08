@@ -11,9 +11,9 @@
 }
 
 .document-card.is-selected {
-  border-color: color-mix(in srgb, var(--tb4l-teal) 55%, var(--border-default));
-  background: color-mix(in srgb, var(--tb4l-teal) 5%, var(--surface-primary, var(--bg-main)));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tb4l-teal) 18%, transparent);
+  border-color: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 55%, var(--border-default));
+  background: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 8%, var(--surface-primary, var(--bg-main)));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 22%, transparent);
 }
 
 .document-card__top {
@@ -41,7 +41,7 @@
 .document-card__check {
   width: 20px;
   height: 20px;
-  border: 2px solid var(--tb4l-teal);
+  border: 2px solid var(--color-hub, var(--tb4l-green, #286436));
   border-radius: 4px;
   display: grid;
   place-items: center;
@@ -52,8 +52,8 @@
 }
 
 .document-card__select input:checked + .document-card__check {
-  background: var(--tb4l-teal);
-  border-color: var(--tb4l-teal);
+  background: var(--color-hub, var(--tb4l-green, #286436));
+  border-color: var(--color-hub, var(--tb4l-green, #286436));
 }
 
 .document-card__select input:focus-visible + .document-card__check {
@@ -144,14 +144,14 @@
 }
 
 .document-card--tile:hover {
-  border-color: color-mix(in srgb, var(--tb4l-teal) 40%, var(--border-default));
+  border-color: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 40%, var(--border-default));
   transform: translateY(-1px);
 }
 
 .document-card--tile.is-selected {
-  border-color: color-mix(in srgb, var(--tb4l-teal) 58%, var(--border-default));
-  background: color-mix(in srgb, var(--tb4l-teal) 6%, var(--surface-primary, var(--bg-main)));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tb4l-teal) 16%, transparent);
+  border-color: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 58%, var(--border-default));
+  background: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 10%, var(--surface-primary, var(--bg-main)));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 26%, transparent);
   transform: none;
   animation: none;
 }
@@ -168,13 +168,13 @@
   height: 1.25rem;
   border-radius: 6px;
   border-width: 1.5px;
-  border-color: color-mix(in srgb, var(--tb4l-teal) 40%, var(--border-default));
+  border-color: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 40%, var(--border-default));
   font-size: 0.7rem;
 }
 
 .document-card--tile.is-selected .document-card__check {
-  background: var(--tb4l-teal);
-  border-color: var(--tb4l-teal);
+  background: var(--color-hub, var(--tb4l-green));
+  border-color: var(--color-hub, var(--tb4l-green));
   color: #fff;
   box-shadow: none;
 }
@@ -244,6 +244,48 @@
   text-align: left;
 }
 
+/* Summary: clearer button affordance on Hub tiles */
+.document-card__actions--tile .btn.btn-secondary {
+  background: var(--bg-elevated, var(--bg-main));
+  border: 1.5px solid color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 55%, var(--border-default));
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  min-height: 34px;
+  padding: 7px 16px;
+  border-radius: 8px;
+  box-shadow:
+    0 1px 2px color-mix(in srgb, #000 18%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+}
+
+.document-card__actions--tile .btn.btn-secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 16%, var(--bg-elevated, var(--bg-main)));
+  border-color: var(--color-hub, var(--tb4l-green));
+  color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px color-mix(in srgb, #000 22%, transparent);
+}
+
+.document-card--tile.is-selected .document-card__actions--tile .btn.btn-secondary {
+  background: color-mix(in srgb, #fff 16%, #0e1b23);
+  border-color: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 70%, #fff);
+  color: #fff;
+  box-shadow:
+    0 2px 4px color-mix(in srgb, #000 28%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #fff 14%, transparent);
+}
+
+[data-theme='dark'] .document-card__actions--tile .btn.btn-secondary {
+  background: color-mix(in srgb, #fff 10%, #122532);
+  border-color: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 58%, #8eb89a);
+}
+
+[data-theme='dark'] .document-card--tile.is-selected .document-card__actions--tile .btn.btn-secondary {
+  background: color-mix(in srgb, #fff 18%, #0c1820);
+  border-color: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 75%, #fff);
+}
+
 .document-card--clickable {
   cursor: pointer;
 }
@@ -274,9 +316,9 @@ a.document-card--external .document-card__ask {
 }
 
 [data-theme='dark'] .document-card--tile.is-selected {
-  background: color-mix(in srgb, var(--tb4l-teal) 12%, var(--bg-sidebar));
-  border-color: color-mix(in srgb, var(--tb4l-teal) 55%, var(--border-default));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tb4l-teal) 20%, transparent);
+  background: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 14%, var(--bg-sidebar));
+  border-color: color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 55%, var(--border-default));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-hub, var(--tb4l-green)) 28%, transparent);
 }
 
 .document-card--compact {
