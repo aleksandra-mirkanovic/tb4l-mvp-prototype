@@ -1,5 +1,7 @@
 name: Deploy M360&Finance preview
 
+# Requires: Settings → Environments → github-pages → Deployment branches
+# include branch name exactly: M360&Finance
 on:
   push:
     branches: ["M360&Finance"]
@@ -24,6 +26,12 @@ jobs:
           ref: main
           path: main-src
 
+      - name: Checkout design-v2 branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/tb4l-design-v2
+          path: design-v2-src
+
       - name: Checkout M360&Finance branch
         uses: actions/checkout@v4
         with:
@@ -43,7 +51,15 @@ jobs:
           mkdir -p ../site
           cp -R dist/. ../site/
 
-      - name: Build M360&Finance preview
+      - name: Build design-v2 preview
+        working-directory: design-v2-src
+        run: |
+          npm install
+          npx vite build --base=/tb4l-mvp-prototype/design-v2/
+          mkdir -p ../site/design-v2
+          cp -R dist/. ../site/design-v2/
+
+      - name: Build M360&Finance preview (AI Assistant)
         working-directory: m360-src
         run: |
           npm install
