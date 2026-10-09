@@ -116,6 +116,12 @@ function fmtShare(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return `${v.toFixed(1)}%`;
 }
+/** Bayer share of a need-state — 0 means no named Bayer brands, not a missing field. */
+function fmtBayerShare(v: number | null | undefined): string {
+  if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
+  if (v === 0) return 'no presence';
+  return `${v.toFixed(1)}%`;
+}
 function fmtEvi(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return v.toFixed(0);
@@ -241,6 +247,7 @@ function StoryNote({ children }: { children: ReactNode }) {
 /** Fixed TB4L analysis under every chart — same blocks every time. */
 function ChartAnalysis({
   facts,
+  factsVariant = 'list',
   insights,
   hypotheses,
   brandImplications,
@@ -248,6 +255,7 @@ function ChartAnalysis({
   risks,
 }: {
   facts: ReactNode;
+  factsVariant?: 'list' | 'table';
   insights: ReactNode;
   hypotheses: HypCheck[];
   brandImplications: ReactNode;
@@ -262,7 +270,11 @@ function ChartAnalysis({
       </header>
       <section className="m360-chart-ax__block is-facts">
         <h4>1 · Key facts / evidence</h4>
-        <ul>{facts}</ul>
+        {factsVariant === 'table' ? (
+          <div className="m360-chart-ax__facts is-table">{facts}</div>
+        ) : (
+          <ul className="m360-chart-ax__facts">{facts}</ul>
+        )}
       </section>
       <section className="m360-chart-ax__block is-insights">
         <h4>2 · Key insights</h4>
@@ -315,6 +327,7 @@ function ChartAnalysis({
 function StoryBand({
   viz,
   facts,
+  factsVariant = 'list',
   insights,
   hypotheses,
   brandImplications,
@@ -327,7 +340,11 @@ function StoryBand({
         {viz}
         <StoryNote>
           <div>{insights}</div>
-          <ul className="m360-story-note__reads">{facts}</ul>
+          {factsVariant === 'table' ? (
+            <div className="m360-story-note__reads is-table">{facts}</div>
+          ) : (
+            <ul className="m360-story-note__reads">{facts}</ul>
+          )}
           <div>{brandImplications}</div>
         </StoryNote>
       </>
@@ -338,6 +355,7 @@ function StoryBand({
       <div className="m360-story-band__viz">{viz}</div>
       <ChartAnalysis
         facts={facts}
+        factsVariant={factsVariant}
         insights={insights}
         hypotheses={hypotheses}
         brandImplications={brandImplications}
@@ -543,7 +561,8 @@ function AttractivenessChart() {
           const g = s.growth1yPct;
           const faster = g !== null && catG !== null && g > catG;
           const slower = g !== null && catG !== null && g < catG;
-          const pace = faster ? 'Faster than category' : slower ? 'Slower than category' : 'In line with category';
+          const paceBase = faster ? 'Faster than category' : slower ? 'Slower than category' : 'In line with category';
+          const pace = catG !== null && catG !== undefined ? `${paceBase} (${fmtPct(catG)})` : paceBase;
           const color = colorForSegment(s.segment);
           const on = !focus || focus === s.segment;
           return (
@@ -560,7 +579,9 @@ function AttractivenessChart() {
                     `Sales  ${fmtM(s.valueMatM)}`,
                     `Share of category  ${fmtShare(s.shareOfCategoryPct)}`,
                     `Growth vs last year  ${fmtPct(g)} · ${pace}`,
-                    `Bayer share  ${fmtShare(s.bayerShareMatPct)} (${fmtPp(s.bayerShareChangePp)})`,
+                    s.bayerShareMatPct === 0
+                      ? 'Bayer: no presence (no named brands)'
+                      : `Bayer share: ${fmtBayerShare(s.bayerShareMatPct)} (${fmtPp(s.bayerShareChangePp)})`,
                     s.whiteSpaceFlag
                       ? 'White-space candidate (Bayer <3% and faster than category)'
                       : 'Not a white-space candidate in this set',
@@ -617,9 +638,16 @@ function RankBars({
   const { wrap, tip, show, hide } = useChartTip();
   const [focus, setFocus] = useState<string | null>(null);
   const max = Math.max(...rows.map((r) => value(r.key)), 1);
+  const hasBayer = rows.some((r) => r.bayer);
   return (
     <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
-      <ul className="m360-rank">
+      {hasBayer ? (
+        <p className="m360-rank__axis">
+          <i className="m360-rank__swatch" aria-hidden />
+          Bayer brands highlighted
+        </p>
+      ) : null}
+      <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands highlighted' : 'Brand share'}>
         {rows.map((r) => {
           const on = !focus || focus === r.key;
           return (
@@ -636,7 +664,10 @@ function RankBars({
               }
               onMouseLeave={() => setFocus(null)}
             >
-              <span>{r.name}</span>
+              <span className="m360-rank__name">
+                {r.name}
+                {r.bayer ? <em className="m360-rank__tag">Bayer</em> : null}
+              </span>
               <div>
                 <b style={{ width: `${(value(r.key) / max) * 100}%` }} />
               </div>
@@ -737,6 +768,7 @@ function ShareChangeChart() {
         {rows.map((s) => {
           const ya = s.bayerShareYaPct ?? 0;
           const mat = s.bayerShareMatPct ?? 0;
+          const noPresence = mat === 0 && ya === 0;
           const xYa = xAt(ya);
           const xMat = xAt(mat);
           const on = !focus || focus === s.segment;
@@ -751,16 +783,21 @@ function ShareChangeChart() {
                 show(e, {
                   color,
                   title: shortName(s.segment),
-                  lines: [
-                    `Previous MAT 12M  ${fmtShare(s.bayerShareYaPct)}`,
-                    `Current MAT 12M  ${fmtShare(s.bayerShareMatPct)}`,
-                    `Change  ${fmtPp(s.bayerShareChangePp)}`,
-                    lost
-                      ? 'Read  Share leak — priority for the Antacids fight'
-                      : (s.bayerShareChangePp ?? 0) > 0
-                        ? 'Read  Gaining share in this need-state'
-                        : 'Read  Flat vs last year',
-                  ],
+                  lines: noPresence
+                    ? [
+                        'Bayer share: no presence',
+                        'Read  No named Bayer brands in this need-state in the extract',
+                      ]
+                    : [
+                        `Previous MAT 12M  ${fmtBayerShare(s.bayerShareYaPct)}`,
+                        `Current MAT 12M  ${fmtBayerShare(s.bayerShareMatPct)}`,
+                        `Change  ${fmtPp(s.bayerShareChangePp)}`,
+                        lost
+                          ? 'Read  Share leak — priority for the Antacids fight'
+                          : (s.bayerShareChangePp ?? 0) > 0
+                            ? 'Read  Gaining share in this need-state'
+                            : 'Read  Flat vs last year',
+                      ],
                 })
               }
               onMouseLeave={() => setFocus(null)}
@@ -768,21 +805,27 @@ function ShareChangeChart() {
               <span className="m360-share-chg__name">{shortName(s.segment)}</span>
               <svg viewBox={`0 0 ${W} ${H}`} className="m360-share-chg__track" aria-hidden>
                 <line className="m360-share-chg__base" x1={pad} x2={W - pad} y1={H / 2} y2={H / 2} />
-                <line
-                  className={lost ? 'm360-share-chg__link is-down' : 'm360-share-chg__link is-up'}
-                  x1={xYa}
-                  x2={xMat}
-                  y1={H / 2}
-                  y2={H / 2}
-                />
-                <circle className="m360-share-chg__ya" cx={xYa} cy={H / 2} r="5" />
-                <circle className="m360-share-chg__mat" cx={xMat} cy={H / 2} r="6" fill={color} />
+                {!noPresence ? (
+                  <>
+                    <line
+                      className={lost ? 'm360-share-chg__link is-down' : 'm360-share-chg__link is-up'}
+                      x1={xYa}
+                      x2={xMat}
+                      y1={H / 2}
+                      y2={H / 2}
+                    />
+                    <circle className="m360-share-chg__ya" cx={xYa} cy={H / 2} r="5" />
+                    <circle className="m360-share-chg__mat" cx={xMat} cy={H / 2} r="6" fill={color} />
+                  </>
+                ) : null}
               </svg>
               <span className="m360-share-chg__levels">
-                {fmtShare(s.bayerShareYaPct)} → {fmtShare(s.bayerShareMatPct)}
+                {noPresence
+                  ? 'no presence'
+                  : `${fmtBayerShare(s.bayerShareYaPct)} → ${fmtBayerShare(s.bayerShareMatPct)}`}
               </span>
-              <strong className={`m360-share-chg__delta ${tone(s.bayerShareChangePp)}`}>
-                {fmtPp(s.bayerShareChangePp)}
+              <strong className={`m360-share-chg__delta ${noPresence ? '' : tone(s.bayerShareChangePp)}`}>
+                {noPresence ? '—' : fmtPp(s.bayerShareChangePp)}
               </strong>
             </li>
           );
@@ -924,29 +967,75 @@ function ChannelDriversChart() {
   );
 }
 
+/**
+ * Channel movers: bar length = share change (pp), sorted gainers first.
+ * Absolute share stays in the name line + tooltip — never as bar length.
+ */
 function ChannelPlayersChart({ channel }: { channel: 'Pharmacies' | 'E-commerce' }) {
+  const { wrap, tip, show, hide } = useChartTip();
+  const [focus, setFocus] = useState<string | null>(null);
   const rows = channelBrandsByShareChange(channel);
+  const maxAbs = Math.max(...rows.map((r) => Math.abs(r.shareChangePp)), 0.1);
+
   return (
-    <RankBars
-      rows={rows.map((r) => ({ key: r.brand, name: r.brand, bayer: r.isBayer }))}
-      value={(key) => rows.find((r) => r.brand === key)?.shareOfChannelPct ?? 0}
-      label={(key) => {
-        const r = rows.find((x) => x.brand === key);
-        return `${fmtPp(r?.shareChangePp ?? null)} · ${fmtPct(r?.valueGrowthPct ?? null)}`;
-      }}
-      detail={(key) => {
-        const r = rows.find((x) => x.brand === key);
-        if (!r) return [];
-        return [
-          `Share of ${channel}  ${fmtShare(r.shareOfChannelPct)}`,
-          `Share change  ${fmtPp(r.shareChangePp)}`,
-          `Value growth  ${fmtPct(r.valueGrowthPct)}`,
-          `Pack growth  ${fmtPct(r.unitGrowthPct)}`,
-          `Sales  ${fmtM(r.valueEurM)}`,
-          r.isBayer ? 'Bayer' : 'Competitor',
-        ];
-      }}
-    />
+    <div className="m360-viz m360-movers" ref={wrap} onMouseLeave={hide}>
+      <p className="m360-movers__axis">Share change (points) → · zero at center · gainers first</p>
+      <ul className="m360-movers__list" role="img" aria-label={`Share change in ${channel}`}>
+        {rows.map((r) => {
+          const on = !focus || focus === r.brand;
+          const neg = r.shareChangePp < 0;
+          const widthPct = (Math.abs(r.shareChangePp) / maxAbs) * 50;
+          return (
+            <li
+              key={r.brand}
+              className={[
+                r.isBayer ? 'is-bayer' : '',
+                neg ? 'is-down' : r.shareChangePp > 0 ? 'is-up' : 'is-flat',
+                on ? '' : 'is-off',
+              ]
+                .filter(Boolean)
+                .join(' ') || undefined}
+              onMouseEnter={() => setFocus(r.brand)}
+              onMouseMove={(e) =>
+                show(e, {
+                  color: r.isBayer ? '#4ec3e0' : neg ? '#f0a15c' : '#6fd48a',
+                  title: r.brand,
+                  lines: [
+                    `Share of ${channel}  ${fmtShare(r.shareOfChannelPct)}`,
+                    `Share change  ${fmtPp(r.shareChangePp)}`,
+                    `Value growth  ${fmtPct(r.valueGrowthPct)}`,
+                    `Pack growth  ${fmtPct(r.unitGrowthPct)}`,
+                    `Sales  ${fmtM(r.valueEurM)}`,
+                    r.isBayer ? 'Bayer' : 'Competitor',
+                  ],
+                })
+              }
+              onMouseLeave={() => setFocus(null)}
+            >
+              <span className="m360-movers__name">
+                {r.brand}
+                <small>{fmtShare(r.shareOfChannelPct)} of {channel}</small>
+              </span>
+              <div className="m360-movers__track" aria-hidden>
+                <i className="m360-movers__zero" />
+                <b
+                  className={`m360-movers__bar ${neg ? 'is-neg' : ''}`}
+                  style={{
+                    width: `${widthPct}%`,
+                    [neg ? 'right' : 'left']: '50%',
+                  }}
+                />
+              </div>
+              <span className="m360-movers__labs">
+                <strong className={tone(r.shareChangePp)}>{fmtPp(r.shareChangePp)}</strong>
+                <em>value {fmtPct(r.valueGrowthPct)}</em>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <ChartTip tip={tip} />
+    </div>
   );
 }
 
@@ -1145,7 +1234,7 @@ export function M360MarketStoryV3() {
             <ChartCard
               id="ch-channel-pharma"
               title="Who is moving in Pharmacies"
-              caption="Sorted by share change (gainers first). Bar = share of Pharmacies. Label = Δ points · value growth."
+              caption="Bar length = share change (points), zero at center. Sorted gainers first. Right: share Δ (points) and value growth (%). Absolute share under each name."
             >
               <ChannelPlayersChart channel="Pharmacies" />
             </ChartCard>
@@ -1157,7 +1246,7 @@ export function M360MarketStoryV3() {
             <ChartCard
               id="ch-channel-ecomm"
               title="Who is moving in E-commerce"
-              caption="Sorted by share change (gainers first). Bar = share of E-commerce. Label = Δ points · value growth."
+              caption="Bar length = share change (points), zero at center. Sorted gainers first. Right: share Δ (points) and value growth (%). Absolute share under each name."
             >
               <ChannelPlayersChart channel="E-commerce" />
             </ChartCard>
@@ -1405,8 +1494,9 @@ export function M360MarketStoryV3() {
                 <>
                   Category value <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num> vs packs{' '}
                   <Num v={cat.unitGrowth1yPct}>{fmtPct(cat.unitGrowth1yPct)}</Num>. IBS packs{' '}
-                  <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num>. PPIs Bayer share{' '}
-                  <Num kind="key">{fmtShare(narrative.ppi.bayerShareMatPct)}</Num> — not a sized entry from this view.
+                  <Num v={ibs.unitGrowth1yPct}>{fmtPct(ibs.unitGrowth1yPct)}</Num>. PPIs:{' '}
+                  <Num kind="key">{fmtBayerShare(narrative.ppi.bayerShareMatPct)}</Num> — not a sized entry from this
+                  view.
                 </>
               }
             />
@@ -1476,8 +1566,8 @@ export function M360MarketStoryV3() {
             title="Do not open a PPI project from this view"
             body={
               <>
-                Bayer share in PPIs is <Num kind="key">{fmtShare(narrative.ppi.bayerShareMatPct)}</Num> and the
-                need-state is not the growth engine (
+                PPIs show <Num kind="key">{fmtBayerShare(narrative.ppi.bayerShareMatPct)}</Num> in this extract —
+                no named Bayer brands in the competitive set — and the need-state is not the growth engine (
                 <Num v={narrative.ppi.growth1yPct}>{fmtPct(narrative.ppi.growth1yPct)}</Num> vs category{' '}
                 <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num>). There is no entry-size in euros here.
               </>

@@ -3,7 +3,12 @@
  * Structure per chart: facts → insights → hypothesis status → brand implications → opp/risks.
  */
 import type { ReactNode } from 'react';
-import type { CalcCategory, CalcSegment, CalcSubBrand } from '../data/m360Charts';
+import {
+  brandValueGrowth1yPct,
+  type CalcCategory,
+  type CalcSegment,
+  type CalcSubBrand,
+} from '../data/m360Charts';
 import type { ChannelBrandRow, ChannelRow } from '../data/m360ChannelRetrieval';
 
 export type HypStatus = 'confirmed' | 'partial' | 'rejected' | 'new';
@@ -16,6 +21,8 @@ export type HypCheck = {
 
 export type ChartAxBody = {
   facts: ReactNode;
+  /** `table` = semi-table layout (channel metrics); default keeps bullet list. */
+  factsVariant?: 'list' | 'table';
   insights: ReactNode;
   hypotheses: HypCheck[];
   brandImplications: ReactNode;
@@ -35,6 +42,12 @@ function fmtShare(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return `${v.toFixed(1)}%`;
 }
+/** Bayer share of a need-state — 0 means no named Bayer brands, not a missing field. */
+function fmtBayerShare(v: number | null | undefined): string {
+  if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
+  if (v === 0) return 'no presence';
+  return `${v.toFixed(1)}%`;
+}
 function fmtEvi(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return v.toFixed(0);
@@ -42,6 +55,17 @@ function fmtEvi(v: number | null | undefined): string {
 function fmtPp(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return `${v >= 0 ? '+' : ''}${v.toFixed(1)} points`;
+}
+
+/** Share-point moves below this band count as effectively stable. */
+const SHARE_STABLE_ABS_PP = 0.5;
+
+function isShareStable(pp: number | null | undefined): boolean {
+  return pp != null && Number.isFinite(pp) && Math.abs(pp) < SHARE_STABLE_ABS_PP;
+}
+
+function isMaterialShareGain(pp: number | null | undefined): boolean {
+  return pp != null && Number.isFinite(pp) && pp >= SHARE_STABLE_ABS_PP;
 }
 
 function tone(v: number | null | undefined, pivot = 0): 'is-up' | 'is-down' | 'is-flat' | '' {
@@ -92,25 +116,51 @@ export type StoryAxCtx = {
 };
 
 export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
+  const iberoGrowth = brandValueGrowth1yPct('IBEROGAST');
+  const rennieGrowth = brandValueGrowth1yPct('RENNIE');
+
+  const iberoPharmaPp = d.iberoPharma?.shareChangePp ?? null;
+  const gavisconPharmaPp = d.gavisconPharma?.shareChangePp ?? null;
+  const iberoEcommPp = d.iberoEcomm?.shareChangePp ?? null;
+  const gavisconEcommPp = d.gavisconEcomm?.shareChangePp ?? null;
+  const iberoPharmaStable = isShareStable(iberoPharmaPp);
+  const gavisconPharmaGain = isMaterialShareGain(gavisconPharmaPp);
+  const gavisconEcommGain = isMaterialShareGain(gavisconEcommPp);
+  /** “Pressure only online” needs Pharmacy competitive pressure negligible and online pressure material. */
+  const pressureOnlyOnlineStatus: HypStatus =
+    !gavisconPharmaGain && gavisconEcommGain
+      ? 'confirmed'
+      : gavisconPharmaGain && gavisconEcommGain
+        ? 'rejected'
+        : 'partial';
+
   return {
     overview: {
       facts: (
         <>
           <li>
-            Category (Iberogast competitive set) sales <Num kind="key">{fmtM(d.cat.valueMatM)}</Num>, growing{' '}
-            <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num> vs last year.
+            Category sales (Iberogast competitive set): <Num kind="key">{fmtM(d.cat.valueMatM)}</Num>, up{' '}
+            <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num> YoY.
           </li>
           <li>
-            Bayer share of set <Num kind="key">{fmtShare(d.cat.bayerShareMatPct)}</Num>, change{' '}
-            <Num v={d.cat.bayerShareChangePp}>{fmtPp(d.cat.bayerShareChangePp)}</Num>; Bayer sales{' '}
-            <Num kind="key">{fmtM(d.cat.bayerValueMatM)}</Num>.
+            Bayer brands in the set: <Num kind="key">{fmtM(d.cat.bayerValueMatM)}</Num>, up{' '}
+            <Num v={d.cat.bayerGrowth1yPct}>{fmtPct(d.cat.bayerGrowth1yPct)}</Num> YoY (Iberogast{' '}
+            <Num v={iberoGrowth}>{fmtPct(iberoGrowth)}</Num>
+            {rennieGrowth != null ? (
+              <>
+                , Rennie <Num v={rennieGrowth}>{fmtPct(rennieGrowth)}</Num>
+              </>
+            ) : null}
+            ).
           </li>
           <li>
-            Packs <Num v={d.cat.unitGrowth1yPct}>{fmtPct(d.cat.unitGrowth1yPct)}</Num> · Iberogast EVI vs IBS{' '}
-            <Num v={d.ibero?.evolutionIndex} kind="evi">
-              {fmtEvi(d.ibero?.evolutionIndex ?? null)}
-            </Num>
-            .
+            Bayer share of set: <Num kind="key">{fmtShare(d.cat.bayerShareMatPct)}</Num> (
+            <Num v={d.cat.bayerShareChangePp}>{fmtPp(d.cat.bayerShareChangePp)}</Num> YoY — share moves in points,
+            not %).
+          </li>
+          <li>
+            Pack sell-out (units): <Num v={d.cat.unitGrowth1yPct}>{fmtPct(d.cat.unitGrowth1yPct)}</Num> YoY — trails
+            category value growth.
           </li>
         </>
       ),
@@ -118,11 +168,12 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
         <>
           <p>
             The set is expanding in euros while Bayer’s share of that set is soft — demand is there, but capture is
-            not keeping pace.
+            not keeping pace. Compare growth rates on the same unit (% YoY sales), then read share points as
+            relative position.
           </p>
           <p>
-            Iberogast’s relative growth versus IBS is near the line, so the headline tension is portfolio /
-            competitive capture, not “Iberogast collapsed in its home need-state.”
+            Iberogast’s relative growth versus IBS is near the line (EVI {fmtEvi(d.ibero?.evolutionIndex ?? null)}), so
+            the headline tension is portfolio / competitive capture, not “Iberogast collapsed in its home need-state.”
           </p>
         </>
       ),
@@ -132,8 +183,8 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
           status: 'rejected',
           because: (
             <>
-              Set value is growing <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num> — size is not the
-              problem.
+              Category value is growing <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num> YoY — size is not
+              the problem.
             </>
           ),
         },
@@ -142,8 +193,9 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
           status: 'confirmed',
           because: (
             <>
-              Share change <Num v={d.cat.bayerShareChangePp}>{fmtPp(d.cat.bayerShareChangePp)}</Num> while set sales
-              grow.
+              Bayer sales grow <Num v={d.cat.bayerGrowth1yPct}>{fmtPct(d.cat.bayerGrowth1yPct)}</Num> YoY vs category{' '}
+              <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num>; share change{' '}
+              <Num v={d.cat.bayerShareChangePp}>{fmtPp(d.cat.bayerShareChangePp)}</Num>.
             </>
           ),
         },
@@ -177,14 +229,15 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
       facts: (
         <>
           <li>
-            Category value <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num> vs packs{' '}
-            <Num v={d.cat.unitGrowth1yPct}>{fmtPct(d.cat.unitGrowth1yPct)}</Num>
+            Category value growth <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num> vs pack sell-out
+            growth <Num v={d.cat.unitGrowth1yPct}>{fmtPct(d.cat.unitGrowth1yPct)}</Num>
             {d.valuePackGap != null ? (
               <>
                 {' '}
-                (gap <Num v={d.valuePackGap}>{fmtPct(d.valuePackGap)}</Num>).
+                (value ahead by <Num v={d.valuePackGap}>{fmtPct(d.valuePackGap)}</Num>).
               </>
             ) : null}
+            .
           </li>
           <li>
             IBS value <Num v={d.ibs.growth1yPct}>{fmtPct(d.ibs.growth1yPct)}</Num>, packs{' '}
@@ -220,8 +273,9 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
           status: 'rejected',
           because: (
             <>
-              Packs <Num v={d.cat.unitGrowth1yPct}>{fmtPct(d.cat.unitGrowth1yPct)}</Num> trail value{' '}
-              <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num>.
+              Pack sell-out growth of <Num v={d.cat.unitGrowth1yPct}>{fmtPct(d.cat.unitGrowth1yPct)}</Num> trails
+              total category value growth of <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num> — so euros
+              are rising faster than units (price / mix), not “more packs everywhere.”
             </>
           ),
         },
@@ -263,30 +317,70 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
     },
 
     channelDrivers: {
+      factsVariant: 'table',
       facts: (
-        <>
-          <li>
-            Pharmacies <Num kind="key">{fmtM(d.pharma.valueEurM)}</Num> (
-            <Num kind="key">{fmtShare(d.pharma.shareOfSetPct)}</Num>), value{' '}
-            <Num v={d.pharma.valueGrowthPct}>{fmtPct(d.pharma.valueGrowthPct)}</Num>, packs{' '}
-            <Num v={d.pharma.unitGrowthPct}>{fmtPct(d.pharma.unitGrowthPct)}</Num>.
-          </li>
-          <li>
-            Pharma price <Num kind="key">{fmtM(d.pharma.priceContribEurM)}</Num> vs volume{' '}
-            <Num v={d.pharma.volumeContribEurM}>{fmtM(d.pharma.volumeContribEurM)}</Num>.
-          </li>
-          <li>
-            E-commerce <Num kind="key">{fmtM(d.ecomm.valueEurM)}</Num> (
-            <Num kind="key">{fmtShare(d.ecomm.shareOfSetPct)}</Num>), value{' '}
-            <Num v={d.ecomm.valueGrowthPct}>{fmtPct(d.ecomm.valueGrowthPct)}</Num>, packs{' '}
-            <Num v={d.ecomm.unitGrowthPct}>{fmtPct(d.ecomm.unitGrowthPct)}</Num>.
-          </li>
-          <li>
-            E-comm volume <Num v={d.ecomm.volumeContribEurM}>{fmtM(d.ecomm.volumeContribEurM)}</Num> vs price{' '}
-            <Num kind="key">{fmtM(d.ecomm.priceContribEurM)}</Num> —{' '}
-            <Num kind="key">{fmtShare(d.ecomm.pctOfSetAbsGrowth)}</Num> of set absolute EUR growth.
-          </li>
-        </>
+        <table className="m360-facts-semi">
+          <thead>
+            <tr>
+              <th scope="col">Channel</th>
+              <th scope="col">Sales</th>
+              <th scope="col">Share</th>
+              <th scope="col">Value YoY</th>
+              <th scope="col">Packs YoY</th>
+              <th scope="col">Price €</th>
+              <th scope="col">Volume €</th>
+              <th scope="col">Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Pharmacies</th>
+              <td>
+                <Num kind="key">{fmtM(d.pharma.valueEurM)}</Num>
+              </td>
+              <td>
+                <Num kind="key">{fmtShare(d.pharma.shareOfSetPct)}</Num>
+              </td>
+              <td>
+                <Num v={d.pharma.valueGrowthPct}>{fmtPct(d.pharma.valueGrowthPct)}</Num>
+              </td>
+              <td>
+                <Num v={d.pharma.unitGrowthPct}>{fmtPct(d.pharma.unitGrowthPct)}</Num>
+              </td>
+              <td>
+                <Num kind="key">{fmtM(d.pharma.priceContribEurM)}</Num>
+              </td>
+              <td>
+                <Num v={d.pharma.volumeContribEurM}>{fmtM(d.pharma.volumeContribEurM)}</Num>
+              </td>
+              <td className="m360-facts-semi__note">Price-led; packs soft</td>
+            </tr>
+            <tr>
+              <th scope="row">E-commerce</th>
+              <td>
+                <Num kind="key">{fmtM(d.ecomm.valueEurM)}</Num>
+              </td>
+              <td>
+                <Num kind="key">{fmtShare(d.ecomm.shareOfSetPct)}</Num>
+              </td>
+              <td>
+                <Num v={d.ecomm.valueGrowthPct}>{fmtPct(d.ecomm.valueGrowthPct)}</Num>
+              </td>
+              <td>
+                <Num v={d.ecomm.unitGrowthPct}>{fmtPct(d.ecomm.unitGrowthPct)}</Num>
+              </td>
+              <td>
+                <Num kind="key">{fmtM(d.ecomm.priceContribEurM)}</Num>
+              </td>
+              <td>
+                <Num v={d.ecomm.volumeContribEurM}>{fmtM(d.ecomm.volumeContribEurM)}</Num>
+              </td>
+              <td className="m360-facts-semi__note">
+                <Num kind="key">{fmtShare(d.ecomm.pctOfSetAbsGrowth)}</Num> of set abs. EUR growth
+              </td>
+            </tr>
+          </tbody>
+        </table>
       ),
       insights: (
         <>
@@ -342,48 +436,98 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
         <>
           <li>
             Iberogast Pharmacies: share <Num kind="key">{fmtShare(d.iberoPharma?.shareOfChannelPct ?? null)}</Num>, Δ{' '}
-            <Num v={d.iberoPharma?.shareChangePp}>{fmtPp(d.iberoPharma?.shareChangePp ?? null)}</Num>, value{' '}
-            <Num v={d.iberoPharma?.valueGrowthPct}>{fmtPct(d.iberoPharma?.valueGrowthPct ?? null)}</Num>.
+            <Num v={iberoPharmaPp}>{fmtPp(iberoPharmaPp)}</Num>, value{' '}
+            <Num v={d.iberoPharma?.valueGrowthPct}>{fmtPct(d.iberoPharma?.valueGrowthPct ?? null)}</Num> YoY.
           </li>
           <li>
-            Gaviscon Pharmacies: Δ{' '}
-            <Num v={d.gavisconPharma?.shareChangePp}>{fmtPp(d.gavisconPharma?.shareChangePp ?? null)}</Num>, value{' '}
-            <Num v={d.gavisconPharma?.valueGrowthPct}>{fmtPct(d.gavisconPharma?.valueGrowthPct ?? null)}</Num>.
+            Gaviscon Pharmacies: Δ <Num v={gavisconPharmaPp}>{fmtPp(gavisconPharmaPp)}</Num>, value{' '}
+            <Num v={d.gavisconPharma?.valueGrowthPct}>{fmtPct(d.gavisconPharma?.valueGrowthPct ?? null)}</Num> YoY.
+          </li>
+          <li>
+            Iberogast E-comm: Δ <Num v={iberoEcommPp}>{fmtPp(iberoEcommPp)}</Num>, value{' '}
+            <Num v={d.iberoEcomm?.valueGrowthPct}>{fmtPct(d.iberoEcomm?.valueGrowthPct ?? null)}</Num> YoY.
+          </li>
+          <li>
+            Gaviscon E-comm: Δ <Num v={gavisconEcommPp}>{fmtPp(gavisconEcommPp)}</Num>, value{' '}
+            <Num v={d.gavisconEcomm?.valueGrowthPct}>{fmtPct(d.gavisconEcomm?.valueGrowthPct ?? null)}</Num> YoY.
           </li>
         </>
       ),
       insights: (
         <p>
-          In the largest channel, a competitor (Gaviscon) is the clear share gainer while Iberogast is soft — Pharmacy
-          is not a quiet fortress.
+          Iberogast Pharmacy share is near-flat (|Δ| &lt; {SHARE_STABLE_ABS_PP} points), but Gaviscon is the clear
+          Pharmacy share gainer — and accelerates harder still online. Near-stable Iberogast ≠ no competitive pressure.
         </p>
       ),
       hypotheses: [
         {
-          claim: 'Pharmacies are stable for Iberogast; pressure is only online.',
-          status: 'rejected',
-          because: <>Iberogast Pharmacy share change {fmtPp(d.iberoPharma?.shareChangePp ?? null)} while Gaviscon gains.</>,
+          claim: `Iberogast Pharmacy share is stable (|Δ| < ${SHARE_STABLE_ABS_PP} points).`,
+          status: iberoPharmaStable ? 'confirmed' : 'rejected',
+          because: (
+            <>
+              Iberogast Pharmacy Δ <Num v={iberoPharmaPp}>{fmtPp(iberoPharmaPp)}</Num>, value{' '}
+              <Num v={d.iberoPharma?.valueGrowthPct}>{fmtPct(d.iberoPharma?.valueGrowthPct ?? null)}</Num> YoY
+              {iberoPharmaStable
+                ? ' — inside the stability band.'
+                : ' — outside the stability band.'}
+            </>
+          ),
+        },
+        {
+          claim: 'Competitive pressure vs Gaviscon is only online.',
+          status: pressureOnlyOnlineStatus,
+          because: (
+            <>
+              Pharmacy: Gaviscon Δ <Num v={gavisconPharmaPp}>{fmtPp(gavisconPharmaPp)}</Num>, value{' '}
+              <Num v={d.gavisconPharma?.valueGrowthPct}>{fmtPct(d.gavisconPharma?.valueGrowthPct ?? null)}</Num> YoY.
+              E-comm: Iberogast Δ <Num v={iberoEcommPp}>{fmtPp(iberoEcommPp)}</Num> / Gaviscon Δ{' '}
+              <Num v={gavisconEcommPp}>{fmtPp(gavisconEcommPp)}</Num>, value{' '}
+              <Num v={d.gavisconEcomm?.valueGrowthPct}>{fmtPct(d.gavisconEcomm?.valueGrowthPct ?? null)}</Num> YoY —
+              {pressureOnlyOnlineStatus === 'confirmed'
+                ? ' online-only competitive pressure.'
+                : pressureOnlyOnlineStatus === 'rejected'
+                  ? ' dual-channel pressure (stronger online).'
+                  : ' mixed channel pressure.'}
+            </>
+          ),
         },
         {
           claim: 'Gaviscon is the Pharmacy rival to beat.',
           status: 'confirmed',
-          because: <>Top gainer on share change with {fmtPct(d.gavisconPharma?.valueGrowthPct ?? null)} value growth.</>,
+          because: (
+            <>
+              Top gainer on share change (
+              <Num v={gavisconPharmaPp}>{fmtPp(gavisconPharmaPp)}</Num>) with{' '}
+              <Num v={d.gavisconPharma?.valueGrowthPct}>{fmtPct(d.gavisconPharma?.valueGrowthPct ?? null)}</Num> YoY
+              value growth.
+            </>
+          ),
         },
       ],
       brandImplications: (
         <p>
-          Pharmacy plans for Iberogast must name Gaviscon explicitly (listing, price, promo) — share change already
-          shows the competitive move in the euro pool.
+          Pharmacy plans for Iberogast must contest Gaviscon head-on (listing, price, promo) — reclaim share while
+          Iberogast still holds {fmtShare(d.iberoPharma?.shareOfChannelPct ?? null)} of the channel; Gaviscon’s{' '}
+          <Num v={gavisconPharmaPp}>{fmtPp(gavisconPharmaPp)}</Num> /{' '}
+          <Num v={d.gavisconPharma?.valueGrowthPct}>{fmtPct(d.gavisconPharma?.valueGrowthPct ?? null)}</Num> Pharmacy
+          run is already the competitive move in the euro pool.
         </p>
       ),
       opportunities: (
         <>
-          <li>Stabilize Iberogast Pharmacy share ({fmtShare(d.iberoPharma?.shareOfChannelPct ?? null)} of channel).</li>
+          <li>
+            Reclaim Pharmacy share from Gaviscon while Iberogast still holds{' '}
+            {fmtShare(d.iberoPharma?.shareOfChannelPct ?? null)} of channel — contest Gaviscon’s{' '}
+            {fmtPp(gavisconPharmaPp)} / {fmtPct(d.gavisconPharma?.valueGrowthPct ?? null)} gains.
+          </li>
         </>
       ),
       risks: (
         <>
-          <li>Further Gaviscon Pharmacy share gains ({fmtPp(d.gavisconPharma?.shareChangePp ?? null)}).</li>
+          <li>
+            Ceding more Pharmacy share to Gaviscon ({fmtPp(gavisconPharmaPp)},{' '}
+            {fmtPct(d.gavisconPharma?.valueGrowthPct ?? null)} value).
+          </li>
         </>
       ),
     },
@@ -432,13 +576,25 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
       ),
       opportunities: (
         <>
-          <li>Double down where Iberogast already gains online ({fmtPp(d.iberoEcomm?.shareChangePp ?? null)}).</li>
+          <li>
+            Contest Gaviscon online and close the growth gap — Iberogast share Δ{' '}
+            {fmtPp(iberoEcommPp)} / value {fmtPct(d.iberoEcomm?.valueGrowthPct ?? null)}, but Gaviscon already
+            outpaces (share Δ {fmtPp(gavisconEcommPp)} / value{' '}
+            {fmtPct(d.gavisconEcomm?.valueGrowthPct ?? null)}).
+          </li>
         </>
       ),
       risks: (
         <>
-          <li>Gaviscon acceleration online ({fmtPct(d.gavisconEcomm?.valueGrowthPct ?? null)}).</li>
-          <li>Sister-brand share erosion (Lefax/Talcid) in the growth channel.</li>
+          <li>
+            If left uncontested, Gaviscon’s online lead keeps widening (Gaviscon share Δ{' '}
+            {fmtPp(gavisconEcommPp)} / value {fmtPct(d.gavisconEcomm?.valueGrowthPct ?? null)} vs Iberogast
+            share Δ {fmtPp(iberoEcommPp)} / value {fmtPct(d.iberoEcomm?.valueGrowthPct ?? null)}).
+          </li>
+          <li>
+            Lefax/Talcid keep leaking online share if defense stays Iberogast-only — portfolio drag in the
+            euro-growth channel.
+          </li>
         </>
       ),
     },
@@ -447,20 +603,24 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
       facts: (
         <>
           <li>
-            IBS <Num kind="key">{fmtShare(d.ibs.shareOfCategoryPct)}</Num> of set, growth{' '}
-            <Num v={d.ibs.growth1yPct}>{fmtPct(d.ibs.growth1yPct)}</Num>, Bayer share{' '}
+            IBS: <Num kind="key">{fmtShare(d.ibs.shareOfCategoryPct)}</Num> of category, value{' '}
+            <Num v={d.ibs.growth1yPct}>{fmtPct(d.ibs.growth1yPct)}</Num> YoY · Bayer share{' '}
             <Num kind="key">{fmtShare(d.ibs.bayerShareMatPct)}</Num> (
             <Num v={d.ibs.bayerShareChangePp}>{fmtPp(d.ibs.bayerShareChangePp)}</Num>).
           </li>
           <li>
-            Antacids <Num kind="key">{fmtShare(d.ant.shareOfCategoryPct)}</Num>, growth{' '}
-            <Num v={d.ant.growth1yPct}>{fmtPct(d.ant.growth1yPct)}</Num>, Bayer share{' '}
+            Antacids: <Num kind="key">{fmtShare(d.ant.shareOfCategoryPct)}</Num> of category, value{' '}
+            <Num v={d.ant.growth1yPct}>{fmtPct(d.ant.growth1yPct)}</Num> YoY · Bayer share{' '}
             <Num kind="key">{fmtShare(d.ant.bayerShareMatPct)}</Num> (
             <Num v={d.ant.bayerShareChangePp}>{fmtPp(d.ant.bayerShareChangePp)}</Num>).
           </li>
           <li>
-            Gas {fmtShare(d.gas.shareOfCategoryPct)}, {fmtPct(d.gas.growth1yPct)} · PPIs {fmtShare(d.ppi.shareOfCategoryPct)},{' '}
-            {fmtPct(d.ppi.growth1yPct)}, Bayer {fmtShare(d.ppi.bayerShareMatPct)}.
+            Gas: {fmtShare(d.gas.shareOfCategoryPct)} of category, value {fmtPct(d.gas.growth1yPct)} YoY · PPIs:{' '}
+            {fmtShare(d.ppi.shareOfCategoryPct)} of category, value {fmtPct(d.ppi.growth1yPct)} YoY · Bayer:{' '}
+            {d.ppi.bayerShareMatPct === 0
+              ? 'no presence in PPIs'
+              : `${fmtBayerShare(d.ppi.bayerShareMatPct)} in PPIs`}
+            .
           </li>
         </>
       ),
@@ -484,7 +644,7 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
         {
           claim: 'PPIs are a sized white-space entry from this view.',
           status: 'rejected',
-          because: <>Bayer PPI share {fmtShare(d.ppi.bayerShareMatPct)}; not the growth engine vs category.</>,
+          because: <>Bayer in PPIs: {fmtBayerShare(d.ppi.bayerShareMatPct)}; not the growth engine vs category.</>,
         },
       ],
       brandImplications: (
@@ -742,7 +902,11 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
             <Num v={d.ibs.bayerShareChangePp}>{fmtPp(d.ibs.bayerShareChangePp)}</Num>).
           </li>
           <li>
-            Gas Δ {fmtPp(d.gas.bayerShareChangePp)} · PPIs Δ {fmtPp(d.ppi.bayerShareChangePp)}.
+            Gas Δ {fmtPp(d.gas.bayerShareChangePp)} · PPIs{' '}
+            {d.ppi.bayerShareMatPct === 0
+              ? fmtBayerShare(d.ppi.bayerShareMatPct)
+              : `Δ ${fmtPp(d.ppi.bayerShareChangePp)}`}
+            .
           </li>
         </>
       ),

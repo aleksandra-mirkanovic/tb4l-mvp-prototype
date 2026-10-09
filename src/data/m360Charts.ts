@@ -33,6 +33,11 @@ export const CALC_FORMULAS: { metric: string; formula: string; from: string }[] 
   { metric: 'Category growth 1y', formula: 'SUM(value_mat) / SUM(value_ya) − 1', from: 'T1' },
   { metric: 'Category unit growth 1y', formula: 'SUM(units_mat) / SUM(units_ya) − 1', from: 'T1' },
   {
+    metric: 'Bayer sales growth 1y (set)',
+    formula: 'SUM(bayer_value_mat) / SUM(bayer_value_ya) − 1',
+    from: 'T1',
+  },
+  {
     metric: 'Bayer share of segment',
     formula: 'bayer_value_mat / value_mat (and same for YA, 3YA)',
     from: 'T1',
@@ -89,9 +94,12 @@ export type CalcCategory = {
   valueYa: number;
   valueMatM: number;
   bayerValueMat: number;
+  bayerValueYa: number;
   bayerValueMatM: number;
   growth1y: number | null;
   growth1yPct: number | null;
+  /** Bayer brands sales growth in the same competitive set (value €, not share points). */
+  bayerGrowth1yPct: number | null;
   unitGrowth1yPct: number | null;
   bayerShareMatPct: number | null;
   bayerShareYaPct: number | null;
@@ -103,9 +111,11 @@ export const CALC_CATEGORY: CalcCategory = {
   valueYa: catYa,
   valueMatM: catMat / 1_000_000,
   bayerValueMat: catBayerMat,
+  bayerValueYa: catBayerYa,
   bayerValueMatM: catBayerMat / 1_000_000,
   growth1y: categoryGrowth1y,
   growth1yPct: pct(categoryGrowth1y),
+  bayerGrowth1yPct: pct(ratioMinusOne(catBayerMat, catBayerYa)),
   unitGrowth1yPct: pct(ratioMinusOne(catUnitsMat, catUnitsYa)),
   bayerShareMatPct: catMat ? (catBayerMat / catMat) * 100 : null,
   bayerShareYaPct: catYa ? (catBayerYa / catYa) * 100 : null,
@@ -252,6 +262,15 @@ export function largestBayerSubBrand(segment: string): CalcSubBrand | undefined 
 export const CALC_IBEROGAST = CALC_SUBBRANDS.filter((r) => r.brand === 'IBEROGAST').sort(
   (a, b) => b.valueMat - a.valueMat,
 );
+
+/** Brand-level value growth inside the competitive set (sum of sub-brands). */
+export function brandValueGrowth1yPct(brand: string): number | null {
+  const rows = CALC_SUBBRANDS.filter((r) => r.brand === brand);
+  if (rows.length === 0) return null;
+  const mat = rows.reduce((s, r) => s + r.valueMat, 0);
+  const ya = rows.reduce((s, r) => s + (r.valueYa ?? 0), 0);
+  return pct(ratioMinusOne(mat, ya));
+}
 
 export const TOP_SUBBRANDS_PER_SEGMENT = CALC_SEGMENTS.map((seg) => ({
   segment: seg.segment,

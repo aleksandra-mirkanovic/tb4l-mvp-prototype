@@ -408,9 +408,16 @@ function RankBars({
 }) {
   const { wrap, tip, show, hide } = useChartTip();
   const max = Math.max(...rows.map((r) => value(r.key)), 1);
+  const hasBayer = rows.some((r) => r.bayer);
   return (
     <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
-      <ul className="m360-rank">
+      {hasBayer ? (
+        <p className="m360-rank__axis">
+          <i className="m360-rank__swatch" aria-hidden />
+          Bayer brands highlighted
+        </p>
+      ) : null}
+      <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands highlighted' : 'Brand share'}>
         {rows.map((r) => (
           <li
             key={r.key}
@@ -423,7 +430,10 @@ function RankBars({
               })
             }
           >
-            <span>{r.name}</span>
+            <span className="m360-rank__name">
+              {r.name}
+              {r.bayer ? <em className="m360-rank__tag">Bayer</em> : null}
+            </span>
             <div>
               <b style={{ width: `${(value(r.key) / max) * 100}%` }} />
             </div>
