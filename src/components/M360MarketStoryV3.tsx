@@ -122,6 +122,15 @@ function fmtBayerShare(v: number | null | undefined): string {
   if (v === 0) return 'no presence';
   return `${v.toFixed(1)}%`;
 }
+/** True when Bayer has (or had) named share — never invent a Δ from 0→0. */
+function hasBayerPresence(
+  mat: number | null | undefined,
+  ya?: number | null | undefined,
+): boolean {
+  const m = mat ?? 0;
+  const y = ya ?? 0;
+  return (Number.isFinite(m) && m > 0) || (Number.isFinite(y) && y > 0);
+}
 function fmtEvi(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return v.toFixed(0);
@@ -579,7 +588,7 @@ function AttractivenessChart() {
                     `Sales  ${fmtM(s.valueMatM)}`,
                     `Share of category  ${fmtShare(s.shareOfCategoryPct)}`,
                     `Growth vs last year  ${fmtPct(g)} · ${pace}`,
-                    s.bayerShareMatPct === 0
+                    !hasBayerPresence(s.bayerShareMatPct, s.bayerShareYaPct)
                       ? 'Bayer: no presence (no named brands)'
                       : `Bayer share: ${fmtBayerShare(s.bayerShareMatPct)} (${fmtPp(s.bayerShareChangePp)})`,
                     s.whiteSpaceFlag
@@ -641,13 +650,8 @@ function RankBars({
   const hasBayer = rows.some((r) => r.bayer);
   return (
     <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
-      {hasBayer ? (
-        <p className="m360-rank__axis">
-          <i className="m360-rank__swatch" aria-hidden />
-          Bayer brands highlighted
-        </p>
-      ) : null}
-      <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands highlighted' : 'Brand share'}>
+      {hasBayer ? <p className="m360-rank__axis">Bayer brands marked by name</p> : null}
+      <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands tagged' : 'Brand share'}>
         {rows.map((r) => {
           const on = !focus || focus === r.key;
           return (
@@ -657,8 +661,7 @@ function RankBars({
               onMouseEnter={() => setFocus(r.key)}
               onMouseMove={(e) =>
                 show(e, {
-                  color: r.bayer ? '#4ec3e0' : undefined,
-                  title: r.name,
+                  title: r.bayer ? `${r.name} (Bayer)` : r.name,
                   lines: detail(r.key),
                 })
               }
@@ -749,9 +752,10 @@ function EviChart() {
 function ShareChangeChart() {
   const { wrap, tip, show, hide } = useChartTip();
   const [focus, setFocus] = useState<string | null>(null);
-  const rows = [...CALC_SEGMENTS].sort(
-    (a, b) => (a.bayerShareChangePp ?? 0) - (b.bayerShareChangePp ?? 0),
-  );
+  // Omit need-states with no Bayer presence — a 0→0 Δ is not a change story.
+  const rows = [...CALC_SEGMENTS]
+    .filter((s) => hasBayerPresence(s.bayerShareMatPct, s.bayerShareYaPct))
+    .sort((a, b) => (a.bayerShareChangePp ?? 0) - (b.bayerShareChangePp ?? 0));
   const maxShare = Math.max(
     ...rows.flatMap((s) => [s.bayerShareYaPct ?? 0, s.bayerShareMatPct ?? 0]),
     10,
@@ -768,7 +772,6 @@ function ShareChangeChart() {
         {rows.map((s) => {
           const ya = s.bayerShareYaPct ?? 0;
           const mat = s.bayerShareMatPct ?? 0;
-          const noPresence = mat === 0 && ya === 0;
           const xYa = xAt(ya);
           const xMat = xAt(mat);
           const on = !focus || focus === s.segment;
@@ -783,21 +786,16 @@ function ShareChangeChart() {
                 show(e, {
                   color,
                   title: shortName(s.segment),
-                  lines: noPresence
-                    ? [
-                        'Bayer share: no presence',
-                        'Read  No named Bayer brands in this need-state in the extract',
-                      ]
-                    : [
-                        `Previous MAT 12M  ${fmtBayerShare(s.bayerShareYaPct)}`,
-                        `Current MAT 12M  ${fmtBayerShare(s.bayerShareMatPct)}`,
-                        `Change  ${fmtPp(s.bayerShareChangePp)}`,
-                        lost
-                          ? 'Read  Share leak — priority for the Antacids fight'
-                          : (s.bayerShareChangePp ?? 0) > 0
-                            ? 'Read  Gaining share in this need-state'
-                            : 'Read  Flat vs last year',
-                      ],
+                  lines: [
+                    `Previous MAT 12M  ${fmtBayerShare(s.bayerShareYaPct)}`,
+                    `Current MAT 12M  ${fmtBayerShare(s.bayerShareMatPct)}`,
+                    `Change  ${fmtPp(s.bayerShareChangePp)}`,
+                    lost
+                      ? 'Read  Share leak — priority for the Antacids fight'
+                      : (s.bayerShareChangePp ?? 0) > 0
+                        ? 'Read  Gaining share in this need-state'
+                        : 'Read  Flat vs last year',
+                  ],
                 })
               }
               onMouseLeave={() => setFocus(null)}
@@ -805,27 +803,21 @@ function ShareChangeChart() {
               <span className="m360-share-chg__name">{shortName(s.segment)}</span>
               <svg viewBox={`0 0 ${W} ${H}`} className="m360-share-chg__track" aria-hidden>
                 <line className="m360-share-chg__base" x1={pad} x2={W - pad} y1={H / 2} y2={H / 2} />
-                {!noPresence ? (
-                  <>
-                    <line
-                      className={lost ? 'm360-share-chg__link is-down' : 'm360-share-chg__link is-up'}
-                      x1={xYa}
-                      x2={xMat}
-                      y1={H / 2}
-                      y2={H / 2}
-                    />
-                    <circle className="m360-share-chg__ya" cx={xYa} cy={H / 2} r="5" />
-                    <circle className="m360-share-chg__mat" cx={xMat} cy={H / 2} r="6" fill={color} />
-                  </>
-                ) : null}
+                <line
+                  className={lost ? 'm360-share-chg__link is-down' : 'm360-share-chg__link is-up'}
+                  x1={xYa}
+                  x2={xMat}
+                  y1={H / 2}
+                  y2={H / 2}
+                />
+                <circle className="m360-share-chg__ya" cx={xYa} cy={H / 2} r="5" />
+                <circle className="m360-share-chg__mat" cx={xMat} cy={H / 2} r="6" fill={color} />
               </svg>
               <span className="m360-share-chg__levels">
-                {noPresence
-                  ? 'no presence'
-                  : `${fmtBayerShare(s.bayerShareYaPct)} → ${fmtBayerShare(s.bayerShareMatPct)}`}
+                {fmtBayerShare(s.bayerShareYaPct)} → {fmtBayerShare(s.bayerShareMatPct)}
               </span>
-              <strong className={`m360-share-chg__delta ${noPresence ? '' : tone(s.bayerShareChangePp)}`}>
-                {noPresence ? '—' : fmtPp(s.bayerShareChangePp)}
+              <strong className={`m360-share-chg__delta ${tone(s.bayerShareChangePp)}`}>
+                {fmtPp(s.bayerShareChangePp)}
               </strong>
             </li>
           );
@@ -1382,7 +1374,7 @@ export function M360MarketStoryV3() {
               id="ch-share"
               wide
               title="Bayer share change by need-state"
-              caption={`Set share ${fmtShare(cat.bayerShareMatPct)} (${fmtPp(cat.bayerShareChangePp)} vs last year). Open circle = previous MAT; filled = current. Sorted worst-first — leak is Antacids.`}
+              caption={`Bayer set share ${fmtShare(cat.bayerShareMatPct)} (${fmtPp(cat.bayerShareChangePp)} vs last year). Open circle = previous year; filled = current. Rows ordered by largest share loss first — Antacids is the biggest drop. Need-states with no Bayer presence omitted.`}
             >
               <ShareChangeChart />
             </ChartCard>
@@ -1433,7 +1425,7 @@ export function M360MarketStoryV3() {
             <SignalCard
               tone="bad"
               label="Problem"
-              title="Antacids is the competitive wound — Gaviscon is taking the growth"
+              title="Bayer is losing Antacids share — Gaviscon is taking the growth"
               why="Set share softness is not an IBS story. The leak sits in the fastest need-state, in both channels."
               evidence={
                 <>

@@ -502,26 +502,10 @@
   background: color-mix(in srgb, var(--text-muted) 45%, transparent);
 }
 
-.m360-rank li.is-bayer b {
-  background: var(--tb4l-teal, #00607e);
-}
-
 .m360-rank__axis {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin: 0 0 10px;
   color: var(--text-secondary);
   font-size: 12px;
-}
-
-.m360-rank__swatch {
-  display: inline-block;
-  width: 14px;
-  height: 6px;
-  border-radius: 99px;
-  background: var(--tb4l-teal, #00607e);
-  flex-shrink: 0;
 }
 
 .m360-rank__name {
@@ -532,13 +516,15 @@
   min-width: 0;
 }
 
+/* Ownership label only — bar color stays neutral (not a performance cue) */
 .m360-rank__tag {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   font-style: normal;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--tb4l-teal, #00607e);
+  color: var(--text-secondary);
+  opacity: 0.85;
 }
 
 .m360-rank small {
@@ -1660,17 +1646,11 @@
   font-size: 12px;
 }
 
-.m360-rep--story-v2 .m360-rank__swatch {
-  background: #4ec3e0;
-}
-
 .m360-rep--story-v2 .m360-rank li {
   display: grid;
   grid-template-columns: minmax(100px, 1.2fr) minmax(80px, 1fr) auto;
   gap: 10px 12px;
   align-items: center;
-  padding-left: 10px;
-  border-left: 2px solid transparent;
 }
 
 .m360-rep--story-v2 .m360-rank li:hover {
@@ -1681,27 +1661,15 @@
   background: color-mix(in srgb, var(--text-muted) 38%, transparent);
 }
 
-.m360-rep--story-v2 .m360-rank li.is-bayer {
-  border-left-color: #4ec3e0;
-  background: color-mix(in srgb, #4ec3e0 5%, transparent);
-}
-
-.m360-rep--story-v2 .m360-rank li.is-bayer:hover {
-  background: color-mix(in srgb, #4ec3e0 10%, transparent);
-}
-
-.m360-rep--story-v2 .m360-rank li.is-bayer .m360-rank__name {
-  color: #7ad4eb;
+.m360-rep--story-v2 .m360-rank li.is-bayer b {
+  /* Same as peers — ownership is the name tag, not bar color */
+  background: color-mix(in srgb, var(--text-muted) 38%, transparent);
 }
 
 .m360-rep--story-v2 .m360-rank li.is-bayer .m360-rank__tag {
-  color: #4ec3e0;
+  color: var(--text-secondary);
   font-size: 10px !important;
   line-height: 1.2;
-}
-
-.m360-rep--story-v2 .m360-rank li.is-bayer b {
-  background: #4ec3e0;
 }
 
 /* Channel movers: bar = share change (pp), diverging from zero */

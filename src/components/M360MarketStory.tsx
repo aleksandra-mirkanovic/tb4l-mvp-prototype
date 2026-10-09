@@ -446,7 +446,9 @@ function AttractivenessChart() {
                     `Sales  ${fmtM(s.valueMatM)}`,
                     `Share of category  ${fmtShare(s.shareOfCategoryPct)}`,
                     `Growth vs last year  ${fmtPct(g)} · ${pace}`,
-                    `Bayer share  ${fmtShare(s.bayerShareMatPct)} (${fmtPp(s.bayerShareChangePp)})`,
+                    (s.bayerShareMatPct ?? 0) === 0 && (s.bayerShareYaPct ?? 0) === 0
+                      ? 'Bayer: no presence (no named brands)'
+                      : `Bayer share  ${fmtShare(s.bayerShareMatPct)} (${fmtPp(s.bayerShareChangePp)})`,
                     s.whiteSpaceFlag
                       ? 'White-space candidate (Bayer <3% and faster than category)'
                       : 'Not a white-space candidate in this set',
@@ -506,13 +508,8 @@ function RankBars({
   const hasBayer = rows.some((r) => r.bayer);
   return (
     <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
-      {hasBayer ? (
-        <p className="m360-rank__axis">
-          <i className="m360-rank__swatch" aria-hidden />
-          Bayer brands highlighted
-        </p>
-      ) : null}
-      <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands highlighted' : 'Brand share'}>
+      {hasBayer ? <p className="m360-rank__axis">Bayer brands marked by name</p> : null}
+      <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands tagged' : 'Brand share'}>
         {rows.map((r) => {
           const on = !focus || focus === r.key;
           return (
@@ -522,8 +519,7 @@ function RankBars({
               onMouseEnter={() => setFocus(r.key)}
               onMouseMove={(e) =>
                 show(e, {
-                  color: r.bayer ? '#4ec3e0' : undefined,
-                  title: r.name,
+                  title: r.bayer ? `${r.name} (Bayer)` : r.name,
                   lines: detail(r.key),
                 })
               }
@@ -614,9 +610,10 @@ function EviChart() {
 function ShareChangeChart() {
   const { wrap, tip, show, hide } = useChartTip();
   const [focus, setFocus] = useState<string | null>(null);
-  const rows = [...CALC_SEGMENTS].sort(
-    (a, b) => (a.bayerShareChangePp ?? 0) - (b.bayerShareChangePp ?? 0),
-  );
+  // Omit need-states with no Bayer presence — a 0→0 Δ is not a change story.
+  const rows = [...CALC_SEGMENTS]
+    .filter((s) => (s.bayerShareMatPct ?? 0) > 0 || (s.bayerShareYaPct ?? 0) > 0)
+    .sort((a, b) => (a.bayerShareChangePp ?? 0) - (b.bayerShareChangePp ?? 0));
   const maxShare = Math.max(
     ...rows.flatMap((s) => [s.bayerShareYaPct ?? 0, s.bayerShareMatPct ?? 0]),
     10,
@@ -1216,7 +1213,7 @@ export function M360MarketStory() {
           id="ch-share"
           wide
           title="Bayer share change by need-state"
-          caption={`Set share ${fmtShare(cat.bayerShareMatPct)} (${fmtPp(cat.bayerShareChangePp)} vs last year). Open circle = previous MAT; filled = current. Sorted worst-first — leak is Antacids.`}
+          caption={`Bayer set share ${fmtShare(cat.bayerShareMatPct)} (${fmtPp(cat.bayerShareChangePp)} vs last year). Open circle = previous year; filled = current. Rows ordered by largest share loss first — Antacids is the biggest drop.`}
         >
           <ShareChangeChart />
         </ChartCard>
@@ -1243,7 +1240,7 @@ export function M360MarketStory() {
           <SignalCard
             tone="bad"
             label="Problem"
-            title="Antacids is the competitive wound — Gaviscon is taking the growth"
+            title="Bayer is losing Antacids share — Gaviscon is taking the growth"
             why="Set share softness is not an IBS story. The leak sits in the fastest need-state, in both channels."
             evidence={
               <>

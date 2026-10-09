@@ -183,7 +183,9 @@ export function buildInteractionCards(): InteractionCard[] {
         `Value 1y ${fmtPct(s.growth1yPct)} vs category ${fmtPct(CALC_CATEGORY.growth1yPct)}.`,
         `Units 1y ${fmtPct(s.unitGrowth1yPct)}.`,
         `3y CAGR ${fmtPct(s.cagr3yPct)}.`,
-        `Bayer share ${fmtShare(s.bayerShareMatPct)} (${fmtPp(s.bayerShareChangePp)}).`,
+        (s.bayerShareMatPct ?? 0) === 0 && (s.bayerShareYaPct ?? 0) === 0
+          ? 'Bayer: no presence (no share Δ).'
+          : `Bayer share ${fmtShare(s.bayerShareMatPct)} (${fmtPp(s.bayerShareChangePp)}).`,
         `Bayer EUR change ${fmtM(s.bayerEuroChangeM)}.`,
         `Largest named non-Bayer: ${topComp ? `${topComp.label} ${fmtShare(topComp.shareMatPct)}` : 'N/A'}.`,
         `Largest named Bayer: ${topBayer ? `${topBayer.label} ${fmtShare(topBayer.shareMatPct)}` : 'N/A'}.`,

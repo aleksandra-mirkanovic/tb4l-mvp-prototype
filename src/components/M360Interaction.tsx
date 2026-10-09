@@ -166,12 +166,18 @@ function SegmentCard({ card }: { card: InteractionCard }) {
             {fmtPct(card.cagr3yPct)}
           </SiriusTip>
         </p>
-        <p>
-          <b>Bayer Δ</b>{' '}
-          <SiriusTip table="CALC" field={`${card.segment} · bayer share MAT − YA, pp`}>
-            {fmtPp(card.bayerShareChangePp)}
-          </SiriusTip>
-        </p>
+        {(card.bayerShareMatPct ?? 0) > 0 ? (
+          <p>
+            <b>Bayer Δ</b>{' '}
+            <SiriusTip table="CALC" field={`${card.segment} · bayer share MAT − YA, pp`}>
+              {fmtPp(card.bayerShareChangePp)}
+            </SiriusTip>
+          </p>
+        ) : (
+          <p>
+            <b>Bayer</b> no presence — no share Δ
+          </p>
+        )}
         <p>{card.note}</p>
         <div className="m360-ix-verdict">
           <b>Verdict.</b> {card.verdict}

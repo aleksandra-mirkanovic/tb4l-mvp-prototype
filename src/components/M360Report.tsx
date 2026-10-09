@@ -263,6 +263,7 @@ function ShareBarsChart() {
           const cx = L + i * groupW + groupW / 2;
           const ya = s.bayerShareYaPct ?? 0;
           const mat = s.bayerShareMatPct ?? 0;
+          const noPresence = mat === 0 && ya === 0;
           const on = !focus || focus === s.segment;
           const color = colorForSegment(s.segment);
           return (
@@ -274,37 +275,43 @@ function ShareBarsChart() {
                 show(e, {
                   color,
                   title: shortName(s.segment),
-                  lines: [
-                    `Previous MAT 12M  ${fmtShare(s.bayerShareYaPct)}`,
-                    `Current MAT 12M  ${fmtShare(s.bayerShareMatPct)}`,
-                    `Change  ${fmtPp(s.bayerShareChangePp)} vs previous MAT 12M`,
-                  ],
+                  lines: noPresence
+                    ? ['Bayer: no presence (no named brands)', 'No share Δ — nothing to compare']
+                    : [
+                        `Previous MAT 12M  ${fmtShare(s.bayerShareYaPct)}`,
+                        `Current MAT 12M  ${fmtShare(s.bayerShareMatPct)}`,
+                        `Change  ${fmtPp(s.bayerShareChangePp)} vs previous MAT 12M`,
+                      ],
                 })
               }
               onMouseLeave={() => setFocus(null)}
             >
               <rect x={cx - groupW / 2 + 4} y={T} width={groupW - 8} height={ih} fill="transparent" />
-              <rect
-                className="m360-viz__bar is-ya"
-                x={cx - barW - 3}
-                y={yAt(ya)}
-                width={barW}
-                height={Math.max(0, yAt(0) - yAt(ya))}
-                rx="3"
-              />
-              <rect
-                className="m360-viz__bar is-mat"
-                x={cx + 3}
-                y={yAt(mat)}
-                width={barW}
-                height={Math.max(0, yAt(0) - yAt(mat))}
-                rx="3"
-              />
+              {!noPresence ? (
+                <>
+                  <rect
+                    className="m360-viz__bar is-ya"
+                    x={cx - barW - 3}
+                    y={yAt(ya)}
+                    width={barW}
+                    height={Math.max(0, yAt(0) - yAt(ya))}
+                    rx="3"
+                  />
+                  <rect
+                    className="m360-viz__bar is-mat"
+                    x={cx + 3}
+                    y={yAt(mat)}
+                    width={barW}
+                    height={Math.max(0, yAt(0) - yAt(mat))}
+                    rx="3"
+                  />
+                </>
+              ) : null}
               <text className="m360-viz__tick" x={cx} y={H - 28} textAnchor="middle">
                 {shortName(s.segment)}
               </text>
-              <text className={`m360-viz__pp ${tone(s.bayerShareChangePp)}`} x={cx} y={H - 12} textAnchor="middle">
-                {fmtPp(s.bayerShareChangePp)}
+              <text className={`m360-viz__pp ${noPresence ? '' : tone(s.bayerShareChangePp)}`} x={cx} y={H - 12} textAnchor="middle">
+                {noPresence ? 'n/a' : fmtPp(s.bayerShareChangePp)}
               </text>
             </g>
           );
@@ -411,21 +418,15 @@ function RankBars({
   const hasBayer = rows.some((r) => r.bayer);
   return (
     <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
-      {hasBayer ? (
-        <p className="m360-rank__axis">
-          <i className="m360-rank__swatch" aria-hidden />
-          Bayer brands highlighted
-        </p>
-      ) : null}
-      <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands highlighted' : 'Brand share'}>
+      {hasBayer ? <p className="m360-rank__axis">Bayer brands marked by name</p> : null}
+      <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands tagged' : 'Brand share'}>
         {rows.map((r) => (
           <li
             key={r.key}
             className={r.bayer ? 'is-bayer' : undefined}
             onMouseMove={(e) =>
               show(e, {
-                color: r.bayer ? '#4ec3e0' : undefined,
-                title: r.name,
+                title: r.bayer ? `${r.name} (Bayer)` : r.name,
                 lines: detail(r.key),
               })
             }
@@ -587,7 +588,11 @@ export function M360Report() {
                 <div>
                   <dt>Bayer market share</dt>
                   <dd>{fmtShare(s.bayerShareMatPct)}</dd>
-                  <small className={tone(s.bayerShareChangePp)}>{fmtPp(s.bayerShareChangePp)} versus last year</small>
+                  <small className={tone(s.bayerShareChangePp)}>
+                    {(s.bayerShareMatPct ?? 0) === 0 && (s.bayerShareYaPct ?? 0) === 0
+                      ? 'No Bayer presence — no share Δ'
+                      : `${fmtPp(s.bayerShareChangePp)} versus last year`}
+                  </small>
                 </div>
                 <div>
                   <dt>Relative growth</dt>

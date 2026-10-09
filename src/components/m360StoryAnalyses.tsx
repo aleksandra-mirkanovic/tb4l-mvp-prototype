@@ -48,6 +48,15 @@ function fmtBayerShare(v: number | null | undefined): string {
   if (v === 0) return 'no presence';
   return `${v.toFixed(1)}%`;
 }
+/** True when Bayer has (or had) named share in the need-state — never invent a Δ from 0→0. */
+function hasBayerPresence(
+  mat: number | null | undefined,
+  ya?: number | null | undefined,
+): boolean {
+  const m = mat ?? 0;
+  const y = ya ?? 0;
+  return (Number.isFinite(m) && m > 0) || (Number.isFinite(y) && y > 0);
+}
 function fmtEvi(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return v.toFixed(0);
@@ -55,6 +64,15 @@ function fmtEvi(v: number | null | undefined): string {
 function fmtPp(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return `${v >= 0 ? '+' : ''}${v.toFixed(1)} points`;
+}
+/** Share-point change only when Bayer actually participates; otherwise null (caller omits Δ). */
+function fmtBayerPp(
+  mat: number | null | undefined,
+  changePp: number | null | undefined,
+  ya?: number | null | undefined,
+): string | null {
+  if (!hasBayerPresence(mat, ya)) return null;
+  return fmtPp(changePp);
 }
 
 /** Share-point moves below this band count as effectively stable. */
@@ -605,21 +623,33 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
           <li>
             IBS: <Num kind="key">{fmtShare(d.ibs.shareOfCategoryPct)}</Num> of category, value{' '}
             <Num v={d.ibs.growth1yPct}>{fmtPct(d.ibs.growth1yPct)}</Num> YoY · Bayer share{' '}
-            <Num kind="key">{fmtShare(d.ibs.bayerShareMatPct)}</Num> (
-            <Num v={d.ibs.bayerShareChangePp}>{fmtPp(d.ibs.bayerShareChangePp)}</Num>).
+            <Num kind="key">{fmtShare(d.ibs.bayerShareMatPct)}</Num>
+            {hasBayerPresence(d.ibs.bayerShareMatPct, d.ibs.bayerShareYaPct) ? (
+              <>
+                {' '}
+                (<Num v={d.ibs.bayerShareChangePp}>{fmtPp(d.ibs.bayerShareChangePp)}</Num>)
+              </>
+            ) : null}
+            .
           </li>
           <li>
             Antacids: <Num kind="key">{fmtShare(d.ant.shareOfCategoryPct)}</Num> of category, value{' '}
             <Num v={d.ant.growth1yPct}>{fmtPct(d.ant.growth1yPct)}</Num> YoY · Bayer share{' '}
-            <Num kind="key">{fmtShare(d.ant.bayerShareMatPct)}</Num> (
-            <Num v={d.ant.bayerShareChangePp}>{fmtPp(d.ant.bayerShareChangePp)}</Num>).
+            <Num kind="key">{fmtShare(d.ant.bayerShareMatPct)}</Num>
+            {hasBayerPresence(d.ant.bayerShareMatPct, d.ant.bayerShareYaPct) ? (
+              <>
+                {' '}
+                (<Num v={d.ant.bayerShareChangePp}>{fmtPp(d.ant.bayerShareChangePp)}</Num>)
+              </>
+            ) : null}
+            .
           </li>
           <li>
             Gas: {fmtShare(d.gas.shareOfCategoryPct)} of category, value {fmtPct(d.gas.growth1yPct)} YoY · PPIs:{' '}
             {fmtShare(d.ppi.shareOfCategoryPct)} of category, value {fmtPct(d.ppi.growth1yPct)} YoY · Bayer:{' '}
-            {d.ppi.bayerShareMatPct === 0
-              ? 'no presence in PPIs'
-              : `${fmtBayerShare(d.ppi.bayerShareMatPct)} in PPIs`}
+            {hasBayerPresence(d.ppi.bayerShareMatPct, d.ppi.bayerShareYaPct)
+              ? `${fmtBayerShare(d.ppi.bayerShareMatPct)} in PPIs (${fmtPp(d.ppi.bayerShareChangePp)})`
+              : 'no presence in PPIs'}
             .
           </li>
         </>
@@ -902,46 +932,60 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
             <Num v={d.ibs.bayerShareChangePp}>{fmtPp(d.ibs.bayerShareChangePp)}</Num>).
           </li>
           <li>
-            Gas Δ {fmtPp(d.gas.bayerShareChangePp)} · PPIs{' '}
-            {d.ppi.bayerShareMatPct === 0
-              ? fmtBayerShare(d.ppi.bayerShareMatPct)
-              : `Δ ${fmtPp(d.ppi.bayerShareChangePp)}`}
+            Gas{' '}
+            {hasBayerPresence(d.gas.bayerShareMatPct, d.gas.bayerShareYaPct)
+              ? `${fmtShare(d.gas.bayerShareYaPct)} → ${fmtShare(d.gas.bayerShareMatPct)} (${fmtBayerPp(d.gas.bayerShareMatPct, d.gas.bayerShareChangePp, d.gas.bayerShareYaPct)})`
+              : 'no Bayer presence'}{' '}
+            · PPIs:{' '}
+            {hasBayerPresence(d.ppi.bayerShareMatPct, d.ppi.bayerShareYaPct)
+              ? `${fmtShare(d.ppi.bayerShareYaPct)} → ${fmtShare(d.ppi.bayerShareMatPct)} (${fmtBayerPp(d.ppi.bayerShareMatPct, d.ppi.bayerShareChangePp, d.ppi.bayerShareYaPct)})`
+              : 'no Bayer presence'}
             .
           </li>
         </>
       ),
       insights: (
         <p>
-          Change-first reading: set share softness is an Antacids leak. IBS Bayer share holds — so the portfolio is not
-          “weak everywhere”; it is wounded in the fastest need-state.
+          Bayer’s overall share softness comes from Antacids, not from everywhere. IBS Bayer share is holding, so the
+          problem is concentrated in Antacids — which is also the faster-growing need-state.
         </p>
       ),
       hypotheses: [
         {
           claim: 'Bayer is losing share across all need-states.',
           status: 'rejected',
-          because: <>IBS Δ {fmtPp(d.ibs.bayerShareChangePp)} vs Antacids {fmtPp(d.ant.bayerShareChangePp)}.</>,
+          because: (
+            <>
+              IBS Bayer share change {fmtPp(d.ibs.bayerShareChangePp)} vs Antacids{' '}
+              {fmtPp(d.ant.bayerShareChangePp)} — the loss is Antacids, not IBS.
+            </>
+          ),
         },
         {
-          claim: 'Antacids is the competitive wound; IBS is the strength to protect.',
+          claim: 'Bayer’s real share problem is Antacids; IBS is still strong and worth defending.',
           status: 'confirmed',
-          because: <>Sorted share-change chart worst-first points to Antacids.</>,
+          because: (
+            <>
+              On the share-change chart (largest losses first), Antacids shows the biggest Bayer share drop (
+              {fmtPp(d.ant.bayerShareChangePp)}).
+            </>
+          ),
         },
       ],
       brandImplications: (
         <p>
-          Prioritize Antacids competitive action this month; protect IBS franchise share. Do not explain set softness
-          as an Iberogast IBS failure — the share change sits in Antacids, not IBS.
+          Act on Antacids competition this month, and keep defending IBS share. Do not blame set softness on Iberogast
+          in IBS — the share loss sits in Antacids.
         </p>
       ),
       opportunities: (
         <>
-          <li>Protect IBS Bayer share ({fmtShare(d.ibs.bayerShareMatPct)}, {fmtPp(d.ibs.bayerShareChangePp)}).</li>
+          <li>Defend IBS Bayer share ({fmtShare(d.ibs.bayerShareMatPct)}, {fmtPp(d.ibs.bayerShareChangePp)}).</li>
         </>
       ),
       risks: (
         <>
-          <li>Antacids leak deepens ({fmtPp(d.ant.bayerShareChangePp)}).</li>
+          <li>Bayer keeps losing Antacids share ({fmtPp(d.ant.bayerShareChangePp)}).</li>
         </>
       ),
     },
