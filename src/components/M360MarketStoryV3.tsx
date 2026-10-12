@@ -2,7 +2,7 @@
  * Bain-logic Market story — AI Assistant v3 (chart + reading units).
  * v4 passes includeTb4l003 for Kirill’s TB4L-003 blocks. v2 keeps M360MarketStory. Classic keeps M360Report.
  */
-import { useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useRef, useState, type ReactNode } from 'react';
 import { ASSISTANT_NARRATIVE_V2, ASSISTANT_STORY_RAIL } from '../config/assistantNarrative';
 import {
   brandEvolutionIndex,
@@ -400,9 +400,13 @@ function ChartAnalysis({
   );
 }
 
+/** v3 = reading under chart (deployed); v4 = reading beside chart with scroll. */
+const StoryBandLayoutCtx = createContext<'stacked' | 'split'>('stacked');
+
 /**
- * Chart + reading in one card. Wide screens: reading sits beside the chart
- * (fills the empty wing). Narrow: stacks reading under the chart.
+ * Chart + reading in one card.
+ * stacked (v3): reading below the chart — same as deployed.
+ * split (v4): reading beside the chart with a full-height scroller.
  * ASSISTANT_STORY_RAIL = false → short note only under the chart.
  */
 function StoryBand({
@@ -415,6 +419,7 @@ function StoryBand({
   opportunities,
   risks,
 }: ChartAxBody & { viz: ReactNode }) {
+  const layout = useContext(StoryBandLayoutCtx);
   if (!ASSISTANT_STORY_RAIL) {
     return (
       <>
@@ -432,7 +437,7 @@ function StoryBand({
     );
   }
   return (
-    <div className="m360-story-band is-split">
+    <div className={`m360-story-band ${layout === 'split' ? 'is-split' : 'is-stacked'}`}>
       <div className="m360-story-band__viz">{viz}</div>
       <ChartAnalysis
         facts={facts}
@@ -1566,7 +1571,10 @@ export function M360MarketStoryV3({ includeTb4l003 = false }: { includeTb4l003?:
     },
   };
 
+  const bandLayout = includeTb4l003 ? 'split' : 'stacked';
+
   return (
+    <StoryBandLayoutCtx.Provider value={bandLayout}>
     <div
       className={`m360-rep m360-rep--story-v2${ASSISTANT_NARRATIVE_V2 ? ' m360-rep--narrative-v2' : ''}${ASSISTANT_STORY_RAIL ? ' m360-rep--story-rail' : ''}${includeTb4l003 ? ' m360-rep--tb4l003' : ''}`}
       data-m360-charts={m360ChartColorModeAttr()}
@@ -2137,5 +2145,6 @@ export function M360MarketStoryV3({ includeTb4l003 = false }: { includeTb4l003?:
 
       <AssistantMarketDataCare checks={narrative.checks} />
     </div>
+    </StoryBandLayoutCtx.Provider>
   );
 }

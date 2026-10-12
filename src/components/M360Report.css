@@ -2005,7 +2005,19 @@
   max-width: 52rem;
 }
 
-/* One unit: chart + reading share one card (side-by-side on wide screens) */
+/* One unit: chart + reading share one card */
+.m360-rep--story-rail .m360-story-band.is-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-main);
+  overflow: clip;
+}
+
+/* v4: reading beside the chart with a full-height scroller */
 .m360-rep--story-rail .m360-story-band.is-split {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.9fr);
@@ -2024,6 +2036,9 @@
 
 .m360-rep--story-rail .m360-story-band__viz {
   min-width: 0;
+}
+
+.m360-rep--story-rail .m360-story-band.is-split > .m360-story-band__viz {
   border-right: 1px solid var(--border-default);
 }
 
@@ -2057,15 +2072,21 @@
 
 .m360-rep--story-rail .m360-chart-ax {
   margin: 0;
-  padding: 16px 18px 18px;
+  padding: 16px 20px 20px;
   border: 0;
+  border-top: 1px solid var(--border-default);
   border-radius: 0;
   background: color-mix(in srgb, var(--bg-elevated) 45%, var(--bg-main));
   display: flex;
   flex-direction: column;
   gap: 0;
   min-width: 0;
-  /* Match chart column height; scroll inside that full strip */
+}
+
+/* v4 split: reading fills chart height and scrolls */
+.m360-rep--story-rail .m360-story-band.is-split > .m360-chart-ax {
+  border-top: 0;
+  padding: 16px 18px 18px;
   height: 0;
   min-height: 100%;
   max-height: none;
@@ -2413,12 +2434,12 @@
     grid-template-columns: 1fr;
   }
 
-  .m360-rep--story-rail .m360-story-band__viz {
+  .m360-rep--story-rail .m360-story-band.is-split > .m360-story-band__viz {
     border-right: 0;
     border-bottom: 1px solid var(--border-default);
   }
 
-  .m360-rep--story-rail .m360-chart-ax {
+  .m360-rep--story-rail .m360-story-band.is-split > .m360-chart-ax {
     height: auto;
     min-height: 0;
     max-height: none;
