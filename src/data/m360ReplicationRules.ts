@@ -27,49 +27,62 @@ export const M360_STORY_SECTIONS: { step: number; id: string; title: string; que
   },
   {
     step: 3,
+    id: 'structure',
+    title: 'Where we play · structure',
+    question:
+      'How big is each need-state, where is Bayer present or absent, and what is the plain job (defend pool / fight growth leak / white space / research only)? (TB4L-003 in story when enabled; S1–S4 codes stay in appendix for replication)',
+  },
+  {
+    step: 4,
     id: 'channel',
     title: 'Channel dynamics',
     question:
       'Where is set growth coming from by channel (price vs volume), and who is gaining or losing share in each channel?',
   },
   {
-    step: 4,
+    step: 5,
     id: 'attract',
     title: 'Segment attractiveness',
     question: 'Where to play — how big is each need-state, and is it growing faster than the category?',
   },
   {
-    step: 5,
+    step: 6,
     id: 'competitive',
     title: 'Competitive landscape',
     question: 'Who holds the cash pool and who is winning the share fight in the growth segment?',
   },
   {
-    step: 6,
+    step: 7,
     id: 'evi',
     title: 'Manufacturer relative growth',
     question: 'Which manufacturer brands outpace or lag their own need-state? (100 = in line; above 100 = faster.)',
   },
   {
-    step: 7,
+    step: 8,
     id: 'brand-pos',
     title: 'Focus brand position',
     question: 'Defend the core line, grow the advance line — or both, with different jobs?',
   },
   {
-    step: 8,
+    step: 9,
     id: 'share',
     title: 'Market share performance',
     question: 'Where is the manufacturer gaining or losing share — change first, not just the level?',
   },
   {
-    step: 9,
+    step: 10,
     id: 'synthesis',
     title: 'Summary · synthesis & key implications',
     question: 'What are the key insights, brand implications, opportunities, risks, and traffic-light signals?',
   },
   {
-    step: 10,
+    step: 11,
+    id: 'candidates',
+    title: 'Preliminary opportunities · candidates',
+    question: 'White space / near-miss / share-loss-in-growth as discussion candidates only? (TB4L-003 when enabled)',
+  },
+  {
+    step: 12,
     id: 'actions',
     title: 'Recommended actions',
     question: 'What to do this month — fix problems first, protect strengths, manage watch items.',
@@ -242,6 +255,10 @@ export const M360_REPLICATION_RULE_GROUPS: ReplicationRuleGroup[] = [
     intro: 'Three color jobs only — so readers do not need the legend after the first screen.',
     items: [
       {
+        label: 'Interactive charts (must)',
+        rule: 'Every story chart must be interactive for brand managers: hover (or equivalent) shows title + 3–6 key numbers / plain readout. Dim non-focus series on hover. Static images-only are not enough for Market story replication.',
+      },
+      {
         label: 'Slate = size / share',
         rule: 'Bar length = how big. Same soft slate for all brands. Manufacturer = one step deeper slate + name tag (ownership, not “good”).',
       },
@@ -259,7 +276,7 @@ export const M360_REPLICATION_RULE_GROUPS: ReplicationRuleGroup[] = [
       },
       {
         label: 'Attractiveness',
-        rule: 'Size bar = slate (share of category). Growth bar = green if faster than category, amber if slower. White-space candidate flag when rule hits.',
+        rule: 'Size bar = slate (share of category). Growth bar = green if faster than category, amber if slower. Plain job tags when TB4L-003-in-story is on (not S1–S4 codes).',
       },
       {
         label: 'Growth quality',
@@ -286,6 +303,46 @@ export const M360_REPLICATION_RULE_GROUPS: ReplicationRuleGroup[] = [
       {
         label: 'Insights layer',
         rule: 'Rank observations from CALC + failed checks only. White-space = “candidate for discussion — not a recommendation”.',
+      },
+    ],
+  },
+  {
+    id: 'tb4l003',
+    title: 'Structure & scenarios (TB4L-003 building block — replication)',
+    intro:
+      'Folded into Market v3 when M360_TB4L003_IN_STORY is true (src/config/m360Tb4l003Story.ts). Same Sirius CALC; Discover growth × presence rules. End-user story shows plain jobs only — S1–S4 / U0 codes are for replication and the TB4L-003 tab, not brand-manager chrome. Easy revert: set flag false.',
+    items: [
+      {
+        label: 'Scenario codes (appendix / replication only)',
+        rule: 'S1 faster+absent · S2 faster+present · S3 slower+absent · S4 slower+present · U0 missing or ±0.5 pp band on either axis. Absent = Bayer share < 3%. Do not put S1–S4 / U0 labels on the end-user Market story; map to plain jobs instead (defend pool, share leak in growth, white-space candidate, research only).',
+      },
+      {
+        label: 'Charts in end-user story',
+        rule: 'Mekko (size × Bayer mix) · growth×share bubble · segment scorecard with plain job column · who-wins all need-states (top 7 + EVI). No scenario-code table on the brand-manager page.',
+      },
+      {
+        label: 'Scenario table (replication / TB4L-003 tab)',
+        rule: 'Keep S1–S4 / U0 + permitted interpretation for analysts and cross-brand replication. Not required on the end-user Market story.',
+      },
+      {
+        label: 'Data checks (not end-user chrome)',
+        rule: 'V1–V10 / T4 FAILs live in Technical appendix and Data care footer — not a badge strip on the brand-manager story. Never hide FAIL from analysts; do not lead the end-user page with check badges.',
+      },
+      {
+        label: 'Candidates vs actions',
+        rule: 'White space / near-miss / share-loss-in-growth = “Candidate for discussion — not a recommendation” (no € sizing). Recommended actions stay separate and judgment-based.',
+      },
+      {
+        label: 'Interactive structure charts',
+        rule: 'Mekko, growth×share, scorecard, and who-wins must support hover tooltips with plain job + key numbers (same as other Market charts).',
+      },
+      {
+        label: 'CAGR fallback',
+        rule: 'If value_3ya incomplete, show 2y CAGR labelled 2y* — never invent 3y.',
+      },
+      {
+        label: 'Guardrails from building block',
+        rule: 'No causal “because/driven by” in candidate cards; candidates permit review only — not entry, budget, or delisting.',
       },
     ],
   },

@@ -4,6 +4,7 @@ import { CopaReport } from '../components/CopaReport';
 import { FinanceMcpAudit } from '../components/FinanceMcpAudit';
 import { M360MarketStory } from '../components/M360MarketStory';
 import { M360MarketStoryV3 } from '../components/M360MarketStoryV3';
+import { M360MarketStoryV4 } from '../components/M360MarketStoryV4';
 import { M360Report } from '../components/M360Report';
 import { SiriusTip, type SiriusTable } from '../components/SiriusTip';
 import { Tb4l003Report } from '../components/Tb4l003Report';
@@ -92,9 +93,10 @@ function PromptBlock({ prompt }: { prompt: ReplicationPrompt }) {
   );
 }
 
-export type AiAssistantVariant = 'classic' | 'v2' | 'v3';
+export type AiAssistantVariant = 'classic' | 'v2' | 'v3' | 'v4';
 
 function assistantBase(variant: AiAssistantVariant): string {
+  if (variant === 'v4') return '/ai-assistant-v4';
   if (variant === 'v3') return '/ai-assistant-v3';
   if (variant === 'v2') return '/ai-assistant-v2';
   return '/ai-assistant';
@@ -115,31 +117,37 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
   const m = M360_METADATA;
   const isV2 = variant === 'v2';
   const isV3 = variant === 'v3';
-  const isStory = isV2 || isV3;
+  const isV4 = variant === 'v4';
+  const isV3Plus = isV3 || isV4;
+  const isStory = isV2 || isV3Plus;
 
   return (
     <div
-      className={`ai-assistant-page ai-assistant-page--tables${isV2 ? ' ai-assistant-page--v2' : ''}${isV3 ? ' ai-assistant-page--v3' : ''}`}
+      className={`ai-assistant-page ai-assistant-page--tables${isV2 ? ' ai-assistant-page--v2' : ''}${isV3 ? ' ai-assistant-page--v3' : ''}${isV4 ? ' ai-assistant-page--v4' : ''}`}
     >
       <header className="ai-assistant-hero">
         <div className="ai-assistant-hero__copy">
           <p className="ai-assistant-hero__eyebrow">
             {view === 'tb4l-003'
               ? 'Discover analytic · TB4L-003 building block'
-              : isV3
+              : isV3Plus || isV2
                 ? 'Brand manager report · story redesign'
-                : isV2
-                  ? 'Brand manager report · story redesign'
-                  : 'Brand manager report'}
+                : 'Brand manager report'}
           </p>
           <h1 className="page-title">
-            {isV3 ? 'AI Assistant v3' : isV2 ? 'AI Assistant v2' : 'AI Assistant'}
+            {isV4
+              ? 'AI Assistant v4'
+              : isV3
+                ? 'AI Assistant v3'
+                : isV2
+                  ? 'AI Assistant v2'
+                  : 'AI Assistant'}
           </h1>
           <p className="page-subtitle">
             {view === 'tb4l-003'
               ? 'Segment Share and White Space — fixed layout from TB4L-003 v0.2. Same Sirius MAT extract as Market; scenario codes S1–S4 / U0; review only, not recommendations.'
               : view === 'market'
-                ? isV3
+                ? isV3Plus
                   ? 'Market window · sell-out, latest 12 months. Bain-logic drill-down from category to brand and channel.'
                   : isV2
                     ? 'Same Sirius and COPA clocks as AI Assistant. Market follows a Bain-logic drill-down; finance is unchanged. Compare side by side with the classic tab.'
@@ -175,7 +183,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
         >
           Market window
-          <span>{isV3 ? 'Sell-out · latest 12 months' : 'Sirius · latest 12 months'}</span>
+          <span>{isV3Plus ? 'Sell-out · latest 12 months' : 'Sirius · latest 12 months'}</span>
         </NavLink>
         <NavLink
           to={`${base}/tb4l-003`}
@@ -202,7 +210,15 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
             </p>
           </header>
           <div className="ai-window__body">
-            {isV3 ? <M360MarketStoryV3 /> : isV2 ? <M360MarketStory /> : <M360Report />}
+            {isV4 ? (
+              <M360MarketStoryV4 />
+            ) : isV3 ? (
+              <M360MarketStoryV3 />
+            ) : isV2 ? (
+              <M360MarketStory />
+            ) : (
+              <M360Report />
+            )}
           </div>
         </section>
       ) : view === 'tb4l-003' ? (
@@ -362,7 +378,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           tables. Brand-manager cards above do not need this open.
         </p>
 
-        <details className="ai-raw__inner" open={isV3}>
+        <details className="ai-raw__inner" open={isV3Plus}>
           <summary>Replication playbook — all rules</summary>
           <p className="ai-table-note">
             Canonical rule book for another country / category / brand. Placeholders match the prompt pack
@@ -475,8 +491,8 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
             <li>
               <b>Channel grain still missing</b> — no customer / retailer grain; no drugstore or grocery for
               Germany. Pharmacies + E-commerce (Mail Order) totals, price/volume drivers, and top-brand dynamics
-              are in the extract and shown in AI Assistant {isV3 ? 'v3' : 'v2'} · Channel dynamics (see T-ch /
-              T-ch-b below).
+              are in the extract and shown in AI Assistant{' '}
+              {isV4 ? 'v4' : isV3 ? 'v3' : 'v2'} · Channel dynamics (see T-ch / T-ch-b below).
             </li>
             <li>
               <b>Innovation bubble</b> — N/A
@@ -493,7 +509,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
             <li>
               <b>Finance / COPA</b> — different clock; never mix into Market charts (see Finance appendix if needed)
             </li>
-            {!isV3 ? (
+            {!isV3Plus ? (
               <>
                 <li>
                   <b>Fiona finance</b> revenue, margin, waterfall, investment, price elasticity — N/A

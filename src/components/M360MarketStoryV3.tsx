@@ -1,9 +1,10 @@
 /**
- * Bain-logic Market story — AI Assistant v3 (stacked chart + reading units).
- * AI Assistant v2 keeps M360MarketStory (deployed story). Classic keeps M360Report.
+ * Bain-logic Market story — AI Assistant v3 / v4 (chart + reading units).
+ * AI Assistant v2 keeps M360MarketStory. Classic keeps M360Report. v4 re-exports this until it diverges.
  */
 import { useRef, useState, type ReactNode } from 'react';
 import { ASSISTANT_NARRATIVE_V2, ASSISTANT_STORY_RAIL } from '../config/assistantNarrative';
+import { M360_TB4L003_IN_STORY } from '../config/m360Tb4l003Story';
 import {
   brandEvolutionIndex,
   CALC_CATEGORY,
@@ -37,6 +38,21 @@ import {
   type HypCheck,
   type HypStatus,
 } from './m360StoryAnalyses';
+import {
+  StoryCandidateOpportunities,
+  StoryGrowthShareBubble,
+  StoryMekkoChart,
+  StorySegmentScorecard,
+  StoryTb4l003KpiExtras,
+  StoryWhoWinsAll,
+  scenarioForSegment,
+} from './M360Tb4l003StoryBlocks';
+import {
+  TB4L003_CATEGORY,
+  TB4L003_SEGMENTS,
+  plainNeedStateJob,
+  shortSegmentName,
+} from '../data/tb4l003Calc';
 import './M360Report.css';
 
 type SignalTone = 'good' | 'watch' | 'bad';
@@ -334,7 +350,7 @@ function ChartAnalysis({
         <p className="m360-chart-ax__sub">What the numbers mean for the brand</p>
       </header>
       <section className="m360-chart-ax__block is-facts">
-        <h4>1 · Key facts / evidence</h4>
+        <h4>1 · What stands out</h4>
         {factsVariant === 'table' ? (
           <div className="m360-chart-ax__facts is-table">{facts}</div>
         ) : (
@@ -342,11 +358,11 @@ function ChartAnalysis({
         )}
       </section>
       <section className="m360-chart-ax__block is-insights">
-        <h4>2 · Key insights</h4>
+        <h4>2 · What it means</h4>
         <div>{insights}</div>
       </section>
       <section className="m360-chart-ax__block is-hyp">
-        <h4>3 · Hypothesis validation</h4>
+        <h4>3 · Claims we checked</h4>
         <ul className="m360-hyp-checks">
           {hypotheses.map((h, i) => {
             const meta = HYP_STATUS_META[h.status];
@@ -365,7 +381,7 @@ function ChartAnalysis({
         </ul>
       </section>
       <section className="m360-chart-ax__block is-brand">
-        <h4>4 · Implications for the brand</h4>
+        <h4>4 · For the brand</h4>
         <div>{brandImplications}</div>
       </section>
       <section className="m360-chart-ax__block is-opp-risk">
@@ -386,7 +402,8 @@ function ChartAnalysis({
 }
 
 /**
- * Chart full width, then TB4L analysis underneath (stacked — not side-by-side).
+ * Chart + reading in one card. Wide screens: reading sits beside the chart
+ * (fills the empty wing). Narrow: stacks reading under the chart.
  * ASSISTANT_STORY_RAIL = false → short note only under the chart.
  */
 function StoryBand({
@@ -416,7 +433,7 @@ function StoryBand({
     );
   }
   return (
-    <div className="m360-story-band is-stacked">
+    <div className="m360-story-band is-split">
       <div className="m360-story-band__viz">{viz}</div>
       <ChartAnalysis
         facts={facts}
@@ -616,8 +633,8 @@ function AttractivenessChart() {
   return (
     <div className="m360-viz m360-attract" ref={wrap} onMouseLeave={hide}>
       <p className="m360-attract__ref">
-        Category growth {fmtPct(catG)} — bars below show each need-state versus that line. Hover a row for Bayer
-        context.
+        Category growth <strong className={`m360-num ${tone(catG) || 'is-key'}`}>{fmtPct(catG)}</strong> — bars
+        below show each need-state versus that line. Hover a row for Bayer context.
       </p>
       <ul className="m360-attract__list">
         {rows.map((s) => {
@@ -644,9 +661,13 @@ function AttractivenessChart() {
                     !hasBayerPresence(s.bayerShareMatPct, s.bayerShareYaPct)
                       ? 'Bayer: no presence (no named brands)'
                       : `Bayer share: ${fmtBayerShare(s.bayerShareMatPct)} (${fmtPp(s.bayerShareChangePp)})`,
-                    s.whiteSpaceFlag
-                      ? 'White-space candidate (Bayer <3% and faster than category)'
-                      : 'Not a white-space candidate in this set',
+                    (() => {
+                      const sc = M360_TB4L003_IN_STORY ? scenarioForSegment(s.segment) : null;
+                      if (sc) return `Job  ${plainNeedStateJob(sc)}`;
+                      return s.whiteSpaceFlag
+                        ? 'White-space candidate (Bayer <3% and faster than category)'
+                        : 'Not a white-space candidate in this set';
+                    })(),
                   ],
                 })
               }
@@ -654,8 +675,12 @@ function AttractivenessChart() {
             >
               <header>
                 <h4>{shortName(s.segment)}</h4>
-                <span className="m360-attract__sales">{fmtM(s.valueMatM)}</span>
-                {s.whiteSpaceFlag ? <em className="m360-attract__ws">White-space candidate</em> : null}
+                <span className="m360-attract__sales m360-num is-key">{fmtM(s.valueMatM)}</span>
+                {M360_TB4L003_IN_STORY && scenarioForSegment(s.segment) ? (
+                  <em className="m360-attract__ws">{plainNeedStateJob(scenarioForSegment(s.segment)!)}</em>
+                ) : s.whiteSpaceFlag ? (
+                  <em className="m360-attract__ws">White-space candidate</em>
+                ) : null}
               </header>
               <div className="m360-attract__metrics">
                 <div>
@@ -663,7 +688,7 @@ function AttractivenessChart() {
                   <div className="m360-attract__bar-wrap">
                     <b className="m360-attract__bar is-size" style={{ width: `${(s.shareOfCategoryPct / maxShare) * 100}%` }} />
                   </div>
-                  <strong>{fmtShare(s.shareOfCategoryPct)}</strong>
+                  <strong className="m360-num is-key">{fmtShare(s.shareOfCategoryPct)}</strong>
                 </div>
                 <div>
                   <span className="m360-attract__lab">Growth vs last year</span>
@@ -673,7 +698,7 @@ function AttractivenessChart() {
                       style={{ width: `${(Math.abs(g ?? 0) / maxGrowth) * 100}%` }}
                     />
                   </div>
-                  <strong className={paceTone}>{fmtPct(g)}</strong>
+                  <strong className={`m360-num ${tone(g) || 'is-key'}`}>{fmtPct(g)}</strong>
                 </div>
               </div>
               <p className={`m360-attract__pace ${paceTone}`}>{pace}</p>
@@ -694,7 +719,7 @@ function RankBars({
 }: {
   rows: { key: string; name: string; bayer?: boolean }[];
   value: (key: string) => number;
-  label: (key: string) => string;
+  label: (key: string) => ReactNode;
   detail: (key: string) => string[];
 }) {
   const { wrap, tip, show, hide } = useChartTip();
@@ -704,7 +729,7 @@ function RankBars({
   return (
     <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
       {hasBayer ? (
-        <p className="m360-rank__axis">Bayer = deeper bar + name tag</p>
+        <p className="m360-rank__axis">Bayer brands: deeper bar and a Bayer tag on the name</p>
       ) : null}
       <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands tagged' : 'Brand share'}>
         {rows.map((r) => {
@@ -790,7 +815,9 @@ function EviChart() {
                 <b className="m360-evi__stem" style={{ left: `${stemLeft}%`, width: `${stemWidth}%` }} />
                 <em className="m360-evi__dot" style={{ left: `${x}%` }} />
               </div>
-              <strong className="m360-evi__val">{fmtEvi(r.evolutionIndex)}</strong>
+              <strong className={`m360-evi__val m360-num ${tone(r.evolutionIndex, 100) || 'is-key'}`}>
+                {fmtEvi(r.evolutionIndex)}
+              </strong>
             </li>
           );
         })}
@@ -870,9 +897,11 @@ function ShareChangeChart() {
                 <circle className="m360-share-chg__mat" cx={xMat} cy={H / 2} r="6" fill={changeColor} />
               </svg>
               <span className="m360-share-chg__levels">
-                {fmtBayerShare(s.bayerShareYaPct)} → {fmtBayerShare(s.bayerShareMatPct)}
+                <strong className="m360-num is-key">{fmtBayerShare(s.bayerShareYaPct)}</strong>
+                {' → '}
+                <strong className="m360-num is-key">{fmtBayerShare(s.bayerShareMatPct)}</strong>
               </span>
-              <strong className={`m360-share-chg__delta ${tone(s.bayerShareChangePp)}`}>
+              <strong className={`m360-share-chg__delta m360-num ${tone(s.bayerShareChangePp) || 'is-key'}`}>
                 {fmtPp(s.bayerShareChangePp)}
               </strong>
             </li>
@@ -942,11 +971,17 @@ function ChannelDriversChart() {
               <header>
                 <h4>{c.channel}</h4>
                 <span>
-                  {fmtM(c.valueEurM)} · {fmtShare(c.shareOfSetPct)} of set · {fmtPct(c.valueGrowthPct)}
+                  <strong className="m360-num is-key">{fmtM(c.valueEurM)}</strong>
+                  {' · '}
+                  <strong className="m360-num is-key">{fmtShare(c.shareOfSetPct)}</strong> of set ·{' '}
+                  <strong className={`m360-num ${tone(c.valueGrowthPct) || 'is-key'}`}>
+                    {fmtPct(c.valueGrowthPct)}
+                  </strong>
                 </span>
               </header>
               <p className={`m360-channel-drv__pace ${c.volumeContribEurM > c.priceContribEurM ? 'is-up' : ''}`}>
-                {driver} · {fmtShare(c.pctOfSetAbsGrowth)} of set’s EUR growth
+                {driver} · <strong className="m360-num is-key">{fmtShare(c.pctOfSetAbsGrowth)}</strong> of set’s EUR
+                growth
               </p>
               <div className="m360-channel-drv__metrics">
                 {showPrice ? (
@@ -962,7 +997,9 @@ function ChannelDriversChart() {
                         }}
                       />
                     </div>
-                    <strong className={tone(c.priceContribEurM)}>{fmtM(c.priceContribEurM)}</strong>
+                    <strong className={`m360-num ${tone(c.priceContribEurM) || 'is-key'}`}>
+                      {fmtM(c.priceContribEurM)}
+                    </strong>
                   </div>
                 ) : null}
                 {showVolume ? (
@@ -978,7 +1015,9 @@ function ChannelDriversChart() {
                         }}
                       />
                     </div>
-                    <strong className={tone(c.volumeContribEurM)}>{fmtM(c.volumeContribEurM)}</strong>
+                    <strong className={`m360-num ${tone(c.volumeContribEurM) || 'is-key'}`}>
+                      {fmtM(c.volumeContribEurM)}
+                    </strong>
                   </div>
                 ) : null}
               </div>
@@ -1062,7 +1101,9 @@ function ChannelPlayersChart({ channel }: { channel: 'Pharmacies' | 'E-commerce'
             >
               <span className="m360-movers__name">
                 {r.brand}
-                <small>{fmtShare(r.shareOfChannelPct)} of {channel}</small>
+                <small>
+                  <strong className="m360-num is-key">{fmtShare(r.shareOfChannelPct)}</strong> of {channel}
+                </small>
               </span>
               <div className="m360-movers__track" aria-hidden>
                 <i className="m360-movers__zero" />
@@ -1075,8 +1116,15 @@ function ChannelPlayersChart({ channel }: { channel: 'Pharmacies' | 'E-commerce'
                 />
               </div>
               <span className="m360-movers__labs">
-                <strong className={tone(r.shareChangePp)}>{fmtPp(r.shareChangePp)}</strong>
-                <em>value {fmtPct(r.valueGrowthPct)}</em>
+                <strong className={`m360-num ${tone(r.shareChangePp) || 'is-key'}`}>
+                  {fmtPp(r.shareChangePp)}
+                </strong>
+                <em>
+                  value{' '}
+                  <strong className={`m360-num ${tone(r.valueGrowthPct) || 'is-key'}`}>
+                    {fmtPct(r.valueGrowthPct)}
+                  </strong>
+                </em>
               </span>
             </li>
           );
@@ -1126,8 +1174,11 @@ function IberogastPosition() {
             >
               <header>
                 <h4>{r.label}</h4>
-                <span className={tone(r.evolutionIndex, 100)}>
-                  Relative growth {fmtEvi(r.evolutionIndex)}
+                <span>
+                  Relative growth{' '}
+                  <strong className={`m360-num ${tone(r.evolutionIndex, 100) || 'is-key'}`}>
+                    {fmtEvi(r.evolutionIndex)}
+                  </strong>
                   {beat ? ' · ahead of IBS' : ' · with / behind IBS'}
                 </span>
               </header>
@@ -1138,8 +1189,12 @@ function IberogastPosition() {
                 />
               </div>
               <p>
-                {fmtShare(r.shareMatPct)} of IBS · sales {fmtPct(r.growth1yPct)} versus last year · share change{' '}
-                {fmtPp(r.shareChangePp)}
+                <strong className="m360-num is-key">{fmtShare(r.shareMatPct)}</strong> of IBS · sales{' '}
+                <strong className={`m360-num ${tone(r.growth1yPct) || 'is-key'}`}>{fmtPct(r.growth1yPct)}</strong>{' '}
+                versus last year · share change{' '}
+                <strong className={`m360-num ${tone(r.shareChangePp) || 'is-key'}`}>
+                  {fmtPp(r.shareChangePp)}
+                </strong>
               </p>
             </li>
           );
@@ -1199,9 +1254,322 @@ export function M360MarketStoryV3() {
     valuePackGap,
   });
 
+  const structSegs = TB4L003_SEGMENTS;
+  const structLargest = structSegs[0];
+  const structFast = [...structSegs]
+    .filter((s) => s.growth1yPct != null)
+    .sort((a, b) => (b.growth1yPct ?? 0) - (a.growth1yPct ?? 0))[0];
+  const structS2 = structSegs.filter((s) => s.shareLossInGrowth);
+  const structS1 = structSegs.filter((s) => s.whiteSpace);
+  const structS3 = structSegs.filter((s) => s.nearMiss);
+  const structS4 = structSegs.filter((s) => s.scenarioCode === 'S4');
+
+  const tb4lAx = {
+    structure: {
+      facts: (
+        <ul>
+          {structLargest ? (
+            <li>
+              <Num kind="key">{shortSegmentName(structLargest.segment)}</Num> is the largest need-state —{' '}
+              <Num kind="key">{fmtShare(structLargest.shareOfCategoryPct)}</Num> of set sales (
+              <Num kind="key">{fmtM(structLargest.valueMatM)}</Num>
+              ). Bayer holds <Num kind="key">{fmtShare(structLargest.bayerShareMatPct)}</Num> there.
+            </li>
+          ) : null}
+          {structFast ? (
+            <li>
+              Fastest need-state: <Num kind="key">{shortSegmentName(structFast.segment)}</Num> at{' '}
+              <Num v={structFast.growth1yPct}>{fmtPct(structFast.growth1yPct)}</Num> vs category{' '}
+              <Num v={TB4L003_CATEGORY.growth1yPct}>{fmtPct(TB4L003_CATEGORY.growth1yPct)}</Num>
+              {structFast.bayerShareChangePp != null ? (
+                <>
+                  ; Bayer share{' '}
+                  <Num v={structFast.bayerShareChangePp}>{fmtPp(structFast.bayerShareChangePp)}</Num>
+                </>
+              ) : null}
+              .
+            </li>
+          ) : null}
+          <li>
+            Job by need-state:{' '}
+            {structSegs.map((s, i) => (
+              <span key={s.segment}>
+                {i > 0 ? ' · ' : null}
+                {shortSegmentName(s.segment)} — {plainNeedStateJob(s)}
+              </span>
+            ))}
+            .
+          </li>
+        </ul>
+      ),
+      insights: (
+        <>
+          <p>
+            This chart answers where the euros sit and whether Bayer is present — before channels or brand lines. The
+            wide columns are the cash pool; the fast-growing ones are where share fights matter most.
+          </p>
+          <p>
+            {structS2.length
+              ? `${structS2.map((s) => shortSegmentName(s.segment)).join(' and ')} grow faster than the set while Bayer’s share softens — that is the main structure tension.`
+              : 'No need-state currently shows Bayer losing share inside a faster-than-category growth space.'}{' '}
+            {structS1.length
+              ? `${structS1.map((s) => shortSegmentName(s.segment)).join(' and ')} look like white-space candidates (fast growth, Bayer under 3%).`
+              : 'There is no clear white-space need-state (fast growth with Bayer under 3%) in this window.'}
+          </p>
+        </>
+      ),
+      hypotheses: [
+        {
+          claim: 'One need-state is both the sales pool and the growth engine.',
+          status: (structLargest &&
+          structFast &&
+          structLargest.segment === structFast.segment
+            ? 'confirmed'
+            : 'rejected') as HypStatus,
+          because: (
+            <>
+              Largest is {structLargest ? shortSegmentName(structLargest.segment) : '—'}; fastest is{' '}
+              {structFast ? shortSegmentName(structFast.segment) : '—'}. Pool and growth are separate jobs.
+            </>
+          ),
+        },
+        {
+          claim: 'Bayer is present in the growth need-state but not keeping pace.',
+          status: (structS2.length ? 'confirmed' : 'partial') as HypStatus,
+          because: (
+            <>
+              {structS2.length
+                ? structS2.map((s) => (
+                    <span key={s.segment}>
+                      {shortSegmentName(s.segment)} share{' '}
+                      <Num v={s.bayerShareChangePp}>{fmtPp(s.bayerShareChangePp)}</Num>
+                      {'. '}
+                    </span>
+                  ))
+                : 'No growing need-state where Bayer is losing share in this extract.'}
+            </>
+          ),
+        },
+      ],
+      brandImplications: (
+        <p>
+          Brief the franchise as “defend the large pool, fight where growth (and leak) sit” — not one blended volume
+          target across every need-state.
+        </p>
+      ),
+      opportunities: (
+        <ul>
+          {structS2.map((s) => (
+            <li key={s.segment}>
+              Contest {shortSegmentName(s.segment)} while it still grows faster than the set (
+              <Num v={s.growth1yPct}>{fmtPct(s.growth1yPct)}</Num>).
+            </li>
+          ))}
+          {structS4.map((s) => (
+            <li key={s.segment}>
+              Protect the {shortSegmentName(s.segment)} pool (
+              <Num kind="key">{fmtShare(s.shareOfCategoryPct)}</Num> of set).
+            </li>
+          ))}
+          {!structS2.length && !structS4.length ? (
+            <li>Use the scorecard next for exact sizes and growth gaps by need-state.</li>
+          ) : null}
+        </ul>
+      ),
+      risks: (
+        <ul>
+          {structS2.map((s) => (
+            <li key={s.segment}>
+              Letting {shortSegmentName(s.segment)} share keep drifting (
+              <Num v={s.bayerShareChangePp}>{fmtPp(s.bayerShareChangePp)}</Num>) while rivals take the growth.
+            </li>
+          ))}
+          <li>Treating every need-state as the same job because they share one category label.</li>
+        </ul>
+      ),
+    },
+    growthShare: {
+      facts: (
+        <ul>
+          <li>
+            Category growth line sits at{' '}
+            <Num v={TB4L003_CATEGORY.growth1yPct}>{fmtPct(TB4L003_CATEGORY.growth1yPct)}</Num>. Need-states to the
+            right grow faster; to the left grow slower.
+          </li>
+          <li>
+            Bayer presence line is 3% share. Above it = Bayer already plays; below it = little or no named presence.
+          </li>
+          {structS1.length ? (
+            <li>
+              White-space zone (fast + Bayer under 3%):{' '}
+              {structS1.map((s) => shortSegmentName(s.segment)).join(', ')}.
+            </li>
+          ) : (
+            <li>No need-state sits in the white-space zone in this window.</li>
+          )}
+          {structS2.length ? (
+            <li>
+              Growing with Bayer present but soft share:{' '}
+              {structS2.map((s) => shortSegmentName(s.segment)).join(', ')}.
+            </li>
+          ) : null}
+        </ul>
+      ),
+      insights: (
+        <p>
+          This map separates four jobs: enter (white space), keep pace where we already play in growth, research
+          carefully where we are absent and growth is soft, and protect slower pools. Bubble size is need-state sales —
+          big and soft is still a franchise issue.
+        </p>
+      ),
+      hypotheses: [
+        {
+          claim: 'There is an obvious white-space need-state to enter now.',
+          status: (structS1.length ? 'partial' : 'rejected') as HypStatus,
+          because: (
+            <>
+              {structS1.length
+                ? `${structS1.map((s) => shortSegmentName(s.segment)).join(', ')} meet the fast + low-presence rule — still a discussion candidate, not a sized entry.`
+                : 'Nothing is both faster than category and under 3% Bayer share outside the unclear band.'}
+            </>
+          ),
+        },
+        {
+          claim: 'The urgent fight is share loss inside a growing need-state we already play.',
+          status: (structS2.length ? 'confirmed' : 'partial') as HypStatus,
+          because: (
+            <>
+              {structS2.length
+                ? structS2.map((s) => shortSegmentName(s.segment)).join(', ')
+                : 'No share-loss-in-growth case in this pack.'}
+            </>
+          ),
+        },
+      ],
+      brandImplications: (
+        <p>
+          Do not brief “new entry” from a slow, low-presence space, and do not ignore share leak in a fast space where
+          Bayer already has a stake.
+        </p>
+      ),
+      opportunities: (
+        <ul>
+          {structS2.map((s) => (
+            <li key={s.segment}>
+              Recover pace in {shortSegmentName(s.segment)} (Bayer share{' '}
+              <Num v={s.bayerShareChangePp}>{fmtPp(s.bayerShareChangePp)}</Num>).
+            </li>
+          ))}
+          {structS3.map((s) => (
+            <li key={s.segment}>
+              Keep {shortSegmentName(s.segment)} as research-only until growth looks durable.
+            </li>
+          ))}
+          {!structS2.length && !structS3.length ? (
+            <li>Use Antacids and IBS charts next to name the brands behind the structure.</li>
+          ) : null}
+        </ul>
+      ),
+      risks: (
+        <ul>
+          <li>Forcing a white-space story when the real leak is share loss in a need-state we already play.</li>
+          <li>Opening entry talk from a low-presence, soft-growth need-state without a clear growth case.</li>
+        </ul>
+      ),
+    },
+    scorecard: {
+      facts: (
+        <ul>
+          {structSegs.map((s) => (
+            <li key={s.segment}>
+              {shortSegmentName(s.segment)}: <Num kind="key">{fmtM(s.valueMatM)}</Num>, value{' '}
+              <Num v={s.growth1yPct}>{fmtPct(s.growth1yPct)}</Num>
+              {s.growthVsCategoryPp != null ? (
+                <>
+                  {' '}
+                  (<Num v={s.growthVsCategoryPp}>{fmtPp(s.growthVsCategoryPp)}</Num> vs category)
+                </>
+              ) : null}
+              , Bayer <Num kind="key">{fmtShare(s.bayerShareMatPct)}</Num>
+              {s.bayerShareChangePp != null ? (
+                <>
+                  {' '}
+                  (<Num v={s.bayerShareChangePp}>{fmtPp(s.bayerShareChangePp)}</Num>)
+                </>
+              ) : null}
+              — {plainNeedStateJob(s)}.
+            </li>
+          ))}
+        </ul>
+      ),
+      insights: (
+        <p>
+          The scorecard is the same story as the structure chart, in numbers you can quote in a meeting — size,
+          growth vs the set, Bayer stake, and the plain job for each need-state.
+        </p>
+      ),
+      hypotheses: [
+        {
+          claim: 'Antacids is the growth need-state; IBS is the pool.',
+          status: 'confirmed' as HypStatus,
+          because: (
+            <>
+              Compare the size and growth columns: pool = largest share of set; growth = fastest vs category.
+            </>
+          ),
+        },
+      ],
+      brandImplications: (
+        <p>Use these figures as the shared reference — do not re-average need-states into one blended KPI.</p>
+      ),
+      opportunities: (
+        <ul>
+          <li>Quote vs-category growth gaps when prioritizing where to fight.</li>
+          <li>Where CAGR is marked 2y*, treat the medium-term view as provisional.</li>
+        </ul>
+      ),
+      risks: (
+        <ul>
+          <li>Cherry-picking one growth number without the size and Bayer share next to it.</li>
+        </ul>
+      ),
+    },
+    whoWinsAll: {
+      facts: (
+        <ul>
+          <li>
+            Top brands by share in every need-state — Bayer names marked; competitors show whether they outpace their
+            need-state.
+          </li>
+          <li>IBS and Antacids still carry most of the euro story; Gas and PPIs complete the cast.</li>
+        </ul>
+      ),
+      insights: (
+        <p>
+          Structure said where; this chart says who. A rival growing faster than its need-state in Antacids is the
+          share fight behind the Bayer leak.
+        </p>
+      ),
+      hypotheses: [],
+      brandImplications: (
+        <p>Name the rival in the growth need-state before briefing channel or pack tactics.</p>
+      ),
+      opportunities: (
+        <ul>
+          <li>Carry the top rival names into the Antacids and channel charts next.</li>
+        </ul>
+      ),
+      risks: (
+        <ul>
+          <li>Treating molecule rows in PPIs as Bayer brands or as a sized entry.</li>
+        </ul>
+      ),
+    },
+  };
+
   return (
     <div
-      className={`m360-rep m360-rep--story-v2${ASSISTANT_NARRATIVE_V2 ? ' m360-rep--narrative-v2' : ''}${ASSISTANT_STORY_RAIL ? ' m360-rep--story-rail' : ''}`}
+      className={`m360-rep m360-rep--story-v2${ASSISTANT_NARRATIVE_V2 ? ' m360-rep--narrative-v2' : ''}${ASSISTANT_STORY_RAIL ? ' m360-rep--story-rail' : ''}${M360_TB4L003_IN_STORY ? ' m360-rep--tb4l003' : ''}`}
       data-m360-charts={m360ChartColorModeAttr()}
     >
       <p className="m360-rep__kicker">
@@ -1214,37 +1582,40 @@ export function M360MarketStoryV3() {
         <AssistantMarketReadout {...narrative} heading="Executive summary" headingLevel={3} />
         <StoryBand
           viz={
-            <section className="m360-rep-kpis" aria-label="Three headline measures by scope">
-              <article>
-                <p>Category sales</p>
-                <strong className="m360-num is-key">{fmtM(cat.valueMatM)}</strong>
-                <span>
-                  Whole Iberogast competitive set, latest 12 months.{' '}
-                  <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num> versus last year. Bayer sales inside this
-                  set: <Num kind="key">{fmtM(cat.bayerValueMatM)}</Num>.
-                </span>
-              </article>
-              <article className={tone(cat.bayerShareChangePp) === 'is-down' ? 'is-soft' : undefined}>
-                <p>Bayer market share</p>
-                <strong className={`m360-num ${tone(cat.bayerShareChangePp) || 'is-key'}`}>
-                  {fmtShare(cat.bayerShareMatPct)}
-                </strong>
-                <span>
-                  Bayer’s share of the same competitive set (not Iberogast alone).{' '}
-                  <Num v={cat.bayerShareChangePp}>{fmtPp(cat.bayerShareChangePp)}</Num> versus last year.
-                </span>
-              </article>
-              <article>
-                <p>Iberogast relative growth</p>
-                <strong className={`m360-num ${tone(iberoBrandEvi, 100) || 'is-key'}`}>
-                  {fmtEvi(iberoBrandEvi)}
-                </strong>
-                <span>
-                  Whole Iberogast brand (Classic + Advance) versus the IBS need-state. 100 = growing in line with
-                  IBS; above 100 = faster.
-                </span>
-              </article>
-            </section>
+            <>
+              <section className="m360-rep-kpis" aria-label="Three headline measures by scope">
+                <article>
+                  <p>Category sales</p>
+                  <strong className="m360-num is-key">{fmtM(cat.valueMatM)}</strong>
+                  <span>
+                    Whole Iberogast competitive set, latest 12 months.{' '}
+                    <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num> versus last year. Bayer sales inside this
+                    set: <Num kind="key">{fmtM(cat.bayerValueMatM)}</Num>.
+                  </span>
+                </article>
+                <article className={tone(cat.bayerShareChangePp) === 'is-down' ? 'is-soft' : undefined}>
+                  <p>Bayer market share</p>
+                  <strong className={`m360-num ${tone(cat.bayerShareChangePp) || 'is-key'}`}>
+                    {fmtShare(cat.bayerShareMatPct)}
+                  </strong>
+                  <span>
+                    Bayer’s share of the same competitive set (not Iberogast alone).{' '}
+                    <Num v={cat.bayerShareChangePp}>{fmtPp(cat.bayerShareChangePp)}</Num> versus last year.
+                  </span>
+                </article>
+                <article>
+                  <p>Iberogast relative growth</p>
+                  <strong className={`m360-num ${tone(iberoBrandEvi, 100) || 'is-key'}`}>
+                    {fmtEvi(iberoBrandEvi)}
+                  </strong>
+                  <span>
+                    Whole Iberogast brand (Classic + Advance) versus the IBS need-state. 100 = growing in line with
+                    IBS; above 100 = faster.
+                  </span>
+                </article>
+              </section>
+              {M360_TB4L003_IN_STORY ? <StoryTb4l003KpiExtras /> : null}
+            </>
           }
           {...ax.overview}
         />
@@ -1254,7 +1625,7 @@ export function M360MarketStoryV3() {
               id="ch-top-brands"
               wide
               title="Top 10 brands in the competitive set"
-              caption="Germany Digestive Health · Iberogast GB BAM set. Bar = brand share of set value. Label = share · value growth YoY. Named brands only (excludes Other)."
+              caption="Longer bar = bigger share of the competitive set. Numbers after each bar: share of set, then sales growth versus last year. Small ‘Other’ leftovers are left out so the cast stays readable."
             >
               <RankBars
                 rows={CALC_TOP_BRANDS_IN_SET.map((b) => ({
@@ -1266,7 +1637,13 @@ export function M360MarketStoryV3() {
                 label={(key) => {
                   const b = CALC_TOP_BRANDS_IN_SET.find((x) => x.brand === key);
                   if (!b) return '';
-                  return `${fmtShare(b.shareOfSetPct)} · ${fmtPct(b.growth1yPct)}`;
+                  return (
+                    <>
+                      <Num kind="key">{fmtShare(b.shareOfSetPct)}</Num>
+                      {' · '}
+                      <Num v={b.growth1yPct}>{fmtPct(b.growth1yPct)}</Num>
+                    </>
+                  );
                 }}
                 detail={(key) => {
                   const b = CALC_TOP_BRANDS_IN_SET.find((x) => x.brand === key);
@@ -1301,6 +1678,55 @@ export function M360MarketStoryV3() {
           {...ax.growth}
         />
       </StorySection>
+
+      {/* 2b · Structure (TB4L-003) — gated; S1–S4 codes live in Technical appendix only */}
+      {M360_TB4L003_IN_STORY ? (
+        <StorySection
+          id="story-structure"
+          title="Where we play · structure"
+          lede="Where the money sits by need-state, whether Bayer is present, and which spaces are growing faster than the set — so pool defend and growth fight stay separate jobs."
+        >
+          <StoryBand
+            viz={
+              <ChartCard
+                id="ch-structure-mekko"
+                wide
+                title="Market structure"
+                caption="Wider column = bigger need-state. Deeper slate in the column = Bayer’s share; lighter = competitors."
+              >
+                <StoryMekkoChart />
+              </ChartCard>
+            }
+            {...tb4lAx.structure}
+          />
+          <StoryBand
+            viz={
+              <ChartCard
+                id="ch-growth-share"
+                wide
+                title="Growth × Bayer share"
+                caption="Right = growing faster than the category; up = higher Bayer share. Bubble size = need-state sales. Soft amber lower-right = white space (fast growth, Bayer under 3%)."
+              >
+                <StoryGrowthShareBubble />
+              </ChartCard>
+            }
+            {...tb4lAx.growthShare}
+          />
+          <StoryBand
+            viz={
+              <ChartCard
+                id="ch-segment-scorecard"
+                wide
+                title="Segment scorecard"
+                caption="One row per need-state: size, growth, gap vs the category, Bayer stake, and the job in plain words."
+              >
+                <StorySegmentScorecard />
+              </ChartCard>
+            }
+            {...tb4lAx.scorecard}
+          />
+        </StorySection>
+      ) : null}
 
       {/* 3 · Channel dynamics */}
       <StorySection id="story-channel" title="Channel dynamics">
@@ -1351,8 +1777,12 @@ export function M360MarketStoryV3() {
               id="ch-attract"
               wide
               title="Need-state size × growth"
-              caption={`Sorted by size. IBS is the pool (${fmtShare(ibs.shareOfCategoryPct)}). Antacids is the growth engine (${fmtPct(ant.growth1yPct)}). White-space candidate = Bayer share under 3% and faster than category.`}
-            >
+              caption={
+                M360_TB4L003_IN_STORY
+                  ? `Sorted by size. Growth bars show pace vs the category. Tags name the job in plain words (defend pool, fight share leak, white-space candidate).`
+                  : `Sorted by size. IBS is the pool (${fmtShare(ibs.shareOfCategoryPct)}). Antacids is the growth engine (${fmtPct(ant.growth1yPct)}). White-space candidate = Bayer share under 3% and faster than category.`
+                }
+              >
               <AttractivenessChart />
             </ChartCard>
           }
@@ -1360,8 +1790,23 @@ export function M360MarketStoryV3() {
         />
       </StorySection>
 
-      {/* 4 · Competitive landscape */}
+      {/* 5 · Competitive landscape */}
       <StorySection id="story-comp" title="Competitive landscape">
+        {M360_TB4L003_IN_STORY ? (
+          <StoryBand
+            viz={
+              <ChartCard
+                id="ch-who-wins-all"
+                wide
+                title="Who wins inside each need-state"
+                caption="Top 7 sub-brands by share. Bayer = deeper slate; competitors green/amber by EVI vs their need-state (100 = in line)."
+              >
+                <StoryWhoWinsAll />
+              </ChartCard>
+            }
+            {...tb4lAx.whoWinsAll}
+          />
+        ) : null}
         <StoryBand
           viz={
             <ChartCard
@@ -1378,7 +1823,15 @@ export function M360MarketStoryV3() {
                 value={(key) => topIbs.find((r) => r.label === key)?.shareMatPct ?? 0}
                 label={(key) => {
                   const r = topIbs.find((x) => x.label === key);
-                  return `${fmtShare(r?.shareMatPct ?? null)} · EVI ${fmtEvi(r?.evolutionIndex ?? null)}`;
+                  return (
+                    <>
+                      <Num kind="key">{fmtShare(r?.shareMatPct ?? null)}</Num>
+                      {' · EVI '}
+                      <Num v={r?.evolutionIndex} kind="evi">
+                        {fmtEvi(r?.evolutionIndex ?? null)}
+                      </Num>
+                    </>
+                  );
                 }}
                 detail={(key) => {
                   const r = topIbs.find((x) => x.label === key);
@@ -1410,7 +1863,15 @@ export function M360MarketStoryV3() {
                 value={(key) => topAnt.find((r) => r.label === key)?.shareMatPct ?? 0}
                 label={(key) => {
                   const r = topAnt.find((x) => x.label === key);
-                  return `${fmtShare(r?.shareMatPct ?? null)} · EVI ${fmtEvi(r?.evolutionIndex ?? null)}`;
+                  return (
+                    <>
+                      <Num kind="key">{fmtShare(r?.shareMatPct ?? null)}</Num>
+                      {' · EVI '}
+                      <Num v={r?.evolutionIndex} kind="evi">
+                        {fmtEvi(r?.evolutionIndex ?? null)}
+                      </Num>
+                    </>
+                  );
                 }}
                 detail={(key) => {
                   const r = topAnt.find((x) => x.label === key);
@@ -1591,6 +2052,17 @@ export function M360MarketStoryV3() {
           </ul>
         </div>
       </StorySection>
+
+      {/* Candidates from TB4L-003 — before hard actions */}
+      {M360_TB4L003_IN_STORY ? (
+        <StorySection
+          id="story-candidates"
+          title="Preliminary opportunities · candidates"
+          lede="From growth and Bayer presence only. Candidate for discussion — not a recommendation. No € sizing."
+        >
+          <StoryCandidateOpportunities />
+        </StorySection>
+      ) : null}
 
       {/* Actions — follow from synthesis + signals */}
       <StorySection
