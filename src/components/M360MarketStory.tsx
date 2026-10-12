@@ -5,11 +5,18 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { ASSISTANT_NARRATIVE_V2 } from '../config/assistantNarrative';
 import {
+  brandEvolutionIndex,
   CALC_CATEGORY,
   CALC_IBEROGAST,
   CALC_SEGMENTS,
   CALC_SUBBRANDS,
 } from '../data/m360Charts';
+import {
+  M360_CHART,
+  m360ChangeColor,
+  m360ChartColorModeAttr,
+  m360SegmentColor,
+} from '../data/m360ChartColors';
 import {
   CALC_CHANNEL_ECOMM,
   CALC_CHANNEL_PHARMA,
@@ -18,7 +25,11 @@ import {
   channelBrandsByShareChange,
 } from '../data/m360ChannelRetrieval';
 import { M360_METADATA, M360_RETRIEVAL_PARAMS } from '../data/m360Retrieval';
-import { AssistantMarketReadout, buildMarketNarrativeProps } from './AssistantNarrative';
+import {
+  AssistantMarketDataCare,
+  AssistantMarketReadout,
+  buildMarketNarrativeProps,
+} from './AssistantNarrative';
 import './M360Report.css';
 
 type SignalTone = 'good' | 'watch' | 'bad';
@@ -117,6 +128,23 @@ function fmtPp(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
   return `${v >= 0 ? '+' : ''}${v.toFixed(1)} points`;
 }
+function fmtMonthLabel(v: string): string {
+  return v
+    .replace(/\bJan\b/g, 'January')
+    .replace(/\bFeb\b/g, 'February')
+    .replace(/\bMar\b/g, 'March')
+    .replace(/\bApr\b/g, 'April')
+    .replace(/\bJun\b/g, 'June')
+    .replace(/\bJul\b/g, 'July')
+    .replace(/\bAug\b/g, 'August')
+    .replace(/\bSep\b/g, 'September')
+    .replace(/\bOct\b/g, 'October')
+    .replace(/\bNov\b/g, 'November')
+    .replace(/\bDec\b/g, 'December');
+}
+function fmtMatWindow(start: string, end: string): string {
+  return `12 months ending ${fmtMonthLabel(end)} (${fmtMonthLabel(start)}–${fmtMonthLabel(end)})`;
+}
 
 function shortName(segment: string): string {
   if (segment.startsWith('IBS')) return 'IBS';
@@ -173,7 +201,7 @@ function ChartTip({ tip }: { tip: Tip | null }) {
   return (
     <div
       className={`m360-tip${flipX ? ' is-left' : ''}${flipY ? ' is-down' : ''}`}
-      style={{ left: tip.x, top: tip.y, ['--tip' as string]: tip.color ?? '#00607e' }}
+      style={{ left: tip.x, top: tip.y, ['--tip' as string]: tip.color ?? M360_CHART.bayerDeep }}
     >
       <strong>{tip.title}</strong>
       {tip.lines.map((line) => (
@@ -183,11 +211,9 @@ function ChartTip({ tip }: { tip: Tip | null }) {
   );
 }
 
-const SEG_PALETTE = ['#4ec3e0', '#c9a0e8', '#6fd48a', '#f0a15c'] as const;
-
 function colorForSegment(segment: string): string {
   const i = CALC_SEGMENTS.findIndex((s) => s.segment === segment);
-  return SEG_PALETTE[i >= 0 ? i % SEG_PALETTE.length : 0];
+  return m360SegmentColor(i);
 }
 
 function ChartCard({
@@ -265,7 +291,7 @@ function GrowthQualityChart() {
     {
       key: 'category',
       name: 'Category',
-      color: '#00607e',
+      color: M360_CHART.category,
       value: CALC_CATEGORY.growth1yPct,
       units: CALC_CATEGORY.unitGrowth1yPct,
     },
@@ -428,6 +454,7 @@ function AttractivenessChart() {
           const g = s.growth1yPct;
           const faster = g !== null && catG !== null && g > catG;
           const slower = g !== null && catG !== null && g < catG;
+          const paceTone = faster ? 'is-up' : slower ? 'is-down' : 'is-flat';
           const paceBase = faster ? 'Faster than category' : slower ? 'Slower than category' : 'In line with category';
           const pace = catG !== null && catG !== undefined ? `${paceBase} (${fmtPct(catG)})` : paceBase;
           const color = colorForSegment(s.segment);
@@ -474,14 +501,14 @@ function AttractivenessChart() {
                   <span className="m360-attract__lab">Growth vs last year</span>
                   <div className="m360-attract__bar-wrap">
                     <b
-                      className={`m360-attract__bar is-growth ${tone(g)}`}
+                      className={`m360-attract__bar is-growth ${paceTone}`}
                       style={{ width: `${(Math.abs(g ?? 0) / maxGrowth) * 100}%` }}
                     />
                   </div>
-                  <strong className={tone(g)}>{fmtPct(g)}</strong>
+                  <strong className={paceTone}>{fmtPct(g)}</strong>
                 </div>
               </div>
-              <p className={`m360-attract__pace ${faster ? 'is-up' : slower ? 'is-down' : ''}`}>{pace}</p>
+              <p className={`m360-attract__pace ${paceTone}`}>{pace}</p>
             </li>
           );
         })}
@@ -508,7 +535,9 @@ function RankBars({
   const hasBayer = rows.some((r) => r.bayer);
   return (
     <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
-      {hasBayer ? <p className="m360-rank__axis">Bayer brands marked by name</p> : null}
+      {hasBayer ? (
+        <p className="m360-rank__axis">Bayer = deeper bar + name tag · gray-blue = competitors</p>
+      ) : null}
       <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands tagged' : 'Brand share'}>
         {rows.map((r) => {
           const on = !focus || focus === r.key;
@@ -573,7 +602,7 @@ function EviChart() {
               onMouseEnter={() => setFocus(id)}
               onMouseMove={(e) =>
                 show(e, {
-                  color: beat ? '#6fd48a' : '#f0a15c',
+                  color: m360ChangeColor(beat ? 1 : -1),
                   title: r.label,
                   lines: [
                     shortName(r.segment),
@@ -864,7 +893,7 @@ function IberogastPosition() {
               onMouseEnter={() => setFocus(r.label)}
               onMouseMove={(e) =>
                 show(e, {
-                  color: beat ? '#6fd48a' : '#f0a15c',
+                  color: m360ChangeColor(beat ? 1 : -1),
                   title: r.label,
                   lines: [
                     `Share of IBS  ${fmtShare(r.shareMatPct)}`,
@@ -916,6 +945,7 @@ export function M360MarketStory() {
     .sort((a, b) => b.valueMat - a.valueMat)
     .slice(0, 6);
   const ibero = CALC_IBEROGAST[0];
+  const iberoBrandEvi = brandEvolutionIndex('IBEROGAST', ibs.segment);
   const pharmaBrands = channelBrandsByShareChange('Pharmacies');
   const ecommBrands = channelBrandsByShareChange('E-commerce');
   const gavisconPharma = pharmaBrands.find((r) => r.brand === 'GAVISCON');
@@ -926,9 +956,10 @@ export function M360MarketStory() {
   return (
     <div
       className={`m360-rep m360-rep--story-v2${ASSISTANT_NARRATIVE_V2 ? ' m360-rep--narrative-v2' : ''}`}
+      data-m360-charts={m360ChartColorModeAttr()}
     >
       <p className="m360-rep__kicker">
-        {p.country} {p.category} · Iberogast competitive set · latest 12 months ending {m.latest_actual_month}
+        {p.country} {p.category} · Iberogast competitive set · {fmtMatWindow(m.mat_start, m.mat_end)}
       </p>
 
       {/* 1 · Category overview */}
@@ -960,13 +991,12 @@ export function M360MarketStory() {
           </article>
           <article>
             <p>Iberogast relative growth</p>
-            <strong className={`m360-num ${tone(ibero?.evolutionIndex ?? null, 100) || 'is-key'}`}>
-              {fmtEvi(ibero?.evolutionIndex ?? null)}
+            <strong className={`m360-num ${tone(iberoBrandEvi, 100) || 'is-key'}`}>
+              {fmtEvi(iberoBrandEvi)}
             </strong>
             <span>
-              {ibero
-                ? `${ibero.label} versus the IBS need-state only. 100 = growing in line with IBS; above 100 = faster.`
-                : 'Not available.'}
+              Whole Iberogast brand (Classic + Advance) versus the IBS need-state. 100 = growing in line with IBS;
+              above 100 = faster.
             </span>
           </article>
         </section>
@@ -1387,6 +1417,8 @@ export function M360MarketStory() {
           />
         </ol>
       </StorySection>
+
+      <AssistantMarketDataCare checks={narrative.checks} />
     </div>
   );
 }

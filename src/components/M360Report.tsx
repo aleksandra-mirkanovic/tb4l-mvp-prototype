@@ -1,5 +1,6 @@
 import { useRef, useState, type ReactNode } from 'react';
 import {
+  brandEvolutionIndex,
   CALC_CATEGORY,
   CALC_IBEROGAST,
   CALC_SEGMENTS,
@@ -10,6 +11,7 @@ import { ASSISTANT_NARRATIVE_V2 } from '../config/assistantNarrative';
 import { M360_METADATA, M360_RETRIEVAL_PARAMS } from '../data/m360Retrieval';
 import {
   AssistantMarketActions,
+  AssistantMarketDataCare,
   AssistantMarketInsights,
   AssistantMarketReadout,
   buildMarketNarrativeProps,
@@ -35,6 +37,23 @@ function fmtEvi(v: number | null): string {
 function fmtPp(v: number | null): string {
   if (v === null || !Number.isFinite(v)) return 'Not available';
   return `${v >= 0 ? '+' : ''}${v.toFixed(1)} points`;
+}
+function fmtMonthLabel(v: string): string {
+  return v
+    .replace(/\bJan\b/g, 'January')
+    .replace(/\bFeb\b/g, 'February')
+    .replace(/\bMar\b/g, 'March')
+    .replace(/\bApr\b/g, 'April')
+    .replace(/\bJun\b/g, 'June')
+    .replace(/\bJul\b/g, 'July')
+    .replace(/\bAug\b/g, 'August')
+    .replace(/\bSep\b/g, 'September')
+    .replace(/\bOct\b/g, 'October')
+    .replace(/\bNov\b/g, 'November')
+    .replace(/\bDec\b/g, 'December');
+}
+function fmtMatWindow(start: string, end: string): string {
+  return `12 months ending ${fmtMonthLabel(end)} (${fmtMonthLabel(start)}–${fmtMonthLabel(end)})`;
 }
 
 function shortName(segment: string): string {
@@ -418,7 +437,9 @@ function RankBars({
   const hasBayer = rows.some((r) => r.bayer);
   return (
     <div className="m360-viz" ref={wrap} onMouseLeave={hide}>
-      {hasBayer ? <p className="m360-rank__axis">Bayer brands marked by name</p> : null}
+      {hasBayer ? (
+        <p className="m360-rank__axis">Bayer = deeper bar + name tag · gray-blue = competitors</p>
+      ) : null}
       <ul className="m360-rank" role="img" aria-label={hasBayer ? 'Brand share; Bayer brands tagged' : 'Brand share'}>
         {rows.map((r) => (
           <li
@@ -509,12 +530,13 @@ export function M360Report() {
     .slice(0, 6);
   const ibero = CALC_IBEROGAST[0];
   const iberoRows = CALC_IBEROGAST;
+  const iberoBrandEvi = brandEvolutionIndex('IBEROGAST', ibs.segment);
   const narrative = buildMarketNarrativeProps();
 
   return (
     <div className={`m360-rep${ASSISTANT_NARRATIVE_V2 ? ' m360-rep--narrative-v2' : ''}`}>
       <p className="m360-rep__kicker">
-        {p.country} {p.category} · Iberogast competitive set · latest 12 months ending {m.latest_actual_month}
+        {p.country} {p.category} · Iberogast competitive set · {fmtMatWindow(m.mat_start, m.mat_end)}
       </p>
 
       <section className="m360-rep-kpis" aria-label="Three headline measures by scope">
@@ -536,12 +558,10 @@ export function M360Report() {
         </article>
         <article>
           <p>Iberogast relative growth</p>
-          <strong>{fmtEvi(ibero?.evolutionIndex ?? null)}</strong>
+          <strong>{fmtEvi(iberoBrandEvi)}</strong>
           <span>
-            {ibero
-              ? `${ibero.label} versus the IBS need-state only. 100 = growing in line with IBS; above 100 = faster.`
-              : 'Not available.'}{' '}
-            {iberoRows.map((r) => `${r.label} ${fmtEvi(r.evolutionIndex)}`).join('. ')}.
+            Whole Iberogast brand (Classic + Advance) versus the IBS need-state. 100 = growing in line with IBS; above
+            100 = faster. Sub-brands: {iberoRows.map((r) => `${r.label} ${fmtEvi(r.evolutionIndex)}`).join(' · ')}.
           </span>
         </article>
       </section>
@@ -684,6 +704,7 @@ export function M360Report() {
       <AssistantMarketInsights {...narrative} />
       <AssistantMarketActions {...narrative} />
       <AssistantMarketReadout {...narrative} />
+      <AssistantMarketDataCare checks={narrative.checks} />
     </div>
   );
 }

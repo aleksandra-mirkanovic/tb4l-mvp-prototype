@@ -471,6 +471,15 @@
   background: var(--tb4l-teal, #00607e);
 }
 
+/* Dual measures (value vs packs / price vs volume): same slate family — labels tell them apart */
+.m360-rep--story-v2 .m360-viz__legend i.is-mat {
+  background: var(--m360-chart-level);
+}
+
+.m360-rep--story-v2 .m360-viz__legend i.is-ya {
+  background: color-mix(in srgb, var(--m360-chart-level) 45%, transparent);
+}
+
 .m360-rank {
   list-style: none;
   margin: 0;
@@ -607,6 +616,18 @@
    - uppercase micro-labels: 11px
 */
 .m360-rep--story-v2 {
+  /* Chart encoding — toggle via src/config/m360ChartColors.ts (data-m360-charts) */
+  --m360-chart-level: color-mix(in srgb, var(--text-muted) 38%, transparent);
+  --m360-chart-level-bayer: color-mix(in srgb, var(--text-muted) 38%, transparent);
+  --m360-chart-series-a: #00607e;
+  --m360-chart-series-b: #4ec3e0;
+  --m360-chart-category: #00607e;
+  --m360-chart-gain: #6fd48a;
+  --m360-chart-loss: #f0a15c;
+  --m360-chart-flat: #8b9aab;
+  --m360-chart-gain-text: #3d9a5c;
+  --m360-chart-loss-text: #c47a3a;
+  --m360-chart-bayer: #4ec3e0;
   --m360-pad-y: 16px;
   --m360-pad-x: 18px;
   --m360-fs-section: 18px;
@@ -619,6 +640,16 @@
   font-size: var(--m360-fs-body);
   line-height: 1.45;
   font-variant-numeric: tabular-nums;
+}
+
+/* Balanced mode: clearer level bars, soft Bayer step — not gray mush, not rainbow */
+.m360-rep--story-v2[data-m360-charts='balanced'] {
+  --m360-chart-level: #5c7d90;
+  --m360-chart-level-bayer: #3a8aa3;
+  --m360-chart-series-a: #2d6a7e;
+  --m360-chart-series-b: #5eb8d4;
+  --m360-chart-category: #2d6a7e;
+  --m360-chart-bayer: #4ec3e0;
 }
 
 .m360-rep--story-v2 .m360-rep__kicker,
@@ -724,11 +755,11 @@
 }
 
 .m360-rep--story-v2 .m360-evi__list li.is-up .m360-evi__stem {
-  background: #6fd48a;
+  background: var(--m360-chart-gain);
 }
 
 .m360-rep--story-v2 .m360-evi__list li.is-down .m360-evi__stem {
-  background: #f0a15c;
+  background: var(--m360-chart-loss);
 }
 
 .m360-rep--story-v2 .m360-evi__dot {
@@ -741,11 +772,11 @@
 }
 
 .m360-rep--story-v2 .m360-evi__list li.is-up .m360-evi__dot {
-  background: #6fd48a;
+  background: var(--m360-chart-gain);
 }
 
 .m360-rep--story-v2 .m360-evi__list li.is-down .m360-evi__dot {
-  background: #f0a15c;
+  background: var(--m360-chart-loss);
 }
 
 .m360-rep--story-v2 .m360-evi__list li:hover .m360-evi__dot {
@@ -762,11 +793,11 @@
 }
 
 .m360-rep--story-v2 .m360-evi__list li.is-up .m360-evi__val {
-  color: #2e7d32;
+  color: var(--m360-chart-gain-text);
 }
 
 .m360-rep--story-v2 .m360-evi__list li.is-down .m360-evi__val {
-  color: #c45c26;
+  color: var(--m360-chart-loss-text);
 }
 
 @media (max-width: 640px) {
@@ -843,7 +874,7 @@
 }
 
 .m360-rep--story-v2 .m360-channel-drv__pace.is-up {
-  color: #2e7d32;
+  color: var(--m360-chart-gain-text);
 }
 
 .m360-rep--story-v2 .m360-channel-drv__metrics {
@@ -890,20 +921,15 @@
   border-radius: 3px;
 }
 
-.m360-rep--story-v2 .m360-channel-drv__bar.is-price {
-  background: #00607e;
-}
-
+/* Price / volume: slate when positive, amber when negative — labels carry the series */
+.m360-rep--story-v2 .m360-channel-drv__bar.is-price,
 .m360-rep--story-v2 .m360-channel-drv__bar.is-vol {
-  background: #4ec3e0;
+  background: var(--m360-chart-level);
 }
 
-.m360-rep--story-v2 .m360-channel-drv__bar.is-neg.is-price {
-  background: #c45c26;
-}
-
+.m360-rep--story-v2 .m360-channel-drv__bar.is-neg.is-price,
 .m360-rep--story-v2 .m360-channel-drv__bar.is-neg.is-vol {
-  background: #d30f4b;
+  background: var(--m360-chart-loss);
 }
 
 .m360-rep--story-v2 .m360-channel-drv__metrics strong {
@@ -935,23 +961,23 @@
 }
 
 .m360-rep--story-v2 .m360-viz__stem.is-up {
-  stroke: #6fd48a;
+  stroke: var(--m360-chart-gain);
 }
 
 .m360-rep--story-v2 .m360-viz__stem.is-down {
-  stroke: #f0a15c;
+  stroke: var(--m360-chart-loss);
 }
 
 .m360-rep--story-v2 .m360-viz__dot.is-up {
-  fill: #6fd48a;
+  fill: var(--m360-chart-gain);
 }
 
 .m360-rep--story-v2 .m360-viz__dot.is-down {
-  fill: #f0a15c;
+  fill: var(--m360-chart-loss);
 }
 
 .m360-rep--story-v2 .m360-viz__val.is-down {
-  fill: #f0a15c;
+  fill: var(--m360-chart-loss);
 }
 
 .m360-rep--story-v2 .section-title {
@@ -1048,11 +1074,11 @@
 }
 
 .m360-rep--story-v2 .m360-num.is-up {
-  color: #3d9a5c;
+  color: var(--m360-chart-gain-text);
 }
 
 .m360-rep--story-v2 .m360-num.is-down {
-  color: #c47a3a;
+  color: var(--m360-chart-loss-text);
 }
 
 .m360-rep--story-v2 .m360-num.is-flat {
@@ -1319,6 +1345,102 @@
   counter-reset: none;
 }
 
+/* Compact 3-rule color key — fixed columns so swatches / labels line up */
+.m360-chart-legend {
+  margin: 0 0 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-main);
+}
+
+.m360-chart-legend__title {
+  margin: 0 0 8px;
+  font-size: var(--m360-fs-label, 11px);
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.m360-chart-legend ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: auto minmax(7.5rem, max-content) minmax(0, 1fr);
+  gap: 6px 10px;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.m360-chart-legend li {
+  display: contents;
+  margin: 0;
+}
+
+.m360-chart-legend__swatch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  width: 32px;
+  height: 10px;
+}
+
+.m360-chart-legend__swatch i {
+  display: block;
+  width: 14px;
+  height: 8px;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+.m360-chart-legend__swatch i:only-child {
+  width: 22px;
+}
+
+.m360-chart-legend__label {
+  color: var(--text-primary);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.m360-chart-legend__desc {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .m360-chart-legend ul {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .m360-chart-legend__desc {
+    grid-column: 2;
+  }
+}
+
+/* Page-end caveats — quiet, after recommendations */
+.m360-data-care {
+  margin: 28px 0 8px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.m360-data-care p {
+  margin: 0;
+}
+
+.m360-data-care b {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
 .m360-rep--story-v2 .m360-action {
   display: grid;
   grid-template-columns: 28px 1fr;
@@ -1428,9 +1550,8 @@
 }
 
 .m360-rep--story-v2 .m360-attract__list li {
-  --seg: var(--tb4l-teal, #4ec3e0);
-  padding-left: 12px;
-  border-left: 3px solid var(--seg);
+  padding-left: 0;
+  border-left: 0;
   cursor: pointer;
   transition: opacity 0.16s ease, background 0.16s ease;
 }
@@ -1532,20 +1653,25 @@
   min-width: 4px;
 }
 
-.m360-rep--story-v2 .m360-attract__bar.is-size,
-.m360-rep--story-v2 .m360-ibero-pos__bar b {
-  background: var(--seg, #4ec3e0);
+/* Size = one slate for every need-state */
+.m360-rep--story-v2 .m360-attract__bar.is-size {
+  background: var(--m360-chart-level);
+}
+
+.m360-rep--story-v2 .m360-ibero-pos__bar b,
+.m360-rep--story-v2 .m360-ibero-pos__bar b.is-bayer-level {
+  background: var(--m360-chart-level-bayer);
 }
 
 .m360-rep--story-v2 .m360-attract__bar.is-growth.is-up,
 .m360-rep--story-v2 .m360-share-chg__delta.is-up,
 .m360-rep--story-v2 .m360-ibero-pos header span.is-up,
 .m360-rep--story-v2 .m360-attract__pace.is-up {
-  color: #3d9a5c;
+  color: var(--m360-chart-gain-text);
 }
 
 .m360-rep--story-v2 .m360-attract__bar.is-growth.is-up {
-  background: #6fd48a;
+  background: var(--m360-chart-gain);
   color: inherit;
 }
 
@@ -1553,17 +1679,17 @@
 .m360-rep--story-v2 .m360-share-chg__delta.is-down,
 .m360-rep--story-v2 .m360-ibero-pos header span.is-down,
 .m360-rep--story-v2 .m360-attract__pace.is-down {
-  color: #c47a3a;
+  color: var(--m360-chart-loss-text);
 }
 
 .m360-rep--story-v2 .m360-attract__bar.is-growth.is-down {
-  background: #f0a15c;
+  background: var(--m360-chart-loss);
   color: inherit;
 }
 
 .m360-rep--story-v2 .m360-attract__bar.is-growth.is-flat,
 .m360-rep--story-v2 .m360-attract__bar.is-growth:not(.is-up):not(.is-down) {
-  background: var(--text-muted);
+  background: var(--m360-chart-flat);
 }
 
 .m360-rep--story-v2 .m360-attract__pace {
@@ -1613,11 +1739,11 @@
 }
 
 .m360-rep--story-v2 .m360-share-chg__link.is-up {
-  stroke: #6fd48a;
+  stroke: var(--m360-chart-gain);
 }
 
 .m360-rep--story-v2 .m360-share-chg__link.is-down {
-  stroke: #f0a15c;
+  stroke: var(--m360-chart-loss);
 }
 
 .m360-rep--story-v2 .m360-share-chg__ya {
@@ -1658,18 +1784,18 @@
 }
 
 .m360-rep--story-v2 .m360-rank b {
-  background: color-mix(in srgb, var(--text-muted) 38%, transparent);
+  background: var(--m360-chart-level);
 }
 
 .m360-rep--story-v2 .m360-rank li.is-bayer b {
-  /* Same as peers — ownership is the name tag, not bar color */
-  background: color-mix(in srgb, var(--text-muted) 38%, transparent);
+  background: var(--m360-chart-level-bayer);
 }
 
 .m360-rep--story-v2 .m360-rank li.is-bayer .m360-rank__tag {
-  color: var(--text-secondary);
+  color: var(--m360-chart-bayer);
   font-size: 10px !important;
   line-height: 1.2;
+  opacity: 0.95;
 }
 
 /* Channel movers: bar = share change (pp), diverging from zero */
@@ -1751,19 +1877,11 @@
   bottom: 0;
   border-radius: 99px;
   min-width: 3px;
-  background: #6fd48a;
+  background: var(--m360-chart-gain);
 }
 
 .m360-rep--story-v2 .m360-movers__bar.is-neg {
-  background: #f0a15c;
-}
-
-.m360-rep--story-v2 .m360-movers__list li.is-bayer .m360-movers__bar:not(.is-neg) {
-  background: #4ec3e0;
-}
-
-.m360-rep--story-v2 .m360-movers__list li.is-bayer .m360-movers__bar.is-neg {
-  background: #e07a4e;
+  background: var(--m360-chart-loss);
 }
 
 .m360-rep--story-v2 .m360-movers__labs {
@@ -1782,11 +1900,11 @@
 }
 
 .m360-rep--story-v2 .m360-movers__labs strong.is-up {
-  color: #3d9a5c;
+  color: var(--m360-chart-gain-text);
 }
 
 .m360-rep--story-v2 .m360-movers__labs strong.is-down {
-  color: #c47a3a;
+  color: var(--m360-chart-loss-text);
 }
 
 .m360-rep--story-v2 .m360-movers__labs strong.is-flat {
@@ -2004,11 +2122,11 @@
 }
 
 .m360-rep--story-rail .m360-chart-ax__block.is-facts .m360-num.is-up {
-  color: #3d9a5c;
+  color: var(--m360-chart-gain-text);
 }
 
 .m360-rep--story-rail .m360-chart-ax__block.is-facts .m360-num.is-down {
-  color: #c47a3a;
+  color: var(--m360-chart-loss-text);
 }
 
 .m360-rep--story-rail .m360-chart-ax__block.is-facts .m360-num.is-key {

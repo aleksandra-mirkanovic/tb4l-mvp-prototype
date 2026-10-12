@@ -16,7 +16,7 @@ import {
   type CalcSegment,
   type CalcSubBrand,
 } from '../data/m360Charts';
-import { buildM360Checks, M360_METADATA, type CheckRow } from '../data/m360Retrieval';
+import { buildM360Checks, type CheckRow } from '../data/m360Retrieval';
 
 function fmtM(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return 'Not available';
@@ -103,6 +103,22 @@ export function AssistantMarketReadout(
   p: MarketNarrativeProps & { heading?: string; headingLevel?: 2 | 3 },
 ) {
   return ASSISTANT_NARRATIVE_V2 ? <MarketReadoutV2 {...p} /> : <MarketReadoutV1 {...p} />;
+}
+
+/** Caveats belong at the end of the story — not in the executive summary. */
+export function AssistantMarketDataCare({ checks }: { checks: CheckRow[] }) {
+  return (
+    <aside className="m360-data-care" aria-label="Data care">
+      <p>
+        <b>Data care.</b>{' '}
+        {checks.some((c) => c.id === 'C2')
+          ? 'Named-brand Bayer sales do not fully match segment Bayer totals (IBS “Other” mixes Bayer and not). '
+          : ''}
+        {checks.some((c) => c.id === 'C5') ? 'One PPI row looks like the wrong product (paracetamol). ' : ''}
+        Three-year market growth is not available (four months of history).
+      </p>
+    </aside>
+  );
 }
 
 export function AssistantFinanceShow(p: FinanceNarrativeProps) {
@@ -334,30 +350,20 @@ function MarketActionsV2({ ant, ibs, ppi, classic, advance }: MarketNarrativePro
   );
 }
 
-function MarketReadoutV1({ cat, ant, ibero, checks }: MarketNarrativeProps) {
+function MarketReadoutV1({ cat, ant, ibero }: MarketNarrativeProps) {
   return (
     <>
       <h2 className="section-title" id="assistant-readout">One-page readout</h2>
       <div className="m360-rep-exec">
         <p>
-          <b>Market.</b> Germany Digestive Health, Iberogast competitive set. Sales {fmtM(cat.valueMatM)},{' '}
-          {fmtPct(cat.growth1yPct)} versus last year. Bayer share {fmtShare(cat.bayerShareMatPct)}.{' '}
-          {ibero?.label ?? 'Iberogast'} relative growth {fmtEvi(ibero?.evolutionIndex ?? null)}.
+          <b>Category.</b> Sales {fmtM(cat.valueMatM)}, {fmtPct(cat.growth1yPct)} versus last year. Bayer share{' '}
+          {fmtShare(cat.bayerShareMatPct)}. {ibero?.label ?? 'Iberogast'} relative growth{' '}
+          {fmtEvi(ibero?.evolutionIndex ?? null)}.
         </p>
         <p>
           <b>Biggest opportunity in this view.</b> Antacids is the fastest-growing need-state ({fmtPct(ant.growth1yPct)})
           with Bayer share {fmtShare(ant.bayerShareMatPct)}. It is not a white-space entry. Entry size in euros is not
           available.
-        </p>
-        <p>
-          <b>Data care.</b>{' '}
-          {checks.some((c) => c.id === 'C2')
-            ? 'Bayer sales in the named-brand list do not fully match Bayer sales in the segment totals (the IBS “Other” group mixes Bayer and non-Bayer). '
-            : ''}
-          {checks.some((c) => c.id === 'C5')
-            ? 'One PPI row looks like the wrong product (paracetamol), so that segment should be treated with care. '
-            : ''}
-          Three-year growth cannot be calculated — this view only has four months of history.
         </p>
       </div>
     </>
@@ -368,11 +374,9 @@ function MarketReadoutV2({
   cat,
   classic,
   advance,
-  checks,
   heading = 'One-page readout',
   headingLevel = 2,
 }: MarketNarrativeProps & { heading?: string; headingLevel?: 2 | 3 }) {
-  const m = M360_METADATA;
   const HeadingTag = headingLevel === 3 ? 'h3' : 'h2';
   return (
     <>
@@ -384,8 +388,7 @@ function MarketReadoutV2({
       </HeadingTag>
       <div className="m360-rep-exec">
         <p>
-          <b>Market, latest 12 months to {m.latest_actual_month}.</b> Germany Digestive Health, Iberogast competitive
-          set: <Num kind="key">{fmtM(cat.valueMatM)}</Num>,{' '}
+          <b>Category.</b> <Num kind="key">{fmtM(cat.valueMatM)}</Num>,{' '}
           <Num v={cat.growth1yPct}>{fmtPct(cat.growth1yPct)}</Num>. Packs{' '}
           <Num v={cat.unitGrowth1yPct}>{fmtPct(cat.unitGrowth1yPct)}</Num>. Bayer share{' '}
           <Num kind="key">{fmtShare(cat.bayerShareMatPct)}</Num> (
@@ -410,14 +413,6 @@ function MarketReadoutV2({
         <p className="m360-hyp">
           <b>Working hypothesis, not proven.</b> Category value is running ahead of packs (price or mix). Iberogast is
           still the IBS leader; Bayer’s competitive wound in this set is Antacids, not IBS.
-        </p>
-        <p>
-          <b>Data care.</b>{' '}
-          {checks.some((c) => c.id === 'C2')
-            ? 'Named-brand Bayer sales do not fully match segment Bayer totals (IBS “Other” mixes Bayer and not). '
-            : ''}
-          {checks.some((c) => c.id === 'C5') ? 'One PPI row looks like the wrong product (paracetamol). ' : ''}
-          Three-year market growth is not available (four months of history).
         </p>
       </div>
     </>

@@ -51,6 +51,12 @@ export const CALC_FORMULAS: { metric: string; formula: string; from: string }[] 
     formula: '(1 + sub-brand growth) / (1 + segment growth) × 100',
     from: 'T2 + T1',
   },
+  {
+    metric: 'Brand evolution index',
+    formula:
+      '(1 + brand growth) / (1 + segment growth) × 100 — brand = SUM(sub-brand value) in that segment',
+    from: 'T2 + T1',
+  },
   { metric: 'Price per unit', formula: 'value / units, MAT and YA', from: 'T2' },
   {
     metric: 'White-space flag',
@@ -272,12 +278,69 @@ export function brandValueGrowth1yPct(brand: string): number | null {
   return pct(ratioMinusOne(mat, ya));
 }
 
+/**
+ * Brand-level evolution index vs a need-state (sums all sub-brands of that brand in the segment).
+ * Use this for “Iberogast vs IBS” — not CALC_IBEROGAST[0], which is Classic only (largest SKU).
+ */
+export function brandEvolutionIndex(brand: string, vsSegment: string): number | null {
+  const rows = CALC_SUBBRANDS.filter((r) => r.brand === brand && r.segment === vsSegment);
+  if (rows.length === 0) return null;
+  const mat = rows.reduce((s, r) => s + r.valueMat, 0);
+  const ya = rows.reduce((s, r) => s + (r.valueYa ?? 0), 0);
+  const gBrand = ratioMinusOne(mat, ya);
+  const gSeg = CALC_SEGMENTS.find((s) => s.segment === vsSegment)?.growth1y ?? null;
+  if (gBrand === null || gSeg === null || 1 + gSeg === 0) return null;
+  return ((1 + gBrand) / (1 + gSeg)) * 100;
+}
+
 export const TOP_SUBBRANDS_PER_SEGMENT = CALC_SEGMENTS.map((seg) => ({
   segment: seg.segment,
   rows: CALC_SUBBRANDS.filter((r) => r.segment === seg.segment)
     .sort((a, b) => b.valueMat - a.valueMat)
     .slice(0, 5),
 }));
+
+/** Brand roll-up across the Iberogast competitive set (all need-states). */
+export type CalcBrandInSet = {
+  brand: string;
+  isBayer: boolean;
+  valueMat: number;
+  valueYa: number | null;
+  valueMatM: number;
+  shareOfSetPct: number;
+  growth1yPct: number | null;
+};
+
+function brandsInCompetitiveSet(): CalcBrandInSet[] {
+  const catMat = CALC_CATEGORY.valueMatM * 1_000_000;
+  const byBrand = new Map<string, { isBayer: boolean; mat: number; ya: number; yaOk: boolean }>();
+  for (const r of CALC_SUBBRANDS) {
+    if (!r.brand || r.brand === 'Other' || r.subBrand === 'Other (<1%)') continue;
+    const cur = byBrand.get(r.brand) ?? { isBayer: false, mat: 0, ya: 0, yaOk: true };
+    cur.isBayer = cur.isBayer || r.isBayer;
+    cur.mat += r.valueMat;
+    if (r.valueYa == null) cur.yaOk = false;
+    else cur.ya += r.valueYa;
+    byBrand.set(r.brand, cur);
+  }
+  return [...byBrand.entries()]
+    .map(([brand, v]) => {
+      const growth = v.yaOk ? ratioMinusOne(v.mat, v.ya) : null;
+      return {
+        brand,
+        isBayer: v.isBayer,
+        valueMat: v.mat,
+        valueYa: v.yaOk ? v.ya : null,
+        valueMatM: v.mat / 1_000_000,
+        shareOfSetPct: catMat ? (v.mat / catMat) * 100 : 0,
+        growth1yPct: pct(growth),
+      };
+    })
+    .sort((a, b) => b.valueMat - a.valueMat);
+}
+
+/** Top 10 named brands in the Iberogast competitive set by value. */
+export const CALC_TOP_BRANDS_IN_SET: CalcBrandInSet[] = brandsInCompetitiveSet().slice(0, 10);
 
 export type StackShareRow = {
   segment: string;
@@ -313,6 +376,7 @@ export const CALC = {
   iberogast: CALC_IBEROGAST,
   stacks: STACK_SHARE_ROWS,
   topSubBrands: TOP_SUBBRANDS_PER_SEGMENT,
+  topBrandsInSet: CALC_TOP_BRANDS_IN_SET,
   whiteSpaceCandidates: WHITE_SPACE_CANDIDATES,
   cagr3yNote: CAGR_3Y_NOTE,
 };

@@ -1,0 +1,25 @@
+---
+description: Market story chart color encoding — keep level, change, and status jobs separate
+globs: src/components/M360*.tsx,src/components/M360Report.css,src/data/m360ChartColors.ts,src/config/m360ChartColors.ts,src/components/m360StoryAnalyses.tsx
+alwaysApply: false
+---
+
+# M360 chart colors
+
+- Tokens: `src/data/m360ChartColors.ts`
+- Mode toggle (easy revert): `src/config/m360ChartColors.ts` → `M360_CHART_COLOR_MODE` = `'balanced'` | `'legacy'`
+
+## Three jobs on Market V3 (never mix)
+
+1. **Level / size** (Who holds, Top 10, attractiveness size): soft slate bars; Bayer one step richer in the same family (not neon “good”).
+2. **Change** (share Δ, EVI, growth %, pace vs category): green up / amber down / muted flat.
+3. **Status cards**: green / orange / magenta — not share-bar fills.
+
+Need-state names live in **labels**, not hues. Dual measures (value vs packs, price vs volume) use the same slate family (or change-by-sign) plus chart legends — not a fourth color language.
+
+## Do not
+
+- Paint Bayer level bars bright performance-green or rainbow rivals.
+- Use a per–need-state palette on V3 charts.
+- Invent one-off hex colors in chart components — use `M360_CHART` / CSS vars.
+

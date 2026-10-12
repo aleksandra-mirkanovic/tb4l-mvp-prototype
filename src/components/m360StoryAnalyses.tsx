@@ -4,7 +4,9 @@
  */
 import type { ReactNode } from 'react';
 import {
+  brandEvolutionIndex,
   brandValueGrowth1yPct,
+  CALC_TOP_BRANDS_IN_SET,
   type CalcCategory,
   type CalcSegment,
   type CalcSubBrand,
@@ -136,6 +138,7 @@ export type StoryAxCtx = {
 export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
   const iberoGrowth = brandValueGrowth1yPct('IBEROGAST');
   const rennieGrowth = brandValueGrowth1yPct('RENNIE');
+  const iberoBrandEvi = brandEvolutionIndex('IBEROGAST', d.ibs.segment);
 
   const iberoPharmaPp = d.iberoPharma?.shareChangePp ?? null;
   const gavisconPharmaPp = d.gavisconPharma?.shareChangePp ?? null;
@@ -190,8 +193,8 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
             relative position.
           </p>
           <p>
-            Iberogast’s relative growth versus IBS is near the line (EVI {fmtEvi(d.ibero?.evolutionIndex ?? null)}), so
-            the headline tension is portfolio / competitive capture, not “Iberogast collapsed in its home need-state.”
+            Whole Iberogast’s relative growth versus IBS is near the line (EVI {fmtEvi(iberoBrandEvi)}), so the
+            headline tension is portfolio / competitive capture, not “Iberogast collapsed in its home need-state.”
           </p>
         </>
       ),
@@ -232,7 +235,7 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
       opportunities: (
         <>
           <li>Growing set euros ({fmtM(d.cat.valueMatM)}, {fmtPct(d.cat.growth1yPct)}) to capture with clearer jobs.</li>
-          <li>Iberogast still near IBS pace (EVI {fmtEvi(d.ibero?.evolutionIndex ?? null)}) — franchise base to protect.</li>
+          <li>Iberogast brand still near IBS pace (EVI {fmtEvi(iberoBrandEvi)}) — franchise base to protect.</li>
         </>
       ),
       risks: (
@@ -242,6 +245,94 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
         </>
       ),
     },
+
+    topBrands: (() => {
+      const top = CALC_TOP_BRANDS_IN_SET;
+      const leader = top[0];
+      const iberoRank = top.findIndex((b) => b.brand === 'IBEROGAST') + 1;
+      const iberoRow = top.find((b) => b.brand === 'IBEROGAST');
+      const bayerInTop = top.filter((b) => b.isBayer);
+      const gavisconRow = top.find((b) => b.brand === 'GAVISCON');
+      return {
+        facts: (
+          <>
+            <li>
+              Leader: {leader?.brand ?? '—'} at <Num kind="key">{fmtShare(leader?.shareOfSetPct ?? null)}</Num> of set
+              value ({fmtM(leader?.valueMatM ?? null)}, {fmtPct(leader?.growth1yPct ?? null)} YoY).
+            </li>
+            <li>
+              Iberogast rank #{iberoRank || '—'} in this top 10
+              {iberoRow ? (
+                <>
+                  {' '}
+                  — <Num kind="key">{fmtShare(iberoRow.shareOfSetPct)}</Num>, {fmtPct(iberoRow.growth1yPct)} YoY.
+                </>
+              ) : null}
+            </li>
+            <li>
+              Bayer brands in the top 10:{' '}
+              {bayerInTop.length
+                ? bayerInTop.map((b) => `${b.brand} (${fmtShare(b.shareOfSetPct)})`).join(' · ')
+                : 'none'}
+              .
+            </li>
+            {gavisconRow ? (
+              <li>
+                Gaviscon in the top 10: <Num kind="key">{fmtShare(gavisconRow.shareOfSetPct)}</Num>,{' '}
+                {fmtPct(gavisconRow.growth1yPct)} YoY — key rival to watch later in Antacids.
+              </li>
+            ) : null}
+          </>
+        ),
+        insights: (
+          <p>
+            This is the cast of the competitive set — who is big enough to matter before we split by need-state or
+            channel. Read share of set and growth together: a smaller brand growing fast is a different problem from
+            a large brand that is flat.
+          </p>
+        ),
+        hypotheses: [
+          {
+            claim: 'Iberogast is the clear #1 brand in its own competitive set.',
+            status: iberoRank === 1 ? 'confirmed' : iberoRank > 0 && iberoRank <= 3 ? 'partial' : 'rejected',
+            because: (
+              <>
+                Iberogast is #{iberoRank || 'n/a'} by set value
+                {leader && iberoRank !== 1 ? `; leader is ${leader.brand}` : ''}.
+              </>
+            ),
+          },
+          {
+            claim: 'The top of the set is already a multi-player fight, not a one-brand category.',
+            status: 'confirmed',
+            because: (
+              <>
+                Top 3 hold roughly{' '}
+                {fmtShare(top.slice(0, 3).reduce((s, b) => s + b.shareOfSetPct, 0))} of set value between them.
+              </>
+            ),
+          },
+        ],
+        brandImplications: (
+          <p>
+            Use this list as the name map for later charts. When Antacids or channel movers mention Gaviscon or sister
+            brands, they are already among the set’s top players — not niche footnotes.
+          </p>
+        ),
+        opportunities: (
+          <>
+            <li>Track who in the top 10 is outgrowing the set — those names show up again in need-state fights.</li>
+          </>
+        ),
+        risks: (
+          <>
+            <li>
+              Treating Iberogast as “the category” when several large brands already share the set with material growth.
+            </li>
+          </>
+        ),
+      };
+    })(),
 
     growth: {
       facts: (
@@ -329,7 +420,7 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
       risks: (
         <>
           <li>Over-investing in soft IBS packs ({fmtPct(d.ibs.unitGrowth1yPct)}) while rivals scale Antacids.</li>
-          <li>Reading category +{fmtPct(d.cat.growth1yPct)} as “volume is fine” when packs lag.</li>
+          <li>Reading category {fmtPct(d.cat.growth1yPct)} as “volume is fine” when packs lag.</li>
         </>
       ),
     },
@@ -473,21 +564,22 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
       ),
       insights: (
         <p>
-          Iberogast Pharmacy share is near-flat (|Δ| &lt; {SHARE_STABLE_ABS_PP} points), but Gaviscon is the clear
-          Pharmacy share gainer — and accelerates harder still online. Near-stable Iberogast ≠ no competitive pressure.
+          Iberogast Pharmacy share is near-flat (moved less than {SHARE_STABLE_ABS_PP} points either way), but Gaviscon
+          is the clear Pharmacy share gainer — and accelerates harder still online. Near-stable Iberogast does not mean
+          no competitive pressure.
         </p>
       ),
       hypotheses: [
         {
-          claim: `Iberogast Pharmacy share is stable (|Δ| < ${SHARE_STABLE_ABS_PP} points).`,
+          claim: `Iberogast Pharmacy share is stable (moved less than ${SHARE_STABLE_ABS_PP} points either way).`,
           status: iberoPharmaStable ? 'confirmed' : 'rejected',
           because: (
             <>
-              Iberogast Pharmacy Δ <Num v={iberoPharmaPp}>{fmtPp(iberoPharmaPp)}</Num>, value{' '}
+              Iberogast Pharmacy share change <Num v={iberoPharmaPp}>{fmtPp(iberoPharmaPp)}</Num>, value{' '}
               <Num v={d.iberoPharma?.valueGrowthPct}>{fmtPct(d.iberoPharma?.valueGrowthPct ?? null)}</Num> YoY
               {iberoPharmaStable
-                ? ' — inside the stability band.'
-                : ' — outside the stability band.'}
+                ? ` — within ±${SHARE_STABLE_ABS_PP} points, treated as stable.`
+                : ` — outside ±${SHARE_STABLE_ABS_PP} points, not treated as stable.`}
             </>
           ),
         },
