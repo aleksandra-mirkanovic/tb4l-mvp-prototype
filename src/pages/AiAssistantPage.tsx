@@ -6,6 +6,7 @@ import { M360MarketStory } from '../components/M360MarketStory';
 import { M360MarketStoryV3 } from '../components/M360MarketStoryV3';
 import { M360Report } from '../components/M360Report';
 import { SiriusTip, type SiriusTable } from '../components/SiriusTip';
+import { Tb4l003Report } from '../components/Tb4l003Report';
 import { CALC_FORMULAS, CAGR_3Y_NOTE } from '../data/m360Charts';
 import {
   CALC_CHANNEL_FORMULAS,
@@ -99,13 +100,16 @@ function assistantBase(variant: AiAssistantVariant): string {
   return '/ai-assistant';
 }
 
+type AssistantPane = 'market' | 'finance' | 'tb4l-003';
+
 export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistantVariant }) {
   const { pane } = useParams();
   const base = assistantBase(variant);
-  if (pane && pane !== 'market' && pane !== 'finance') {
+  if (pane && pane !== 'market' && pane !== 'finance' && pane !== 'tb4l-003') {
     return <Navigate to={`${base}/market`} replace />;
   }
-  const view = pane === 'finance' ? 'finance' : 'market';
+  const view: AssistantPane =
+    pane === 'finance' ? 'finance' : pane === 'tb4l-003' ? 'tb4l-003' : 'market';
   const checks = buildM360Checks();
   const p = M360_RETRIEVAL_PARAMS;
   const m = M360_METADATA;
@@ -120,25 +124,29 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
       <header className="ai-assistant-hero">
         <div className="ai-assistant-hero__copy">
           <p className="ai-assistant-hero__eyebrow">
-            {isV3
-              ? 'Brand manager report · story redesign'
-              : isV2
+            {view === 'tb4l-003'
+              ? 'Discover analytic · TB4L-003 building block'
+              : isV3
                 ? 'Brand manager report · story redesign'
-                : 'Brand manager report'}
+                : isV2
+                  ? 'Brand manager report · story redesign'
+                  : 'Brand manager report'}
           </p>
           <h1 className="page-title">
             {isV3 ? 'AI Assistant v3' : isV2 ? 'AI Assistant v2' : 'AI Assistant'}
           </h1>
           <p className="page-subtitle">
-            {view === 'market'
-              ? isV3
-                ? 'Market window · sell-out, latest 12 months. Bain-logic drill-down from category to brand and channel.'
-                : isV2
-                  ? 'Same Sirius and COPA clocks as AI Assistant. Market follows a Bain-logic drill-down; finance is unchanged. Compare side by side with the classic tab.'
-                  : 'Two windows. Market is Sirius sell-out for the latest 12 months. Finance is internal COPA for calendar 2025 versus 2024. Prompt one window at a time — the clocks are different.'
-              : isStory
-                ? 'Finance window · internal COPA, calendar 2025 versus 2024. Same finance pack as classic; compare side by side with the classic tab.'
-                : 'Finance window · internal COPA for calendar 2025 versus 2024. Prompt this window separately from Market — the clocks are different.'}
+            {view === 'tb4l-003'
+              ? 'Segment Share and White Space — fixed layout from TB4L-003 v0.2. Same Sirius MAT extract as Market; scenario codes S1–S4 / U0; review only, not recommendations.'
+              : view === 'market'
+                ? isV3
+                  ? 'Market window · sell-out, latest 12 months. Bain-logic drill-down from category to brand and channel.'
+                  : isV2
+                    ? 'Same Sirius and COPA clocks as AI Assistant. Market follows a Bain-logic drill-down; finance is unchanged. Compare side by side with the classic tab.'
+                    : 'Two windows. Market is Sirius sell-out for the latest 12 months. Finance is internal COPA for calendar 2025 versus 2024. Prompt one window at a time — the clocks are different.'
+                : isStory
+                  ? 'Finance window · internal COPA, calendar 2025 versus 2024. Same finance pack as classic; compare side by side with the classic tab.'
+                  : 'Finance window · internal COPA for calendar 2025 versus 2024. Prompt this window separately from Market — the clocks are different.'}
           </p>
         </div>
         <dl className="ai-assistant-params">
@@ -170,6 +178,13 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           <span>{isV3 ? 'Sell-out · latest 12 months' : 'Sirius · latest 12 months'}</span>
         </NavLink>
         <NavLink
+          to={`${base}/tb4l-003`}
+          className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
+        >
+          TB4L-003
+          <span>Segment share & white space</span>
+        </NavLink>
+        <NavLink
           to={`${base}/finance`}
           className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
         >
@@ -188,6 +203,18 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           </header>
           <div className="ai-window__body">
             {isV3 ? <M360MarketStoryV3 /> : isV2 ? <M360MarketStory /> : <M360Report />}
+          </div>
+        </section>
+      ) : view === 'tb4l-003' ? (
+        <section className="ai-window" aria-label="TB4L-003 Segment Share and White Space">
+          <header className="ai-window__bar">
+            <p className="ai-window__title">TB4L-003 · Segment Share and White Space</p>
+            <p className="ai-window__meta">
+              {p.country} {p.category} · GB BAM · MAT ending {m.latest_actual_month} · DRAFT v0.2
+            </p>
+          </header>
+          <div className="ai-window__body">
+            <Tb4l003Report />
           </div>
         </section>
       ) : (
@@ -326,7 +353,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           </ul>
         </details>
       </details>
-      ) : (
+      ) : view === 'market' ? (
       <details className="ai-raw">
         <summary>Technical appendix — formulas, gaps, prompts, Sirius tables</summary>
         <p className="ai-raw__lede">
@@ -792,7 +819,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
       </section>
         </details>
       </details>
-      )}
+      ) : null}
     </div>
   );
 }
