@@ -21,6 +21,11 @@ import {
   type ReplicationPrompt,
 } from '../data/m360ReplicationPrompts';
 import {
+  M360_CHART_PLAYBOOK,
+  M360_REPLICATION_RULE_GROUPS,
+  M360_STORY_SECTIONS,
+} from '../data/m360ReplicationRules';
+import {
   M360_METADATA,
   M360_RETRIEVAL_PARAMS,
   M360_SEGMENTS,
@@ -325,50 +330,89 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
       <details className="ai-raw">
         <summary>Technical appendix — formulas, gaps, prompts, Sirius tables</summary>
         <p className="ai-raw__lede">
-          For analysts. Brand-manager cards and charts above do not need this to be open.
+          For analysts and for AI replication. Everything needed to rebuild this Market analytics for another brand
+          or market is below: rules, section order, chart playbook, CALC, gaps, copy-paste prompts, and Sirius
+          tables. Brand-manager cards above do not need this open.
         </p>
 
-        {isV3 ? (
-          <details className="ai-raw__inner">
-            <summary>Business questions by section</summary>
-            <p className="ai-table-note">
-              Framing questions used to build each Market story section. Kept here so the brand-manager view stays
-              chart-first.
-            </p>
-            <ul className="m360-rep-na">
-              <li>
-                <b>Category overview</b> — How big is the set, how is Bayer doing, and is Iberogast keeping pace with
-                IBS?
-              </li>
-              <li>
-                <b>Category growth</b> — Is growth coming from more packs, or from value (price / mix)?
-              </li>
-              <li>
-                <b>Channel dynamics</b> — Where is set growth coming from by channel (price vs volume), and who is
-                gaining or losing share in each channel?
-              </li>
-              <li>
-                <b>Segment attractiveness</b> — Where to play — how big is each need-state, and is it growing faster
-                than the category?
-              </li>
-              <li>
-                <b>Competitive landscape</b> — Who holds the cash pool and who is winning the share fight in the
-                growth segment?
-              </li>
-              <li>
-                <b>Bayer relative growth</b> — Which Bayer brands outpace or lag their own need-state? (100 = in line;
-                above 100 = faster.)
-              </li>
-              <li>
-                <b>Iberogast position</b> — Defend Classic, grow Advance — or both, with different jobs?
-              </li>
-              <li>
-                <b>Market share performance</b> — Where is Bayer gaining or losing share — change first, not just the
-                level?
-              </li>
-            </ul>
-          </details>
-        ) : null}
+        <details className="ai-raw__inner" open={isV3}>
+          <summary>Replication playbook — all rules</summary>
+          <p className="ai-table-note">
+            Canonical rule book for another country / category / brand. Placeholders match the prompt pack
+            ({'{{COUNTRY}}'}, {'{{BRAND}}'}, …). Do not copy Iberogast-specific rivals or conclusions — rediscover
+            pool, leak, and rival from that brand’s CALC.
+          </p>
+          {M360_REPLICATION_RULE_GROUPS.map((group) => (
+            <section key={group.id} className="ai-rule-group" aria-labelledby={`rule-${group.id}`}>
+              <h3 id={`rule-${group.id}`} className="ai-rule-group__title">
+                {group.title}
+              </h3>
+              {group.intro ? <p className="ai-table-note">{group.intro}</p> : null}
+              <ul className="m360-rep-na ai-rule-list">
+                {group.items.map((item) => (
+                  <li key={item.label}>
+                    <b>{item.label}</b> — {item.rule}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </details>
+
+        <details className="ai-raw__inner">
+          <summary>Story section order (10 steps)</summary>
+          <p className="ai-table-note">
+            Fixed Bain-logic drill-down used by Market v3. One business question per section.
+          </p>
+          <div className="ai-table-wrap">
+            <table className="ai-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Section</th>
+                  <th>Business question</th>
+                </tr>
+              </thead>
+              <tbody>
+                {M360_STORY_SECTIONS.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.step}</td>
+                    <td>{row.title}</td>
+                    <td>{row.question}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+
+        <details className="ai-raw__inner">
+          <summary>Chart playbook</summary>
+          <p className="ai-table-note">
+            Chart types to use when replicating. Colors: slate = size; deeper slate + manufacturer tag = ownership;
+            green/amber = change. No per–need-state rainbow.
+          </p>
+          <div className="ai-table-wrap">
+            <table className="ai-table">
+              <thead>
+                <tr>
+                  <th>Section</th>
+                  <th>Chart</th>
+                  <th>Reads</th>
+                </tr>
+              </thead>
+              <tbody>
+                {M360_CHART_PLAYBOOK.map((row) => (
+                  <tr key={`${row.section}-${row.chart}`}>
+                    <td>{row.section}</td>
+                    <td>{row.chart}</td>
+                    <td>{row.reads}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
 
         <details className="ai-raw__inner">
           <summary>CALC formulas</summary>
@@ -399,7 +443,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
         </details>
 
         <details className="ai-raw__inner">
-          <summary>Not in this Sirius extract</summary>
+          <summary>Not in this Sirius extract (gaps → always N/A)</summary>
           <ul className="m360-rep-na">
             <li>
               <b>Channel grain still missing</b> — no customer / retailer grain; no drugstore or grocery for
@@ -416,6 +460,12 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
             <li>
               <b>Monthly Value RSP / share / EVI</b> — N/A (MAT windows only)
             </li>
+            <li>
+              <b>Household penetration / buyer panel</b> — N/A (sell-out share is not HH %)
+            </li>
+            <li>
+              <b>Finance / COPA</b> — different clock; never mix into Market charts (see Finance appendix if needed)
+            </li>
             {!isV3 ? (
               <>
                 <li>
@@ -430,7 +480,9 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
               <b>3y CAGR</b> — N/A · {CAGR_3Y_NOTE}
             </li>
             <li>
-              <b>T4 checks</b> — {checks.filter((c) => c.status === 'FAIL').map((c) => c.id).join(', ') || 'none failed'}
+              <b>T4 checks</b> —{' '}
+              {checks.filter((c) => c.status === 'FAIL').map((c) => c.id).join(', ') || 'none failed'} (surface FAILs
+              in Data care; do not silently ignore)
             </li>
           </ul>
         </details>
@@ -438,9 +490,9 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
         <details className="ai-raw__inner">
           <summary>Prompts — replicate this Market story for another brand</summary>
           <p className="ai-table-note">
-            Use with an LLM that can call Sirius / CHDAA (or paste retrieval tables). Replace{' '}
-            <code>{'{{PLACEHOLDERS}}'}</code> first. Prompt 1 is system instructions (story order + chart
-            playbook). Prompt 8 is the one-shot. Prompt 9 shows the Iberogast fill used in this report.
+            Use with an LLM that can call Sirius / CHDAA (or paste retrieval tables). Read the{' '}
+            <b>Replication playbook</b> above first, then replace <code>{'{{PLACEHOLDERS}}'}</code>. Prompt 1 =
+            system instructions (full rules). Prompt 8 = one-shot. Prompt 9 = Iberogast fill for this report only.
           </p>
           <div className="ai-table-wrap">
             <table className="ai-table">

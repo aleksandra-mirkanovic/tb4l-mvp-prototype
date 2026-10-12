@@ -273,6 +273,28 @@
   color: var(--text-muted);
 }
 
+.ai-rule-group {
+  margin: 14px 0 0;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.ai-rule-group:last-of-type {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.ai-rule-group__title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ai-rule-list {
+  margin-top: 6px;
+}
+
 .ai-prompt-list {
   display: flex;
   flex-direction: column;
