@@ -1,10 +1,9 @@
 /**
- * Bain-logic Market story — AI Assistant v3 / v4 (chart + reading units).
- * AI Assistant v2 keeps M360MarketStory. Classic keeps M360Report. v4 re-exports this until it diverges.
+ * Bain-logic Market story — AI Assistant v3 (chart + reading units).
+ * v4 passes includeTb4l003 for Kirill’s TB4L-003 blocks. v2 keeps M360MarketStory. Classic keeps M360Report.
  */
 import { useRef, useState, type ReactNode } from 'react';
 import { ASSISTANT_NARRATIVE_V2, ASSISTANT_STORY_RAIL } from '../config/assistantNarrative';
-import { M360_TB4L003_IN_STORY } from '../config/m360Tb4l003Story';
 import {
   brandEvolutionIndex,
   CALC_CATEGORY,
@@ -622,7 +621,7 @@ function GrowthQualityChart() {
  * Size × growth as readable rows (not a bubble plot).
  * Sorted by size — pool first; growth compared to category in plain language.
  */
-function AttractivenessChart() {
+function AttractivenessChart({ includeTb4l003 = false }: { includeTb4l003?: boolean }) {
   const { wrap, tip, show, hide } = useChartTip();
   const [focus, setFocus] = useState<string | null>(null);
   const catG = CALC_CATEGORY.growth1yPct;
@@ -662,7 +661,7 @@ function AttractivenessChart() {
                       ? 'Bayer: no presence (no named brands)'
                       : `Bayer share: ${fmtBayerShare(s.bayerShareMatPct)} (${fmtPp(s.bayerShareChangePp)})`,
                     (() => {
-                      const sc = M360_TB4L003_IN_STORY ? scenarioForSegment(s.segment) : null;
+                      const sc = includeTb4l003 ? scenarioForSegment(s.segment) : null;
                       if (sc) return `Job  ${plainNeedStateJob(sc)}`;
                       return s.whiteSpaceFlag
                         ? 'White-space candidate (Bayer <3% and faster than category)'
@@ -676,7 +675,7 @@ function AttractivenessChart() {
               <header>
                 <h4>{shortName(s.segment)}</h4>
                 <span className="m360-attract__sales m360-num is-key">{fmtM(s.valueMatM)}</span>
-                {M360_TB4L003_IN_STORY && scenarioForSegment(s.segment) ? (
+                {includeTb4l003 && scenarioForSegment(s.segment) ? (
                   <em className="m360-attract__ws">{plainNeedStateJob(scenarioForSegment(s.segment)!)}</em>
                 ) : s.whiteSpaceFlag ? (
                   <em className="m360-attract__ws">White-space candidate</em>
@@ -1205,7 +1204,7 @@ function IberogastPosition() {
   );
 }
 
-export function M360MarketStoryV3() {
+export function M360MarketStoryV3({ includeTb4l003 = false }: { includeTb4l003?: boolean } = {}) {
   const cat = CALC_CATEGORY;
   const p = M360_RETRIEVAL_PARAMS;
   const m = M360_METADATA;
@@ -1569,7 +1568,7 @@ export function M360MarketStoryV3() {
 
   return (
     <div
-      className={`m360-rep m360-rep--story-v2${ASSISTANT_NARRATIVE_V2 ? ' m360-rep--narrative-v2' : ''}${ASSISTANT_STORY_RAIL ? ' m360-rep--story-rail' : ''}${M360_TB4L003_IN_STORY ? ' m360-rep--tb4l003' : ''}`}
+      className={`m360-rep m360-rep--story-v2${ASSISTANT_NARRATIVE_V2 ? ' m360-rep--narrative-v2' : ''}${ASSISTANT_STORY_RAIL ? ' m360-rep--story-rail' : ''}${includeTb4l003 ? ' m360-rep--tb4l003' : ''}`}
       data-m360-charts={m360ChartColorModeAttr()}
     >
       <p className="m360-rep__kicker">
@@ -1614,7 +1613,7 @@ export function M360MarketStoryV3() {
                   </span>
                 </article>
               </section>
-              {M360_TB4L003_IN_STORY ? <StoryTb4l003KpiExtras /> : null}
+              {includeTb4l003 ? <StoryTb4l003KpiExtras /> : null}
             </>
           }
           {...ax.overview}
@@ -1679,8 +1678,8 @@ export function M360MarketStoryV3() {
         />
       </StorySection>
 
-      {/* 2b · Structure (TB4L-003) — gated; S1–S4 codes live in Technical appendix only */}
-      {M360_TB4L003_IN_STORY ? (
+      {/* 2b · Structure (TB4L-003) — v4 only; S1–S4 codes live in Technical appendix only */}
+      {includeTb4l003 ? (
         <StorySection
           id="story-structure"
           title="Where we play · structure"
@@ -1778,12 +1777,12 @@ export function M360MarketStoryV3() {
               wide
               title="Need-state size × growth"
               caption={
-                M360_TB4L003_IN_STORY
+                includeTb4l003
                   ? `Sorted by size. Growth bars show pace vs the category. Tags name the job in plain words (defend pool, fight share leak, white-space candidate).`
                   : `Sorted by size. IBS is the pool (${fmtShare(ibs.shareOfCategoryPct)}). Antacids is the growth engine (${fmtPct(ant.growth1yPct)}). White-space candidate = Bayer share under 3% and faster than category.`
                 }
               >
-              <AttractivenessChart />
+              <AttractivenessChart includeTb4l003={includeTb4l003} />
             </ChartCard>
           }
           {...ax.attract}
@@ -1792,7 +1791,7 @@ export function M360MarketStoryV3() {
 
       {/* 5 · Competitive landscape */}
       <StorySection id="story-comp" title="Competitive landscape">
-        {M360_TB4L003_IN_STORY ? (
+        {includeTb4l003 ? (
           <StoryBand
             viz={
               <ChartCard
@@ -2053,8 +2052,8 @@ export function M360MarketStoryV3() {
         </div>
       </StorySection>
 
-      {/* Candidates from TB4L-003 — before hard actions */}
-      {M360_TB4L003_IN_STORY ? (
+      {/* Candidates from TB4L-003 — v4 only; before hard actions */}
+      {includeTb4l003 ? (
         <StorySection
           id="story-candidates"
           title="Preliminary opportunities · candidates"

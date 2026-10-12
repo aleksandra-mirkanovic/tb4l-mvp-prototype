@@ -1,6 +1,6 @@
 /**
  * TB4L-003 building-block visuals adapted for Market v3 story chrome.
- * Gated by `M360_TB4L003_IN_STORY` in the parent. Uses Market color rules (slate / change).
+ * Shown when parent passes includeTb4l003 (AI Assistant v4). Uses Market color rules (slate / change).
  * Charts are interactive (hover tooltips) — required for Market story and replication prompts.
  */
 import { useRef, useState } from 'react';

@@ -310,7 +310,7 @@ export const M360_REPLICATION_RULE_GROUPS: ReplicationRuleGroup[] = [
     id: 'tb4l003',
     title: 'Structure & scenarios (TB4L-003 building block — replication)',
     intro:
-      'Folded into Market v3 when M360_TB4L003_IN_STORY is true (src/config/m360Tb4l003Story.ts). Same Sirius CALC; Discover growth × presence rules. End-user story shows plain jobs only — S1–S4 / U0 codes are for replication and the TB4L-003 tab, not brand-manager chrome. Easy revert: set flag false.',
+      'Folded into AI Assistant v4 Market story (includeTb4l003). v3 stays pre-Kirill. Same Sirius CALC; Discover growth × presence rules. End-user story shows plain jobs only — S1–S4 / U0 codes are for replication and the TB4L-003 tab, not brand-manager chrome.',
     items: [
       {
         label: 'Scenario codes (appendix / replication only)',
