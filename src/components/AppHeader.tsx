@@ -10,6 +10,7 @@ export function AppHeader() {
   const assistantV2On = pathname === '/ai-assistant-v2' || pathname.startsWith('/ai-assistant-v2/');
   const assistantV3On = pathname === '/ai-assistant-v3' || pathname.startsWith('/ai-assistant-v3/');
   const assistantV4On = pathname === '/ai-assistant-v4' || pathname.startsWith('/ai-assistant-v4/');
+  const assistantV5On = pathname === '/ai-assistant-v5' || pathname.startsWith('/ai-assistant-v5/');
   return (
     <header className="app-header" role="banner">
       <div className="app-header__inner">
@@ -97,6 +98,16 @@ export function AppHeader() {
           }
         >
           AI Assistant v4
+        </NavLink>
+        <NavLink
+          to="/ai-assistant-v5/market"
+          className={
+            assistantV5On
+              ? 'main-nav__link main-nav__link--assistant-v5 is-active'
+              : 'main-nav__link main-nav__link--assistant-v5'
+          }
+        >
+          AI Assistant v5
         </NavLink>
       </nav>
     </header>

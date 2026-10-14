@@ -10,79 +10,271 @@ export type ReplicationRuleGroup = {
   items: { label: string; rule: string }[];
 };
 
-/** Ordered story sections — same as Market V3. */
+/** Bain Category Discover analytics (under Landscape · Category). */
+export type M360CategoryAnalytic = {
+  id: string;
+  title: string;
+  status: 'live' | 'partial' | 'stub';
+  question: string;
+  note: string;
+};
+
+/**
+ * Category analytic menu — Segment Share and White Space is TB4L-003 (Kirill v0.2).
+ * Others are listed for navigation; Sirius coverage varies.
+ */
+export const M360_CATEGORY_ANALYTICS: M360CategoryAnalytic[] = [
+  {
+    id: 'portfolio-growth-margin',
+    title: 'Portfolio Growth and Margin Mix',
+    status: 'stub',
+    question: 'How is the portfolio growing, and how is margin mix shifting?',
+    note: 'Sirius can support growth (value/units). Margin mix needs Finance / COPA — not in Market sell-out.',
+  },
+  {
+    id: 'shopper-partitioning',
+    title: 'Shopper Purchase Partitioning',
+    status: 'stub',
+    question: 'How do shoppers partition purchases across need-states and occasions?',
+    note: 'Not in Sirius sell-out — needs household / shopper panel or demand-space research.',
+  },
+  {
+    id: 'segment-share-white-space',
+    title: 'Segment Share and White Space',
+    status: 'live',
+    question:
+      'How is the category structured, who is winning in each segment, and how is Bayer performing across them? Where is Bayer under-represented in growing segments?',
+    note: 'TB4L-003 · Kirill building block v0.2 · M360 GB BAM · review and discussion only.',
+  },
+  {
+    id: 'growth-decomposition',
+    title: 'Brand and Segment Growth Decomposition',
+    status: 'partial',
+    question: 'Which brands and segments drive growth, and is it price or volume?',
+    note: 'Sirius supports value/unit growth, share Δ, price vs volume. Full contribution bridge not yet built as its own page.',
+  },
+];
+
+/** One answered question → chart under a Bain Landscape C (Market v3/v4). */
+export type M360CCatalogRow = {
+  cId: string;
+  c: string;
+  /** sirius = sell-out chart; proxy = POS-only stand-in; stub = no data; bridge = summary/actions */
+  status: 'sirius' | 'proxy' | 'stub' | 'bridge';
+  question: string;
+  chart: string;
+};
+
+/** Questions we already answer in Market v3, categorized by Bain C. */
+export const M360_C_QUESTION_CHARTS: M360CCatalogRow[] = [
+  {
+    cId: 'exec',
+    c: 'Executive summary',
+    status: 'bridge',
+    question: 'What’s the one-page readout for this MAT?',
+    chart: 'Executive summary',
+  },
+  {
+    cId: 'category',
+    c: 'Category',
+    status: 'sirius',
+    question: 'How big is the set, what’s Bayer’s stake, is Iberogast keeping pace with IBS?',
+    chart: 'KPI strip (+ TB4L extras)',
+  },
+  {
+    cId: 'category',
+    c: 'Category',
+    status: 'sirius',
+    question: 'Is growth packs or value / mix?',
+    chart: 'Value growth vs pack growth',
+  },
+  {
+    cId: 'category',
+    c: 'Category',
+    status: 'sirius',
+    question: 'How big is each need-state, and where does Bayer play?',
+    chart: 'Market structure (mekko)',
+  },
+  {
+    cId: 'category',
+    c: 'Category',
+    status: 'sirius',
+    question: 'Which need-states grow faster than the category, and where is Bayer present or absent?',
+    chart: 'Growth × Bayer share',
+  },
+  {
+    cId: 'category',
+    c: 'Category',
+    status: 'sirius',
+    question: 'All key numbers per need-state and the plain job?',
+    chart: 'Segment scorecard',
+  },
+  {
+    cId: 'category',
+    c: 'Category',
+    status: 'sirius',
+    question: 'Which need-states are large and growing vs the category?',
+    chart: 'Need-state size × growth',
+  },
+  {
+    cId: 'category',
+    c: 'Category',
+    status: 'sirius',
+    question: 'Where is Bayer gaining or losing share by need-state?',
+    chart: 'Bayer share change by need-state',
+  },
+  {
+    cId: 'customers',
+    c: 'Customers',
+    status: 'sirius',
+    question: 'Which channels drive euros (price vs volume)?',
+    chart: 'Channel growth drivers',
+  },
+  {
+    cId: 'customers',
+    c: 'Customers',
+    status: 'sirius',
+    question: 'Who is gaining or losing share in Pharmacies?',
+    chart: 'Who is moving in Pharmacies',
+  },
+  {
+    cId: 'customers',
+    c: 'Customers',
+    status: 'sirius',
+    question: 'Who is gaining or losing share in E-commerce?',
+    chart: 'Who is moving in E-commerce',
+  },
+  {
+    cId: 'competition',
+    c: 'Competition',
+    status: 'sirius',
+    question: 'Which brands lead the competitive set?',
+    chart: 'Top 10 brands in the competitive set',
+  },
+  {
+    cId: 'competition',
+    c: 'Competition',
+    status: 'sirius',
+    question: 'Who leads each need-state, and who’s ahead or behind the segment?',
+    chart: 'Who wins inside each need-state',
+  },
+  {
+    cId: 'competition',
+    c: 'Competition',
+    status: 'sirius',
+    question: 'Who holds the IBS pool?',
+    chart: 'Who holds IBS',
+  },
+  {
+    cId: 'competition',
+    c: 'Competition',
+    status: 'sirius',
+    question: 'Who holds Antacids (growth fight)?',
+    chart: 'Who holds Antacids',
+  },
+  {
+    cId: 'competition',
+    c: 'Competition',
+    status: 'sirius',
+    question: 'Which Bayer brands outpace or lag their own segment?',
+    chart: 'Bayer brands versus their own segment',
+  },
+  {
+    cId: 'competition',
+    c: 'Competition',
+    status: 'sirius',
+    question: 'Classic defend vs Advance grow on IBS?',
+    chart: 'Classic vs Advance on IBS',
+  },
+  {
+    cId: 'consumers',
+    c: 'Consumers',
+    status: 'proxy',
+    question: 'Where does sell-out flag white space / near-miss / share-loss? (POS proxy only)',
+    chart: 'Preliminary opportunities · candidates',
+  },
+  {
+    cId: 'convincers',
+    c: 'Convincers',
+    status: 'stub',
+    question: 'Who shapes recommendation (HCP, KOL, influencers) and what drives it?',
+    chart: '— (stub · not in Sirius sell-out)',
+  },
+  {
+    cId: 'culture',
+    c: 'Culture / Country',
+    status: 'stub',
+    question: 'What cultural, societal, or regulatory dynamics shape the category?',
+    chart: '— (stub · not in Sirius sell-out)',
+  },
+  {
+    cId: 'synthesis',
+    c: 'Summary · actions',
+    status: 'bridge',
+    question: 'What are the key implications for Bayer?',
+    chart: 'Signal cards (Problem / Strength / Watch)',
+  },
+  {
+    cId: 'synthesis',
+    c: 'Summary · actions',
+    status: 'bridge',
+    question: 'What should the country team do this month?',
+    chart: 'Recommended actions',
+  },
+];
+
+/** Ordered story sections — Bain Landscape 6Cs + Define bridge (same as Market V3). */
 export const M360_STORY_SECTIONS: { step: number; id: string; title: string; question: string }[] = [
   {
     step: 1,
-    id: 'overview',
-    title: 'Category overview',
+    id: 'category',
+    title: 'Category',
     question:
-      'How big is the competitive set, how is the manufacturer doing, and is the focus brand keeping pace with its primary need-state?',
+      'How is the category structured and sized, how is it growing (value vs packs), where does Bayer play, and which need-states are attractive?',
   },
   {
     step: 2,
-    id: 'growth',
-    title: 'Category growth',
-    question: 'Is growth coming from more packs, or from value (price / mix)?',
+    id: 'customers',
+    title: 'Customers',
+    question:
+      'What channels comprise the set, where do euros come from (price vs volume), and who is gaining or losing share in each channel?',
   },
   {
     step: 3,
-    id: 'structure',
-    title: 'Where we play · structure',
+    id: 'competition',
+    title: 'Competition',
     question:
-      'How big is each need-state, where is Bayer present or absent, and what is the plain job (defend pool / fight growth leak / white space / research only)? (TB4L-003 in story when enabled; S1–S4 codes stay in appendix for replication)',
+      'Who are the key brands, who leads each need-state, and which Bayer lines outpace or lag their own segment?',
   },
   {
     step: 4,
-    id: 'channel',
-    title: 'Channel dynamics',
+    id: 'consumers',
+    title: 'Consumers',
     question:
-      'Where is set growth coming from by channel (price vs volume), and who is gaining or losing share in each channel?',
+      'Where do sell-out proxies flag white space or unmet adjacency (POS only — no household panel in this pack)?',
   },
   {
     step: 5,
-    id: 'attract',
-    title: 'Segment attractiveness',
-    question: 'Where to play — how big is each need-state, and is it growing faster than the category?',
+    id: 'convincers',
+    title: 'Convincers',
+    question:
+      'Who are the key convincers (HCP, KOL, influencers) and what drives recommendation? (Not in Sirius sell-out — stub.)',
   },
   {
     step: 6,
-    id: 'competitive',
-    title: 'Competitive landscape',
-    question: 'Who holds the cash pool and who is winning the share fight in the growth segment?',
+    id: 'culture',
+    title: 'Culture / Country',
+    question:
+      'What cultural, societal, or regulatory dynamics shape the category? (Not in Sirius sell-out — stub.)',
   },
   {
     step: 7,
-    id: 'evi',
-    title: 'Manufacturer relative growth',
-    question: 'Which manufacturer brands outpace or lag their own need-state? (100 = in line; above 100 = faster.)',
-  },
-  {
-    step: 8,
-    id: 'brand-pos',
-    title: 'Focus brand position',
-    question: 'Defend the core line, grow the advance line — or both, with different jobs?',
-  },
-  {
-    step: 9,
-    id: 'share',
-    title: 'Market share performance',
-    question: 'Where is the manufacturer gaining or losing share — change first, not just the level?',
-  },
-  {
-    step: 10,
     id: 'synthesis',
     title: 'Summary · synthesis & key implications',
     question: 'What are the key insights, brand implications, opportunities, risks, and traffic-light signals?',
   },
   {
-    step: 11,
-    id: 'candidates',
-    title: 'Preliminary opportunities · candidates',
-    question: 'White space / near-miss / share-loss-in-growth as discussion candidates only? (TB4L-003 when enabled)',
-  },
-  {
-    step: 12,
+    step: 8,
     id: 'actions',
     title: 'Recommended actions',
     question: 'What to do this month — fix problems first, protect strengths, manage watch items.',
@@ -310,7 +502,7 @@ export const M360_REPLICATION_RULE_GROUPS: ReplicationRuleGroup[] = [
     id: 'tb4l003',
     title: 'Structure & scenarios (TB4L-003 building block — replication)',
     intro:
-      'Folded into AI Assistant v4 Market story (includeTb4l003). v3 stays pre-Kirill. Same Sirius CALC; Discover growth × presence rules. End-user story shows plain jobs only — S1–S4 / U0 codes are for replication and the TB4L-003 tab, not brand-manager chrome.',
+      'Folded into AI Assistant v4 (includeTb4l003) and v5 (6Cs Market + Category Segment Share & White Space). v3 is the prior Bain-logic story without Kirill chrome. Same Sirius CALC; Discover growth × presence rules. End-user story shows plain jobs only — S1–S4 / U0 codes are for replication and the TB4L-003 tab, not brand-manager chrome.',
     items: [
       {
         label: 'Scenario codes (appendix / replication only)',
@@ -360,7 +552,7 @@ export const M360_REPLICATION_RULE_GROUPS: ReplicationRuleGroup[] = [
       },
       {
         label: '3 · Story',
-        rule: 'Fixed section order (10 steps). One business question per section. Chart playbook types only. 1–2 charts per section.',
+        rule: 'Fixed Bain Landscape 6Cs order (Category → Customers → Competition → Consumers → Convincers → Culture), then Summary and Actions. One business question per section. Chart playbook types only.',
       },
       {
         label: '4 · Signals',
@@ -374,46 +566,36 @@ export const M360_REPLICATION_RULE_GROUPS: ReplicationRuleGroup[] = [
   },
 ];
 
-/** Compact chart playbook for appendix tables. */
+/** Compact chart playbook for appendix tables — Bain Landscape 6Cs. */
 export const M360_CHART_PLAYBOOK: { section: string; chart: string; reads: string }[] = [
   {
-    section: 'Category overview',
-    chart: 'KPI strip + top-10 brand share bars',
-    reads: 'Set size, manufacturer share, brand EVI; cast of rivals',
+    section: 'Category',
+    chart: 'KPI strip; value vs packs; mekko / growth×share / scorecard; attractiveness; Bayer share Δ',
+    reads: 'Size, growth quality, structure, attractiveness, manufacturer share change',
   },
   {
-    section: 'Category growth',
-    chart: 'Grouped bars: value % vs pack % by need-state (+ category)',
-    reads: 'Packs vs value/mix',
-  },
-  {
-    section: 'Channel dynamics',
+    section: 'Customers',
     chart: 'Price vs volume EUR by channel; movers = share Δ per channel',
-    reads: 'Where euros come from; who gains/loses share',
+    reads: 'Where euros come from; who gains/loses share by channel',
   },
   {
-    section: 'Segment attractiveness',
-    chart: 'Size bar + growth-vs-category bar; white-space flag',
-    reads: 'Pool vs growth jobs',
+    section: 'Competition',
+    chart: 'Top-10 brands; who-wins; IBS/Antacids ranks; Bayer EVI; Classic vs Advance',
+    reads: 'Cast of rivals; who holds pool/fight; Bayer pace vs segment',
   },
   {
-    section: 'Competitive landscape',
-    chart: 'Ranked share bars in primary + growth need-states',
-    reads: 'Who holds the pool / the fight',
+    section: 'Consumers',
+    chart: 'POS white-space / near-miss / share-loss candidates (proxy only)',
+    reads: 'Discussion flags from sell-out — not HH penetration',
   },
   {
-    section: 'Relative growth',
-    chart: 'EVI lollipops vs 100 for manufacturer brands',
-    reads: 'Ahead / behind own segment',
+    section: 'Convincers',
+    chart: 'Stub — no Sirius sell-out chart',
+    reads: 'HCP / KOL recommendation needs survey data',
   },
   {
-    section: 'Brand position',
-    chart: 'Lines compare: share of primary segment + EVI',
-    reads: 'Defend vs grow jobs',
-  },
-  {
-    section: 'Share performance',
-    chart: 'Before→after manufacturer share by need-state, worst first',
-    reads: 'Where share leaks',
+    section: 'Culture / Country',
+    chart: 'Stub — no Sirius sell-out chart',
+    reads: 'Cultural / regulatory trends need secondary research',
   },
 ];

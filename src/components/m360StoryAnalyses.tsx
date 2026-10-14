@@ -12,7 +12,7 @@ import {
   type CalcSubBrand,
 } from '../data/m360Charts';
 import type { ChannelBrandRow, ChannelRow } from '../data/m360ChannelRetrieval';
-import { TB4L003_CATEGORY } from '../data/tb4l003Calc';
+import { TB4L003_CATEGORY, TB4L003_SEGMENTS, shortSegmentName } from '../data/tb4l003Calc';
 
 export type HypStatus = 'confirmed' | 'partial' | 'rejected' | 'new';
 
@@ -1224,14 +1224,22 @@ export function buildStoryAnalyses(d: StoryAxCtx): Record<string, ChartAxBody> {
 }
 
 /** Final synthesis — Key insights + brand implications + prioritized opportunities. */
-export function MarketSynthesis({ d }: { d: StoryAxCtx }) {
+export function MarketSynthesis({
+  d,
+  includeTb4l003 = false,
+}: {
+  d: StoryAxCtx;
+  includeTb4l003?: boolean;
+}) {
+  const s2 = TB4L003_SEGMENTS.filter((s) => s.shareLossInGrowth);
+  const s1 = TB4L003_SEGMENTS.filter((s) => s.whiteSpace);
+  const s3 = TB4L003_SEGMENTS.filter((s) => s.nearMiss);
   return (
     <div className="m360-synthesis">
       <header className="m360-synthesis__head">
         <span className="m360-synthesis__kicker">Summary · synthesis</span>
         <p>
-          Close-out: key insights, brand implications, and prioritized opportunities. Key implications (signals)
-          continue in this same section below — then recommended actions.
+          Close-out of the evidence. Traffic-light signals, then candidates (when shown), then ordered actions.
         </p>
       </header>
 
@@ -1239,22 +1247,52 @@ export function MarketSynthesis({ d }: { d: StoryAxCtx }) {
         <h3>Key insights</h3>
         <ul>
           <li>
-            Set grows ({fmtPct(d.cat.growth1yPct)}) while Bayer share is soft ({fmtPp(d.cat.bayerShareChangePp)}) —
-            capture problem, not a small category.
+            Set grows (<Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num>) while Bayer share is soft (
+            <Num v={d.cat.bayerShareChangePp}>{fmtPp(d.cat.bayerShareChangePp)}</Num>) — a capture problem, not a
+            small category.
           </li>
           <li>
-            Growth is value/mix-led (value {fmtPct(d.cat.growth1yPct)} vs packs {fmtPct(d.cat.unitGrowth1yPct)});
-            Antacids (~{fmtPct(d.ant.growth1yPct)}) is the growth need-state; IBS packs are soft (
-            {fmtPct(d.ibs.unitGrowth1yPct)}).
+            Growth is value/mix-led (value <Num v={d.cat.growth1yPct}>{fmtPct(d.cat.growth1yPct)}</Num> vs packs{' '}
+            <Num v={d.cat.unitGrowth1yPct}>{fmtPct(d.cat.unitGrowth1yPct)}</Num>); Antacids (
+            <Num v={d.ant.growth1yPct}>{fmtPct(d.ant.growth1yPct)}</Num>) is the growth need-state; IBS packs are soft (
+            <Num v={d.ibs.unitGrowth1yPct}>{fmtPct(d.ibs.unitGrowth1yPct)}</Num>).
           </li>
           <li>
-            Channels split: Pharmacies = euro pool ({fmtShare(d.pharma.shareOfSetPct)}, price-led); E-commerce ={' '}
-            {fmtShare(d.ecomm.pctOfSetAbsGrowth)} of absolute EUR growth (volume-led).
+            Channels split: Pharmacies = euro pool (
+            <Num kind="key">{fmtShare(d.pharma.shareOfSetPct)}</Num>, price-led); E-commerce ={' '}
+            <Num kind="key">{fmtShare(d.ecomm.pctOfSetAbsGrowth)}</Num> of absolute EUR growth (volume-led).
           </li>
           <li>
             Gaviscon is the rival in both channels and in Antacids; Iberogast still leads IBS; Advance EVI{' '}
-            {fmtEvi(d.advance?.evolutionIndex ?? null)} vs Classic {fmtEvi(d.classic?.evolutionIndex ?? null)}.
+            <Num v={d.advance?.evolutionIndex} kind="evi">
+              {fmtEvi(d.advance?.evolutionIndex ?? null)}
+            </Num>{' '}
+            vs Classic{' '}
+            <Num v={d.classic?.evolutionIndex} kind="evi">
+              {fmtEvi(d.classic?.evolutionIndex ?? null)}
+            </Num>
+            .
           </li>
+          {includeTb4l003 && (s2.length > 0 || s1.length > 0 || s3.length > 0) ? (
+            <li>
+              Need-state jobs from structure:{' '}
+              {s2.length > 0 ? (
+                <>
+                  share leak in growth — {s2.map((s) => shortSegmentName(s.segment)).join(', ')}
+                  {s1.length || s3.length ? '; ' : '.'}
+                </>
+              ) : null}
+              {s1.length > 0 ? (
+                <>
+                  white-space candidates — {s1.map((s) => shortSegmentName(s.segment)).join(', ')}
+                  {s3.length ? '; ' : '.'}
+                </>
+              ) : null}
+              {s3.length > 0 ? (
+                <>low Bayer / softer growth — {s3.map((s) => shortSegmentName(s.segment)).join(', ')}.</>
+              ) : null}
+            </li>
+          ) : null}
         </ul>
       </section>
 
@@ -1264,6 +1302,9 @@ export function MarketSynthesis({ d }: { d: StoryAxCtx }) {
           Iberogast / Bayer must run two jobs, not one Digestive average: defend the IBS franchise (Classic share;
           Advance as growth line) and contest Antacids vs Gaviscon — especially where E-commerce is adding euros and
           Pharmacies still hold the pool. Soft set share is an Antacids story, not an IBS leadership loss.
+          {includeTb4l003
+            ? ' Treat white-space / near-miss need-states as discussion candidates only — not sized entry briefs.'
+            : null}
         </p>
       </section>
 
@@ -1294,6 +1335,13 @@ export function MarketSynthesis({ d }: { d: StoryAxCtx }) {
             <Num kind="key">{fmtShare(d.ecomm.pctOfSetAbsGrowth)}</Num> of EUR growth); watch Lefax/Talcid online
             share loss.
           </li>
+          {includeTb4l003 && s1.length > 0 ? (
+            <li>
+              <strong>P4 · Discuss only</strong> — white-space candidates (
+              {s1.map((s) => shortSegmentName(s.segment)).join(', ')}) from growth × Bayer presence; no € sizing on
+              this page.
+            </li>
+          ) : null}
         </ol>
       </section>
 
@@ -1303,6 +1351,9 @@ export function MarketSynthesis({ d }: { d: StoryAxCtx }) {
           <li>Gaviscon acceleration (Antacids + both channels).</li>
           <li>Pharmacy volume drag while price carries a flat large channel.</li>
           <li>Blended Iberogast volume targets that ignore Advance EVI and soft IBS packs.</li>
+          {includeTb4l003 ? (
+            <li>Turning a white-space / near-miss flag into an entry brief without consumer or supply evidence.</li>
+          ) : null}
         </ul>
       </section>
     </div>

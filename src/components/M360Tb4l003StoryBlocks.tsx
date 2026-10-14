@@ -1,6 +1,6 @@
 /**
  * TB4L-003 building-block visuals adapted for Market v3 story chrome.
- * Shown when parent passes includeTb4l003 (AI Assistant v4). Uses Market color rules (slate / change).
+ * Shown when parent passes includeTb4l003 (AI Assistant v4 + v5). Uses Market color rules (slate / change).
  * Charts are interactive (hover tooltips) — required for Market story and replication prompts.
  */
 import { useRef, useState } from 'react';
@@ -365,23 +365,33 @@ export function StoryWhoWinsAll() {
         const maxShare = Math.max(...rows.map((r) => r.shareMatPct), 1);
         return (
           <article key={s.segment}>
-            <h4>
-              {shortSegmentName(s.segment)} · <span className="m360-num is-key">{fmtM(s.valueMatM)}</span> ·{' '}
-              <span className={'m360-num ' + changeTone(s.growth1yPct)}>{fmtPct(s.growth1yPct)}</span>
-            </h4>
+            <header className="m360-tb4l-wins__head">
+              <h4>
+                {shortSegmentName(s.segment)}
+                <span className="m360-tb4l-wins__head-meta">
+                  <span className="m360-num is-key">{fmtM(s.valueMatM)}</span>
+                  <span className={'m360-num ' + changeTone(s.growth1yPct)}>{fmtPct(s.growth1yPct)}</span>
+                </span>
+              </h4>
+              <div className="m360-tb4l-wins__cols" aria-hidden>
+                <span />
+                <span />
+                <span>Share</span>
+                <span>Sales Δ</span>
+                <span>EVI</span>
+              </div>
+            </header>
             <ul>
               {rows.map((r) => {
                 const ei = r.evolutionIndex;
                 const beat = ei != null && ei >= 100;
-                const color = r.isBayer
-                  ? M360_CHART.levelBarBayer
-                  : m360ChangeColor(ei != null ? ei - 100 : 0);
+                const color = r.isBayer ? M360_CHART.levelBarBayer : M360_CHART.levelBar;
                 const id = `${s.segment}-${r.label}`;
                 const on = !focus || focus === id;
                 return (
                   <li
                     key={r.label}
-                    className={on ? undefined : 'is-off'}
+                    className={[r.isBayer ? 'is-bayer' : '', on ? '' : 'is-off'].filter(Boolean).join(' ') || undefined}
                     onMouseEnter={() => setFocus(id)}
                     onMouseMove={(e) =>
                       show(e, {
@@ -390,29 +400,28 @@ export function StoryWhoWinsAll() {
                         lines: [
                           shortSegmentName(s.segment),
                           `Share of need-state  ${fmtShare(r.shareMatPct)}`,
-                          `Value growth  ${fmtPct(r.growth1yPct)}`,
-                          `EVI  ${ei != null ? Math.round(ei) : 'N/A'} (100 = in line)`,
+                          `Sales vs last year  ${fmtPct(r.growth1yPct)}`,
+                          `Relative growth (EVI)  ${ei != null ? Math.round(ei) : 'N/A'} (100 = in line)`,
                           beat ? 'Pace  Ahead of need-state' : 'Pace  With / behind need-state',
                         ],
                       })
                     }
                     onMouseLeave={() => setFocus(null)}
                   >
-                    <span>{r.label}</span>
+                    <span className="m360-tb4l-wins__name">
+                      {r.label}
+                      {r.isBayer ? <em className="m360-tb4l-wins__tag">Bayer</em> : null}
+                    </span>
                     <div className="m360-tb4l-wins__bar" aria-hidden>
                       <i style={{ width: `${(r.shareMatPct / maxShare) * 100}%`, background: color }} />
                     </div>
-                    <small>
-                      <span className="m360-num is-key">{fmtShare(r.shareMatPct)}</span>
-                      {' · '}
-                      <span className={'m360-num ' + changeTone(r.growth1yPct)}>{fmtPct(r.growth1yPct)}</span>
-                      {ei != null ? (
-                        <>
-                          {' · EVI '}
-                          <span className={'m360-num ' + changeTone(ei, 100)}>{Math.round(ei)}</span>
-                        </>
-                      ) : null}
-                    </small>
+                    <span className="m360-tb4l-wins__cell m360-num is-key">{fmtShare(r.shareMatPct)}</span>
+                    <span className={'m360-tb4l-wins__cell m360-num ' + changeTone(r.growth1yPct)}>
+                      {fmtPct(r.growth1yPct)}
+                    </span>
+                    <span className={'m360-tb4l-wins__cell m360-num ' + (ei != null ? changeTone(ei, 100) : 'is-flat')}>
+                      {ei != null ? Math.round(ei) : '—'}
+                    </span>
                   </li>
                 );
               })}
@@ -496,47 +505,80 @@ export function StoryScenarioTable() {
   );
 }
 
-/** Candidate opportunities — not recommendations. */
+/** Candidate opportunities — not recommendations. Traffic-light tones match signal readout. */
 export function StoryCandidateOpportunities() {
   const { opportunities } = buildTb4l003Insights();
-  const types = ['white space', 'near-miss', 'share loss in growth'] as const;
+  const groups: {
+    type: (typeof opportunities)[number]['type'];
+    tone: 'bad' | 'watch';
+    badge: string;
+    title: string;
+    hint: string;
+  }[] = [
+    {
+      type: 'share loss in growth',
+      tone: 'bad',
+      badge: 'Problem',
+      title: 'Growing — Bayer losing share',
+      hint: 'Same fight as the Antacids Problem signal: contest the rival while the need-state still grows — do not treat this as a new entry.',
+    },
+    {
+      type: 'white space',
+      tone: 'watch',
+      badge: 'Discuss',
+      title: 'Faster growth, little Bayer',
+      hint: 'Shows up because the need-state outpaces the category and Bayer is under 3%. Talk only — no € size, no entry brief here.',
+    },
+    {
+      type: 'near-miss',
+      tone: 'watch',
+      badge: 'Discuss',
+      title: 'Low Bayer, softer growth',
+      hint: 'Bayer is barely present, but value growth is not beating the category. Research first; do not brief investment from this flag.',
+    },
+  ];
   return (
     <div className="m360-tb4l-opps">
       <p className="m360-tb4l-opps__lede">
-        From growth and Bayer presence only. Labelled candidates for discussion — not investment, entry, or delisting
-        decisions. No € opportunity sizing.
+        Built only from need-state growth vs the category and Bayer share. Use it to decide what to talk about next —
+        not what to fund. Colors match Key implications.
       </p>
-      {types.map((type) => {
-        const rows = opportunities.filter((o) => o.type === type);
+      {groups.map((g) => {
+        const rows = opportunities.filter((o) => o.type === g.type);
         return (
-          <div key={type} className="m360-tb4l-opps__block">
-            <h4>{type}</h4>
+          <div key={g.type} className={`m360-tb4l-opps__block is-${g.tone}`}>
+            <header className="m360-tb4l-opps__block-head">
+              <span className={`m360-tb4l-opps__badge is-${g.tone}`}>{g.badge}</span>
+              <h4>{g.title}</h4>
+            </header>
+            <p className="m360-tb4l-opps__hint">{g.hint}</p>
             {rows.length === 0 ? (
               <p className="m360-tb4l-opps__empty">None in this MAT window.</p>
             ) : (
               <ul>
                 {rows.map((o) => (
-                  <li key={`${o.type}-${o.segment}`}>
-                    <p className="m360-tb4l-opps__tag">{o.label}</p>
+                  <li key={`${o.type}-${o.segment}`} className={`is-${g.tone}`}>
                     <strong>{shortSegmentName(o.segment)}</strong>
-                    <p>
+                    <p className="m360-tb4l-opps__metrics">
                       <span className="m360-num is-key">{fmtM(o.valueEurM)}</span>
-                      {' · vs category '}
-                      <span className={'m360-num ' + changeTone(o.growthVsCategoryPp)}>
-                        {fmtPp(o.growthVsCategoryPp)}
+                      <span>
+                        vs category{' '}
+                        <span className={'m360-num ' + changeTone(o.growthVsCategoryPp)}>
+                          {fmtPp(o.growthVsCategoryPp)}
+                        </span>
                       </span>
-                      {' · Bayer '}
-                      <span className="m360-num is-key">{fmtShare(o.bayerSharePct)}</span> (
-                      <span className={'m360-num ' + changeTone(o.bayerShareChangePp)}>
-                        {fmtPp(o.bayerShareChangePp)}
+                      <span>
+                        Bayer <span className="m360-num is-key">{fmtShare(o.bayerSharePct)}</span>{' '}
+                        <span className={'m360-num ' + changeTone(o.bayerShareChangePp)}>
+                          ({fmtPp(o.bayerShareChangePp)})
+                        </span>
                       </span>
-                      )
                     </p>
                     <p>
-                      <b>For:</b> {o.rationaleFor}
+                      <b>Why it shows up:</b> {o.rationaleFor}
                     </p>
                     <p>
-                      <b>Against:</b> {o.rationaleAgainst}
+                      <b>Why not act yet:</b> {o.rationaleAgainst}
                     </p>
                   </li>
                 ))}

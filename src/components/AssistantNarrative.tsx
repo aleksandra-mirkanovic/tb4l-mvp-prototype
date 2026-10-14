@@ -408,7 +408,8 @@ function MarketReadoutV2({
           ).
         </p>
         <p>
-          <b>What to do next.</b> Antacids vs Gaviscon. Split Classic defend / Advance grow. Leave PPIs.
+          <b>What to do next.</b> Antacids vs Gaviscon. Split Classic defend / Advance grow. Leave PPIs. Use the
+          summary signals and candidates at the end to act in color order — Problem, Strength, Watch.
         </p>
         <p className="m360-hyp">
           <b>Working hypothesis, not proven.</b> Category value is running ahead of packs (price or mix). Iberogast is

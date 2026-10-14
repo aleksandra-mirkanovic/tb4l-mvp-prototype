@@ -5,6 +5,7 @@ import { FinanceMcpAudit } from '../components/FinanceMcpAudit';
 import { M360MarketStory } from '../components/M360MarketStory';
 import { M360MarketStoryV3 } from '../components/M360MarketStoryV3';
 import { M360MarketStoryV4 } from '../components/M360MarketStoryV4';
+import { M360MarketStoryV5 } from '../components/M360MarketStoryV5';
 import { M360Report } from '../components/M360Report';
 import { SiriusTip, type SiriusTable } from '../components/SiriusTip';
 import { Tb4l003Report } from '../components/Tb4l003Report';
@@ -23,9 +24,12 @@ import {
   type ReplicationPrompt,
 } from '../data/m360ReplicationPrompts';
 import {
+  M360_CATEGORY_ANALYTICS,
   M360_CHART_PLAYBOOK,
+  M360_C_QUESTION_CHARTS,
   M360_REPLICATION_RULE_GROUPS,
   M360_STORY_SECTIONS,
+  type M360CCatalogRow,
 } from '../data/m360ReplicationRules';
 import {
   M360_METADATA,
@@ -36,6 +40,41 @@ import {
   type NullableNumber,
 } from '../data/m360Retrieval';
 import './AiAssistantPage.css';
+
+const M360_C_GROUPS: { cId: string; c: string; rows: M360CCatalogRow[] }[] = (() => {
+  const order: string[] = [];
+  const map = new Map<string, M360CCatalogRow[]>();
+  for (const row of M360_C_QUESTION_CHARTS) {
+    if (!map.has(row.cId)) {
+      order.push(row.cId);
+      map.set(row.cId, []);
+    }
+    map.get(row.cId)!.push(row);
+  }
+  return order.map((cId) => ({
+    cId,
+    c: map.get(cId)![0].c,
+    rows: map.get(cId)!,
+  }));
+})();
+
+const M360_C_STORY_ANCHOR: Record<string, string> = {
+  exec: 'story-exec',
+  category: 'story-category',
+  customers: 'story-customers',
+  competition: 'story-competition',
+  consumers: 'story-consumers',
+  convincers: 'story-convincers',
+  culture: 'story-culture',
+  synthesis: 'story-synthesis',
+};
+
+function cStatusLabel(status: M360CCatalogRow['status']): string {
+  if (status === 'sirius') return 'Sirius';
+  if (status === 'proxy') return 'POS proxy';
+  if (status === 'stub') return 'Stub';
+  return 'Bridge';
+}
 
 const MARKET_CALC_FORMULAS = [...CALC_FORMULAS, ...CALC_CHANNEL_FORMULAS];
 
@@ -93,9 +132,10 @@ function PromptBlock({ prompt }: { prompt: ReplicationPrompt }) {
   );
 }
 
-export type AiAssistantVariant = 'classic' | 'v2' | 'v3' | 'v4';
+export type AiAssistantVariant = 'classic' | 'v2' | 'v3' | 'v4' | 'v5';
 
 function assistantBase(variant: AiAssistantVariant): string {
+  if (variant === 'v5') return '/ai-assistant-v5';
   if (variant === 'v4') return '/ai-assistant-v4';
   if (variant === 'v3') return '/ai-assistant-v3';
   if (variant === 'v2') return '/ai-assistant-v2';
@@ -107,6 +147,10 @@ type AssistantPane = 'market' | 'finance' | 'tb4l-003';
 export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistantVariant }) {
   const { pane } = useParams();
   const base = assistantBase(variant);
+  /** Bain Landscape C focus for Market v5 — null = show all sections. */
+  const [focusCId, setFocusCId] = useState<string | null>(null);
+  /** Category Discover analytic (under Category C) — v5 only. */
+  const [focusCategoryAnalyticId, setFocusCategoryAnalyticId] = useState<string | null>(null);
   if (pane && pane !== 'market' && pane !== 'finance' && pane !== 'tb4l-003') {
     return <Navigate to={`${base}/market`} replace />;
   }
@@ -118,12 +162,57 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
   const isV2 = variant === 'v2';
   const isV3 = variant === 'v3';
   const isV4 = variant === 'v4';
-  const isV3Plus = isV3 || isV4;
+  const isV5 = variant === 'v5';
+  const isV3Plus = isV3 || isV4 || isV5;
   const isStory = isV2 || isV3Plus;
+  const activeCGroup = focusCId ? M360_C_GROUPS.find((g) => g.cId === focusCId) ?? null : null;
+  const activeCategoryAnalytic =
+    focusCId === 'category' && focusCategoryAnalyticId
+      ? M360_CATEGORY_ANALYTICS.find((a) => a.id === focusCategoryAnalyticId) ?? null
+      : null;
+  const showKirillSegmentShare =
+    focusCId === 'category' && focusCategoryAnalyticId === 'segment-share-white-space';
+
+  function scrollMarketBody() {
+    window.setTimeout(() => {
+      document.querySelector('.ai-window__body')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+
+  function selectC(cId: string | null) {
+    setFocusCId(cId);
+    if (cId === 'category') {
+      setFocusCategoryAnalyticId('segment-share-white-space');
+      scrollMarketBody();
+      return;
+    }
+    setFocusCategoryAnalyticId(null);
+    window.setTimeout(() => {
+      const anchor = cId ? M360_C_STORY_ANCHOR[cId] : 'story-exec';
+      const el = document.getElementById(anchor);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      document.querySelector('.ai-window__body')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+
+  function selectCategoryAnalytic(analyticId: string) {
+    setFocusCId('category');
+    setFocusCategoryAnalyticId(analyticId);
+    scrollMarketBody();
+  }
+
+  function categoryAnalyticStatusLabel(status: 'live' | 'partial' | 'stub'): string {
+    if (status === 'live') return 'Live';
+    if (status === 'partial') return 'Partial';
+    return 'Stub';
+  }
 
   return (
     <div
-      className={`ai-assistant-page ai-assistant-page--tables${isV2 ? ' ai-assistant-page--v2' : ''}${isV3 ? ' ai-assistant-page--v3' : ''}${isV4 ? ' ai-assistant-page--v4' : ''}`}
+      className={`ai-assistant-page ai-assistant-page--tables${isV2 ? ' ai-assistant-page--v2' : ''}${isV3 ? ' ai-assistant-page--v3' : ''}${isV4 ? ' ai-assistant-page--v4' : ''}${isV5 ? ' ai-assistant-page--v5' : ''}`}
     >
       <header className="ai-assistant-hero">
         <div className="ai-assistant-hero__copy">
@@ -135,23 +224,27 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
                 : 'Brand manager report'}
           </p>
           <h1 className="page-title">
-            {isV4
-              ? 'AI Assistant v4'
-              : isV3
-                ? 'AI Assistant v3'
-                : isV2
-                  ? 'AI Assistant v2'
-                  : 'AI Assistant'}
+            {isV5
+              ? 'AI Assistant v5'
+              : isV4
+                ? 'AI Assistant v4'
+                : isV3
+                  ? 'AI Assistant v3'
+                  : isV2
+                    ? 'AI Assistant v2'
+                    : 'AI Assistant'}
           </h1>
           <p className="page-subtitle">
             {view === 'tb4l-003'
               ? 'Segment Share and White Space — fixed layout from TB4L-003 v0.2. Same Sirius MAT extract as Market; scenario codes S1–S4 / U0; review only, not recommendations.'
               : view === 'market'
-                ? isV3Plus
-                  ? 'Market window · sell-out, latest 12 months. Bain-logic drill-down from category to brand and channel.'
-                  : isV2
-                    ? 'Same Sirius and COPA clocks as AI Assistant. Market follows a Bain-logic drill-down; finance is unchanged. Compare side by side with the classic tab.'
-                    : 'Two windows. Market is Sirius sell-out for the latest 12 months. Finance is internal COPA for calendar 2025 versus 2024. Prompt one window at a time — the clocks are different.'
+                ? isV5
+                  ? 'Market window · sell-out, latest 12 months. Bain Landscape 6Cs (Category, Customers, Competition, Consumers, Convincers, Culture).'
+                  : isV3Plus
+                    ? 'Market window · sell-out, latest 12 months. Bain-logic drill-down from category to brand and channel.'
+                    : isV2
+                      ? 'Same Sirius and COPA clocks as AI Assistant. Market follows a Bain-logic drill-down; finance is unchanged. Compare side by side with the classic tab.'
+                      : 'Two windows. Market is Sirius sell-out for the latest 12 months. Finance is internal COPA for calendar 2025 versus 2024. Prompt one window at a time — the clocks are different.'
                 : isStory
                   ? 'Finance window · internal COPA, calendar 2025 versus 2024. Same finance pack as classic; compare side by side with the classic tab.'
                   : 'Finance window · internal COPA for calendar 2025 versus 2024. Prompt this window separately from Market — the clocks are different.'}
@@ -209,8 +302,116 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
               {p.country} {p.category} · Iberogast competitive set · MAT ending {m.latest_actual_month}
             </p>
           </header>
+          {isV5 ? (
+            <div className="ai-c-nav ai-c-nav--in-window" aria-label="Bain Landscape 6Cs">
+              <p className="ai-c-nav__lede">
+                Click a C to show only that analysis. <strong>All</strong> shows the full story.
+              </p>
+              <div className="ai-c-nav__tabs" role="tablist" aria-label="Landscape Cs">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={focusCId === null}
+                  className={`ai-c-nav__tab${focusCId === null ? ' is-active' : ''}`}
+                  onClick={() => selectC(null)}
+                >
+                  All
+                </button>
+                {M360_C_GROUPS.map((group) => (
+                  <button
+                    key={group.cId}
+                    type="button"
+                    role="tab"
+                    aria-selected={focusCId === group.cId}
+                    className={`ai-c-nav__tab${focusCId === group.cId ? ' is-active' : ''}`}
+                    onClick={() => selectC(group.cId)}
+                  >
+                    {group.c}
+                  </button>
+                ))}
+              </div>
+              {activeCGroup ? (
+                <p className="ai-c-nav__focus-note">
+                  Showing <strong>{activeCGroup.c}</strong>
+                  <span className={`ai-c-status is-${activeCGroup.rows[0].status}`}>
+                    {cStatusLabel(activeCGroup.rows[0].status)}
+                  </span>
+                  {activeCategoryAnalytic ? (
+                    <>
+                      {' '}
+                      · <strong>{activeCategoryAnalytic.title}</strong>
+                    </>
+                  ) : (
+                    <>
+                      {' '}
+                      — {activeCGroup.rows.length} view{activeCGroup.rows.length === 1 ? '' : 's'} below.
+                    </>
+                  )}
+                </p>
+              ) : null}
+              {focusCId === 'category' ? (
+                <div className="ai-c-subnav" aria-label="Category analytics">
+                  <p className="ai-c-subnav__lede">Category analytics (Discover)</p>
+                  <div className="ai-c-subnav__tabs" role="tablist">
+                    {M360_CATEGORY_ANALYTICS.map((analytic) => (
+                      <button
+                        key={analytic.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={focusCategoryAnalyticId === analytic.id}
+                        className={`ai-c-subnav__tab${focusCategoryAnalyticId === analytic.id ? ' is-active' : ''}${analytic.status === 'stub' ? ' is-stub' : ''}`}
+                        onClick={() => selectCategoryAnalytic(analytic.id)}
+                      >
+                        {analytic.title}
+                        <span
+                          className={`ai-c-status is-${analytic.status === 'live' ? 'sirius' : analytic.status === 'partial' ? 'proxy' : 'stub'}`}
+                        >
+                          {categoryAnalyticStatusLabel(analytic.status)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
           <div className="ai-window__body">
-            {isV4 ? (
+            {isV5 && showKirillSegmentShare ? (
+              <div className="ai-category-analytic" id="story-category">
+                <header className="ai-category-analytic__head">
+                  <p className="ai-category-analytic__kicker">Category · TB4L-003</p>
+                  <h2 className="ai-category-analytic__title">Segment Share and White Space</h2>
+                  <p className="ai-category-analytic__q">
+                    {M360_CATEGORY_ANALYTICS.find((a) => a.id === 'segment-share-white-space')?.question}
+                  </p>
+                  <p className="ai-category-analytic__note">
+                    Layout follows Kirill’s building block v0.2: title → executive summary → data checks → 6 KPIs →
+                    charts 1–4 → observations → scenarios → candidates → watch-outs. GB BAM · review only.
+                  </p>
+                </header>
+                <Tb4l003Report />
+              </div>
+            ) : isV5 && focusCId === 'category' && activeCategoryAnalytic ? (
+              <div className="ai-category-analytic ai-category-analytic--stub" id="story-category">
+                <header className="ai-category-analytic__head">
+                  <p className="ai-category-analytic__kicker">Category</p>
+                  <h2 className="ai-category-analytic__title">{activeCategoryAnalytic.title}</h2>
+                  <p className="ai-category-analytic__q">{activeCategoryAnalytic.question}</p>
+                </header>
+                <div className="m360-c-stub" role="note">
+                  <p>
+                    <strong>{categoryAnalyticStatusLabel(activeCategoryAnalytic.status)}.</strong>{' '}
+                    {activeCategoryAnalytic.note}
+                  </p>
+                  <p>
+                    Open <strong>Segment Share and White Space</strong> for the live Kirill / TB4L-003 analytic, or
+                    choose another Landscape C.
+                  </p>
+                </div>
+              </div>
+            ) : isV5 ? (
+              <M360MarketStoryV5 focusCId={focusCId} />
+            ) : isV4 ? (
               <M360MarketStoryV4 />
             ) : isV3 ? (
               <M360MarketStoryV3 />
@@ -402,10 +603,56 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           ))}
         </details>
 
-        <details className="ai-raw__inner">
-          <summary>Story section order (10 steps)</summary>
+        <details className="ai-raw__inner" open={isV3Plus}>
+          <summary>Bain Landscape 6Cs — questions &amp; charts by C</summary>
           <p className="ai-table-note">
-            Fixed Bain-logic drill-down used by Market v3. One business question per section.
+            What Market v5 already answers, grouped by Bain Landscape C. Status: Sirius = sell-out chart; POS
+            proxy = consumer stand-in only; Stub = no data in this pack; Bridge = summary / actions.
+          </p>
+          {M360_C_GROUPS.map((group) => (
+            <section key={group.cId} className="ai-rule-group ai-c-group" aria-labelledby={`c-cat-${group.cId}`}>
+              <h3 id={`c-cat-${group.cId}`} className="ai-rule-group__title">
+                <button
+                  type="button"
+                  className="ai-c-group__jump"
+                  onClick={() => selectC(group.cId)}
+                >
+                  {group.c}
+                </button>
+                <span className={`ai-c-status is-${group.rows[0].status}`}>
+                  {cStatusLabel(group.rows[0].status)}
+                </span>
+              </h3>
+              <div className="ai-table-wrap">
+                <table className="ai-table">
+                  <thead>
+                    <tr>
+                      <th>Business question</th>
+                      <th>Chart / visual</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.rows.map((row) => (
+                      <tr key={`${row.cId}-${row.chart}-${row.question.slice(0, 24)}`}>
+                        <td>{row.question}</td>
+                        <td>{row.chart}</td>
+                        <td>
+                          <span className={`ai-c-status is-${row.status}`}>{cStatusLabel(row.status)}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          ))}
+        </details>
+
+        <details className="ai-raw__inner">
+          <summary>Story section order (Bain Landscape 6Cs)</summary>
+          <p className="ai-table-note">
+            Section order on the Market story page. One business question per section.
           </p>
           <div className="ai-table-wrap">
             <table className="ai-table">
@@ -492,7 +739,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
               <b>Channel grain still missing</b> — no customer / retailer grain; no drugstore or grocery for
               Germany. Pharmacies + E-commerce (Mail Order) totals, price/volume drivers, and top-brand dynamics
               are in the extract and shown in AI Assistant{' '}
-              {isV4 ? 'v4' : isV3 ? 'v3' : 'v2'} · Channel dynamics (see T-ch / T-ch-b below).
+              {isV5 ? 'v5' : isV4 ? 'v4' : isV3 ? 'v3' : 'v2'} · Channel dynamics (see T-ch / T-ch-b below).
             </li>
             <li>
               <b>Innovation bubble</b> — N/A

@@ -72,17 +72,16 @@ POOL / LEAK (discover from CALC — do not copy Iberogast rivals blindly)
 - Reference rival = largest non-{{MANUFACTURER}} gainer in that fight
 - Do not open entry projects the pack cannot size (tiny / no-presence need-states)
 
-STORY ORDER (required — 10 steps)
-1. Category overview — exec summary + 3 KPIs (set sales, {{MANUFACTURER}} share, {{BRAND}} EVI vs {{PRIMARY_SEGMENT}}) + top-10 brands in set
-2. Category growth — value % vs pack % by need-state
-3. Channel dynamics — price/volume EUR drivers, then share-Δ movers per channel (gainers first)
-4. Segment attractiveness — size × growth vs category; white-space flags
-5. Competitive landscape — top players in {{PRIMARY_SEGMENT}} and growth/leak need-state
-6. {{MANUFACTURER}} relative growth — EVI of company brands vs own segment
-7. {{BRAND}} position — compare {{LINES}} on the primary franchise segment
-8. Market share performance — {{MANUFACTURER}} share change by need-state (worst first; omit no-presence)
-9. Summary · synthesis & key implications — key insights, brand implications, opportunities, risks, then Problem / Strength / Watch cards
-10. Recommended actions — same signal order: fix red, protect green, manage yellow
+STORY ORDER (required — Bain Landscape 6Cs + Define bridge)
+0. Executive summary (above the Cs)
+1. Category — KPIs; value vs packs; structure (mekko / growth×share / scorecard when enabled); attractiveness; {{MANUFACTURER}} share change by need-state
+2. Customers — price/volume EUR by channel; share-Δ movers per channel (gainers first)
+3. Competition — top-10 brands; who-wins / {{PRIMARY_SEGMENT}} + growth need-state; {{MANUFACTURER}} EVI; {{BRAND}} lines ({{LINES}})
+4. Consumers — POS white-space / near-miss candidates only (no HH panel); stub if structure charts off
+5. Convincers — stub unless HCP/KOL research is loaded
+6. Culture / Country — stub unless cultural/secondary research is loaded
+7. Summary · synthesis & key implications — Problem / Strength / Watch cards
+8. Recommended actions — same signal order: fix red, protect green, manage yellow
 
 UNDER EACH CHART (analysis rail)
 Key facts → Key insights → Hypothesis validation (confirmed|partial|rejected|new) → Implications for the brand → Opportunities and risks.
@@ -94,15 +93,11 @@ CHART COLORS (three rules only)
 
 CHART PLAYBOOK
 | Section | Chart | Reads |
-| Overview | KPI strip + top-10 share bars | Cast + headlines |
-| Category growth | Grouped bars: value % vs pack % (+ category) | Packs or value/mix? |
-| Channel dynamics | Price vs volume EUR by channel | Where euros come from |
-| Channel dynamics | Brand rows: share Δ (pp) + value growth % | Who gains/loses |
-| Attractiveness | Size slate + growth green/amber vs category | Pool vs growth jobs |
-| Competitive | Ranked share bars (slate; manufacturer deeper) | Who holds pool / fight |
-| Relative growth | EVI lollipops vs 100 | Ahead / behind segment |
-| Brand position | Lines: share + EVI on primary segment | Defend vs grow |
-| Share performance | Before→after share, worst first | Where share leaks |
+| Category | KPI strip; value vs packs; structure; attractiveness; share Δ | Size, growth, where we play |
+| Customers | Price vs volume EUR by channel; movers share Δ | Channel euros and share fights |
+| Competition | Top-10; who-wins; EVI; brand lines | Rivals and Bayer pace |
+| Consumers | POS candidate cards (proxy) | Discussion flags only |
+| Convincers / Culture | Stub | Not in Sirius sell-out |
 
 OUTPUT STYLE
 - Short ledes as business questions.
@@ -130,7 +125,7 @@ If value_3ya is incomplete, mark 3y CAGR as N/A — do not extrapolate.`,
   {
     id: 'retrieve-subbrands',
     title: '3 · Sirius retrieval — sub-brands (T2)',
-    purpose: 'Brand / line grain for competitive landscape, EVI, and {{BRAND}} position.',
+    purpose: 'Brand / line grain for Competition (who-wins, EVI, and {{BRAND}} position).',
     body: `For the same {{SCOPE}} MAT {{MAT_END}}:
 
 Return sub-brand rows with:
@@ -146,7 +141,7 @@ Exclude or flag junk rows (unrelated SKUs in a need-state) in checks.`,
   {
     id: 'retrieve-channels',
     title: '4 · Sirius retrieval — channels (T-ch / T-ch-b)',
-    purpose: 'Channel drivers and top-brand dynamics used in Channel dynamics.',
+    purpose: 'Channel drivers and top-brand dynamics used under Customers.',
     body: `For {{COUNTRY}} {{CATEGORY}}, {{SCOPE}}, MAT {{MAT_END}}, channel grain:
 
 1) Channel totals (e.g. Pharmacies / E-commerce — use whatever CHANNEL_NAME exists for this country):
@@ -202,25 +197,25 @@ Return a structured CALC object before writing any prose.`,
   {
     id: 'story',
     title: '6 · Build the full Market story (charts + copy)',
-    purpose: 'Main replication prompt after CALC exists. Same section flow as AI Assistant Market v3.',
+    purpose: 'Main replication prompt after CALC exists. Same Bain 6C flow as AI Assistant Market v3.',
     body: `Using the CALC object for {{BRAND}} in {{SCOPE}} ({{COUNTRY}}, MAT {{MAT_END}}), write the Market story.
 
-Follow the STORY ORDER and CHART PLAYBOOK from the system instructions (v3).
+Follow the STORY ORDER and CHART PLAYBOOK from the system instructions (v3 Bain Landscape 6Cs).
 
-For each analytic section output:
+For each analytic C section output:
 - title + one-line business-question lede
 - chart spec: { type, title, caption, encodings } matching the playbook and three color rules
 - Under-chart rail: Key facts → Key insights → Hypothesis validation → Implications → Opportunities and risks
 - Then bridge (logic only)
 
-KPI strip (overview only):
+KPI strip (Category only):
 1. Category sales (set EUR m + value growth %; mention {{MANUFACTURER}} EUR in set)
 2. {{MANUFACTURER}} market share (level + pp change)
 3. {{BRAND}} relative growth (whole-brand EVI vs {{PRIMARY_SEGMENT}}; 100 = in line)
 
-Executive summary (overview): Market; {{BRAND}} in that market; What to do next; Working hypothesis (not proven). Put Data care (failed checks / missing 3y) in the footer — do not duplicate MAT/scope there.
+Executive summary sits above the Cs: Market; {{BRAND}} in that market; What to do next; Working hypothesis (not proven). Put Data care (failed checks / missing 3y) in the footer — do not duplicate MAT/scope there.
 
-If channel data is missing, keep the section but mark charts N/A and say what grain is unavailable.`,
+Stub Convincers and Culture / Country when those sources are missing. If channel data is missing, keep Customers but mark charts N/A.`,
   },
   {
     id: 'signals',
@@ -261,7 +256,7 @@ Fill:
 Steps:
 1) Retrieve Sirius T3 metadata, T1 segments, T2 sub-brands, T4 checks, T-ch channels, T-ch-b top brands.
 2) Compute CALC only (category/segment/sub-brand/channel; EVI; white-space; presence rules; pool vs leak; top-10).
-3) Build the 10-step story with chart playbook + three color rules + under-chart analysis rail.
+3) Build the Bain Landscape 6C story (Category → Customers → Competition → Consumers → Convincers → Culture) plus Summary and Actions, with chart playbook + three color rules + under-chart analysis rail.
 4) Close with synthesis, traffic-light implications, ordered actions, and data-care footer.
 5) List gaps as N/A (no 3y, no retailer grain, etc.) — never invent. Do not copy Iberogast-specific rivals or conclusions.
 
@@ -291,4 +286,3 @@ Expected story emphasis for THIS pack only (validate from CALC; do not assume fo
 - T4: surface FAIL checks (e.g. C2 Bayer Other mix, C5 junk SKU) in Data care`,
   },
 ];
-
