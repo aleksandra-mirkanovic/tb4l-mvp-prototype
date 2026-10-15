@@ -49,9 +49,9 @@ export const M360_CATEGORY_ANALYTICS: M360CategoryAnalytic[] = [
   {
     id: 'growth-decomposition',
     title: 'Brand and Segment Growth Decomposition',
-    status: 'partial',
+    status: 'stub',
     question: 'Which brands and segments drive growth, and is it price or volume?',
-    note: 'Sirius supports value/unit growth, share Δ, price vs volume. Full contribution bridge not yet built as its own page.',
+    note: 'Not built as its own Category analytic page on this extract yet.',
   },
 ];
 

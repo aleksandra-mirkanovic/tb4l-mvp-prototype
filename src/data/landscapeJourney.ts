@@ -2,9 +2,11 @@
  * AI Assistant v6 — Landscape Assessment journey.
  * Bain 6Cs outside; Kirill SSWS nested under Category Discover analytics.
  */
-import iberogastPack from '../assets/brands/iberogast-classic-pack.jpg';
 import { M360_CATEGORY_ANALYTICS } from './m360ReplicationRules';
 import { M360_METADATA, M360_RETRIEVAL_PARAMS } from './m360Retrieval';
+
+/** Public URL so deploys/browsers cannot keep an old Vite-hashed packshot. */
+const iberogastPack = `${import.meta.env.BASE_URL}brands/iberogast-classic-pack-v2.jpg`;
 
 export type JourneyStep = 'scope' | 'landscape' | 'category' | 'c-analysis' | 'analytic' | 'c-stub';
 
@@ -143,13 +145,13 @@ export const LANDSCAPE_6CS: LandscapeC[] = [
   {
     id: 'consumer',
     label: 'Consumers',
-    short: 'Whitespace · POS proxy',
+    short: 'Need states · demand space',
     available: true,
-    status: 'partial',
-    blurb: 'Bain Consumer needs panel / demand space. Here: sell-out white-space candidates only (POS proxy).',
+    status: 'stub',
+    blurb: 'Bain Consumer needs panel / demand space. No household or shopper survey in this Sirius sell-out extract.',
     icon: 'consumer',
     storyCId: 'consumers',
-    openAs: 'story-c',
+    openAs: 'stub',
   },
   {
     id: 'convincer',

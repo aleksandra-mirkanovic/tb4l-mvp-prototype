@@ -249,7 +249,13 @@ export function LandscapeJourney() {
         <section className="lj-brand lj-brand--strip" aria-label="Selected brand">
           <div className="lj-brand__visual">
             {brand.packImage ? (
-              <img src={brand.packImage} alt="" width={72} height={72} decoding="async" />
+              <img
+                src={brand.packImage}
+                alt={`${brand.label} pack`}
+                width={72}
+                height={72}
+                decoding="async"
+              />
             ) : (
               <div className="lj-brand__placeholder" aria-hidden="true">
                 <span>{brand.label.slice(0, 1)}</span>
@@ -316,7 +322,7 @@ export function LandscapeJourney() {
             </button>
             <p className="lj-actions__hint">
               {liveBrand
-                ? 'Next: Bain 6Cs — Category, Customers, Competition live; Consumers partial; Convincers & Culture stubs.'
+                ? 'Next: Bain 6Cs — Category, Customers, Competition live; Consumers, Convincers & Culture need other data sources.'
                 : 'Preview only — switch Brand back to Iberogast to continue with live data.'}
             </p>
           </div>
@@ -334,7 +340,7 @@ export function LandscapeJourney() {
                 {brand.label} · {optionLabel(LANDSCAPE_COUNTRIES, countryId)}
               </strong>
               . Pick a C. Category opens Discover analytics (Kirill SSWS). Customers / Competition open chart packs.
-              Consumers is POS proxy only. Convincers and Culture are coming soon.
+              Consumers, Convincers, and Culture are coming soon (not in this Sirius extract).
             </p>
           </header>
           <ul className="lj-cs">
@@ -389,14 +395,16 @@ export function LandscapeJourney() {
                 >
                   <span className="lj-analytic__top">
                     <strong>{a.title}</strong>
-                    <StatusPill status={a.status} />
+                    <StatusPill status={a.canOpen ? a.status : 'stub'} />
                   </span>
-                  <span className="lj-analytic__q">{a.question}</span>
-                  <span className="lj-analytic__note">{a.note}</span>
                   {a.canOpen ? (
-                    <span className="lj-analytic__cta">Open Kirill analysis →</span>
+                    <>
+                      <span className="lj-analytic__q">{a.question}</span>
+                      <span className="lj-analytic__note">{a.note}</span>
+                      <span className="lj-analytic__cta">Open Kirill analysis →</span>
+                    </>
                   ) : (
-                    <span className="lj-analytic__cta is-muted">Not available on this Sirius extract yet</span>
+                    <span className="lj-analytic__cta is-muted">Coming soon · not in this Sirius extract</span>
                   )}
                 </button>
               </li>
