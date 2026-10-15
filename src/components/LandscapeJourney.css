@@ -59,6 +59,68 @@
   padding: 10px 14px 10px 10px;
 }
 
+.lj-brand--lines {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 20px;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.lj-line-packs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.lj-line-pack {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  width: 112px;
+}
+
+.lj-line-pack__visual {
+  width: 104px;
+  height: 104px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--line-accent, var(--lj-accent)) 22%, var(--border-default));
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--line-accent, var(--lj-accent)) 12%, transparent);
+}
+
+.lj-line-pack__visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.lj-line-pack__label {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-secondary);
+  line-height: 1.25;
+}
+
+@media (max-width: 720px) {
+  .lj-brand--lines {
+    grid-template-columns: 1fr;
+  }
+
+  .lj-line-packs {
+    justify-content: flex-start;
+  }
+}
+
 .lj-brand__visual {
   min-height: 200px;
   background: color-mix(in srgb, var(--lj-accent) 8%, #fff);

@@ -9,6 +9,7 @@ import {
   LANDSCAPE_CATEGORIES,
   LANDSCAPE_COUNTRIES,
   LANDSCAPE_DEFAULTS,
+  IBEROGAST_LINE_PACKS,
   LANDSCAPE_LIVE_CASE,
   LANDSCAPE_PERIODS,
   brandById,
@@ -246,22 +247,7 @@ export function LandscapeJourney() {
       </nav>
 
       {showBrandPanel ? (
-        <section className="lj-brand lj-brand--strip" aria-label="Selected brand">
-          <div className="lj-brand__visual">
-            {brand.packImage ? (
-              <img
-                src={brand.packImage}
-                alt={`${brand.label} pack`}
-                width={72}
-                height={72}
-                decoding="async"
-              />
-            ) : (
-              <div className="lj-brand__placeholder" aria-hidden="true">
-                <span>{brand.label.slice(0, 1)}</span>
-              </div>
-            )}
-          </div>
+        <section className="lj-brand lj-brand--lines" aria-label="Selected brand">
           <div className="lj-brand__copy">
             <p className="lj-brand__kicker">Focus brand</p>
             <h2 className="lj-brand__name">{brand.label}</h2>
@@ -275,6 +261,16 @@ export function LandscapeJourney() {
               {optionLabel(LANDSCAPE_PERIODS, periodId)}
             </p>
           </div>
+          <ul className="lj-line-packs" aria-label="Iberogast lines">
+            {IBEROGAST_LINE_PACKS.map((line) => (
+              <li key={line.id} className="lj-line-pack">
+                <div className="lj-line-pack__visual" style={{ ['--line-accent' as string]: line.accent }}>
+                  <img src={line.image} alt="" width={120} height={120} decoding="async" />
+                </div>
+                <p className="lj-line-pack__label">{line.label}</p>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 

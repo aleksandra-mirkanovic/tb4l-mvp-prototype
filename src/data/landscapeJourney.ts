@@ -2,11 +2,11 @@
  * AI Assistant v6 — Landscape Assessment journey.
  * Bain 6Cs outside; Kirill SSWS nested under Category Discover analytics.
  */
+import { IBEROGAST_FOCUS_PACK, IBEROGAST_LINE_PACKS } from './iberogastPacks';
 import { M360_CATEGORY_ANALYTICS } from './m360ReplicationRules';
 import { M360_METADATA, M360_RETRIEVAL_PARAMS } from './m360Retrieval';
 
-/** Public URL so deploys/browsers cannot keep an old Vite-hashed packshot. */
-const iberogastPack = `${import.meta.env.BASE_URL}brands/iberogast-classic-pack-v2.jpg`;
+export { IBEROGAST_LINE_PACKS };
 
 export type JourneyStep = 'scope' | 'landscape' | 'category' | 'c-analysis' | 'analytic' | 'c-stub';
 
@@ -60,7 +60,7 @@ export const LANDSCAPE_BRANDS: BrandOption[] = [
     manufacturer: 'Bayer',
     available: true,
     hint: 'GB BAM focus brand',
-    packImage: iberogastPack,
+    packImage: IBEROGAST_FOCUS_PACK,
     accent: '#1f5c3a',
     accentSoft: '#e8f2ec',
     tagline: 'Digestive herbal drops · competitive set',

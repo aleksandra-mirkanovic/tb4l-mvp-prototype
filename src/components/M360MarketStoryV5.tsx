@@ -24,6 +24,7 @@ import {
   M360_CHANNEL_META,
   channelBrandsByShareChange,
 } from '../data/m360ChannelRetrieval';
+import { IBEROGAST_LINE_PACKS } from '../data/iberogastPacks';
 import { M360_METADATA, M360_RETRIEVAL_PARAMS } from '../data/m360Retrieval';
 import {
   AssistantMarketDataCare,
@@ -2078,6 +2079,14 @@ export function M360MarketStoryV5({
               title="Classic vs Advance on IBS"
               caption={`Classic ${fmtShare(classic?.shareMatPct ?? null)} of IBS · Advance ${fmtShare(advance?.shareMatPct ?? null)}. Share plus relative growth versus IBS only.`}
             >
+              <ul className="m360-pack-line" aria-label="Iberogast Classic and Advance packs">
+                {IBEROGAST_LINE_PACKS.map((line) => (
+                  <li key={line.id} className="m360-pack-line__item">
+                    <img src={line.image} alt={line.label} width={96} height={96} decoding="async" />
+                    <span>{line.short}</span>
+                  </li>
+                ))}
+              </ul>
               <IberogastPosition />
             </ChartCard>
           }
