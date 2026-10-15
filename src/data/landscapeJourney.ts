@@ -2,7 +2,7 @@
  * AI Assistant v6 — Landscape Assessment journey.
  * Bain 6Cs outside; Kirill SSWS nested under Category Discover analytics.
  */
-import iberogastPack from '../assets/brands/iberogast-pack-hero.jpg';
+import iberogastPack from '../assets/brands/iberogast-classic-pack.jpg';
 import { M360_CATEGORY_ANALYTICS } from './m360ReplicationRules';
 import { M360_METADATA, M360_RETRIEVAL_PARAMS } from './m360Retrieval';
 

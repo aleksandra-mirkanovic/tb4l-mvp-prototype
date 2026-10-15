@@ -70,6 +70,7 @@
   min-height: 0;
   border-radius: 10px;
   overflow: hidden;
+  background: #fff;
 }
 
 .lj-brand__visual img {
@@ -78,6 +79,12 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
+
+.lj-brand--strip .lj-brand__visual img {
+  object-fit: contain;
+  padding: 4px;
+  box-sizing: border-box;
 }
 
 .lj-brand__placeholder {
