@@ -146,6 +146,30 @@ function StatusPill({ status }: { status: LandscapeCStatus | 'live' | 'partial' 
   return <span className={`lj-pill is-${status === 'soon' ? 'stub' : status}`}>{label}</span>;
 }
 
+/** Journey = click into each C; page = full Landscape with jump buttons. */
+type BrowseMode = 'journey' | 'page';
+
+const BROWSE_MODE_KEY = 'ai-v6-browse-mode';
+
+function readBrowseMode(): BrowseMode {
+  try {
+    const stored = sessionStorage.getItem(BROWSE_MODE_KEY);
+    if (stored === 'journey' || stored === 'page') return stored;
+  } catch {
+    /* ignore */
+  }
+  return 'journey';
+}
+
+const PAGE_JUMP_ID: Record<string, string> = {
+  category: 'lj-jump-category',
+  customer: 'lj-jump-customer',
+  competitor: 'lj-jump-competitor',
+  consumer: 'lj-jump-consumer',
+  convincer: 'lj-jump-convincer',
+  culture: 'lj-jump-culture',
+};
+
 export function LandscapeJourney() {
   const [step, setStep] = useState<JourneyStep>('scope');
   const [categoryId, setCategoryId] = useState(LANDSCAPE_DEFAULTS.categoryId);
@@ -154,12 +178,39 @@ export function LandscapeJourney() {
   const [periodId, setPeriodId] = useState(LANDSCAPE_DEFAULTS.periodId);
   const [activeCId, setActiveCId] = useState<string | null>(null);
   const [analyticId, setAnalyticId] = useState<string | null>(null);
+  const [browseMode, setBrowseMode] = useState<BrowseMode>(readBrowseMode);
+  const [pageJumpCId, setPageJumpCId] = useState<string | null>(null);
 
   const brand = brandById(brandId);
   const liveBrand = brand.available;
   const scopeReady = Boolean(categoryId && brandId && countryId && periodId && liveBrand);
   const activeC = activeCId ? landscapeCById(activeCId) : null;
   const analytic = CATEGORY_ANALYTICS_JOURNEY.find((a) => a.id === analyticId) ?? null;
+  const pastScope = scopeReady && step !== 'scope';
+  const isPageMode = pastScope && browseMode === 'page';
+  const isJourneyMode = !isPageMode;
+
+  function changeBrowseMode(mode: BrowseMode) {
+    if (!scopeReady && mode === 'page') return;
+    setBrowseMode(mode);
+    try {
+      sessionStorage.setItem(BROWSE_MODE_KEY, mode);
+    } catch {
+      /* ignore */
+    }
+    if (mode === 'page') {
+      setActiveCId(null);
+      setAnalyticId(null);
+      setPageJumpCId(null);
+      setStep('landscape');
+      window.setTimeout(() => {
+        document.getElementById('lj-page-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 60);
+      return;
+    }
+    setPageJumpCId(null);
+    setStep('landscape');
+  }
 
   function goLandscape() {
     if (!scopeReady) return;
@@ -168,8 +219,19 @@ export function LandscapeJourney() {
     setStep('landscape');
   }
 
+  function jumpToC(c: LandscapeC) {
+    setPageJumpCId(c.id);
+    window.setTimeout(() => {
+      document.getElementById(PAGE_JUMP_ID[c.id])?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 60);
+  }
+
   function openC(c: LandscapeC) {
     if (!c.available) return;
+    if (browseMode === 'page') {
+      jumpToC(c);
+      return;
+    }
     setActiveCId(c.id);
     setAnalyticId(null);
     if (c.openAs === 'category-analytics') {
@@ -202,49 +264,82 @@ export function LandscapeJourney() {
   }
 
   /** Pack + meta only after scope is confirmed (not while choosing filters). */
-  const showBrandPanel = step !== 'scope' && step !== 'analytic' && step !== 'c-analysis';
+  const showBrandPanel =
+    pastScope && (isPageMode || (step !== 'analytic' && step !== 'c-analysis'));
 
   return (
     <div
-      className="lj"
+      className={`lj${isPageMode ? ' lj--page' : ''}`}
       style={{ ['--lj-accent' as string]: brand.accent, ['--lj-accent-soft' as string]: brand.accentSoft }}
     >
-      <nav className="lj-crumbs" aria-label="Journey">
-        <button type="button" className={step === 'scope' ? 'is-on' : undefined} onClick={() => setStep('scope')}>
-          1 · Scope
-        </button>
-        <span aria-hidden="true">/</span>
-        <button
-          type="button"
-          className={step === 'landscape' ? 'is-on' : undefined}
-          disabled={step === 'scope'}
-          onClick={() => scopeReady && goLandscape()}
-        >
-          2 · Landscape 6Cs
-        </button>
-        {activeC ? (
-          <>
-            <span aria-hidden="true">/</span>
+      <div className="lj-topbar" id="lj-page-top">
+        <nav className="lj-crumbs" aria-label="Journey">
+          <button
+            type="button"
+            className={step === 'scope' ? 'is-on' : undefined}
+            onClick={() => setStep('scope')}
+          >
+            1 · Scope
+          </button>
+          <span aria-hidden="true">/</span>
+          <button
+            type="button"
+            className={pastScope && !isPageMode && step === 'landscape' ? 'is-on' : undefined}
+            disabled={!scopeReady}
+            onClick={() => scopeReady && goLandscape()}
+          >
+            2 · Landscape 6Cs
+          </button>
+          {isJourneyMode && activeC ? (
+            <>
+              <span aria-hidden="true">/</span>
+              <button
+                type="button"
+                className={
+                  step === 'category' || step === 'c-analysis' || step === 'c-stub' || step === 'analytic'
+                    ? 'is-on'
+                    : undefined
+                }
+                onClick={() => openC(activeC)}
+              >
+                {activeC.label}
+              </button>
+            </>
+          ) : null}
+          {isJourneyMode && step === 'analytic' && analytic ? (
+            <>
+              <span aria-hidden="true">/</span>
+              <span className="lj-crumbs__now">{analytic.title}</span>
+            </>
+          ) : null}
+          {isPageMode ? (
+            <>
+              <span aria-hidden="true">/</span>
+              <span className="lj-crumbs__now">One page</span>
+            </>
+          ) : null}
+        </nav>
+        {pastScope ? (
+          <div className="lj-modes" role="group" aria-label="Browse mode">
             <button
               type="button"
-              className={
-                step === 'category' || step === 'c-analysis' || step === 'c-stub' || step === 'analytic'
-                  ? 'is-on'
-                  : undefined
-              }
-              onClick={() => openC(activeC)}
+              className={`lj-mode${browseMode === 'journey' ? ' is-on' : ''}`}
+              aria-pressed={browseMode === 'journey'}
+              onClick={() => changeBrowseMode('journey')}
             >
-              {activeC.label}
+              Journey
             </button>
-          </>
+            <button
+              type="button"
+              className={`lj-mode${browseMode === 'page' ? ' is-on' : ''}`}
+              aria-pressed={browseMode === 'page'}
+              onClick={() => changeBrowseMode('page')}
+            >
+              One page
+            </button>
+          </div>
         ) : null}
-        {step === 'analytic' && analytic ? (
-          <>
-            <span aria-hidden="true">/</span>
-            <span className="lj-crumbs__now">{analytic.title}</span>
-          </>
-        ) : null}
-      </nav>
+      </div>
 
       {showBrandPanel ? (
         <section className="lj-brand lj-brand--lines" aria-label="Selected brand">
@@ -272,6 +367,27 @@ export function LandscapeJourney() {
             ))}
           </ul>
         </section>
+      ) : null}
+
+      {isPageMode ? (
+        <nav className="lj-jump" aria-label="Jump to Landscape C">
+          <p className="lj-jump__lede">Jump to a C. Full Landscape stays on one scroll.</p>
+          <div className="lj-jump__tabs" role="tablist">
+            {LANDSCAPE_6CS.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="tab"
+                aria-selected={pageJumpCId === c.id}
+                className={`lj-jump__tab${pageJumpCId === c.id ? ' is-active' : ''}${c.status === 'stub' ? ' is-stub' : ''}`}
+                onClick={() => jumpToC(c)}
+              >
+                {c.label}
+                <StatusPill status={c.status} />
+              </button>
+            ))}
+          </div>
+        </nav>
       ) : null}
 
       {step === 'scope' ? (
@@ -325,7 +441,65 @@ export function LandscapeJourney() {
         </section>
       ) : null}
 
-      {step === 'landscape' ? (
+      {isPageMode ? (
+        <div className="lj-page" aria-label="Landscape one page">
+          <section className="lj-page__sec" id="lj-jump-category" aria-labelledby="lj-page-cat-title">
+            <header className="lj-page__head">
+              <p className="lj-eyebrow">Bain Category · live Sirius</p>
+              <h2 id="lj-page-cat-title">Category · Segment Share &amp; White Space</h2>
+              <p>Kirill pack under Category. Other Discover analytics stay Coming soon.</p>
+            </header>
+            <div className="lj-analytic-story">
+              <M360MarketStoryV5 includeTb4l003 analyticPack="segment-share-white-space" />
+            </div>
+          </section>
+
+          <section className="lj-page__sec" id="lj-jump-customer" aria-labelledby="lj-page-cust-title">
+            <header className="lj-page__head">
+              <p className="lj-eyebrow">Bain Customer / Channel · live Sirius</p>
+              <h2 id="lj-page-cust-title">Customer / Channel</h2>
+              <p>Channel mix, growth drivers, and movers in Pharmacies and E-commerce.</p>
+            </header>
+            <div className="lj-analytic-story">
+              <M360MarketStoryV5 includeTb4l003 focusCId="customers" />
+            </div>
+          </section>
+
+          <section className="lj-page__sec" id="lj-jump-competitor" aria-labelledby="lj-page-comp-title">
+            <header className="lj-page__head">
+              <p className="lj-eyebrow">Bain Competition · live Sirius</p>
+              <h2 id="lj-page-comp-title">Competition</h2>
+              <p>Who leads the set and each need-state, plus Classic vs Advance on IBS.</p>
+            </header>
+            <div className="lj-analytic-story">
+              <M360MarketStoryV5 includeTb4l003 focusCId="competition" />
+            </div>
+          </section>
+
+          {LANDSCAPE_6CS.filter((c) => c.openAs === 'stub').map((c) => (
+            <section
+              key={c.id}
+              className="lj-page__sec lj-page__sec--stub"
+              id={PAGE_JUMP_ID[c.id]}
+              aria-labelledby={`lj-page-stub-${c.id}`}
+            >
+              <header className="lj-page__head">
+                <p className="lj-eyebrow">Bain Landscape · {c.label}</p>
+                <h2 id={`lj-page-stub-${c.id}`}>{c.label}</h2>
+                <p>{c.blurb}</p>
+              </header>
+              <div className="lj-stub" role="note">
+                <p>
+                  <strong>Coming soon.</strong> Not in this Sirius sell-out extract — no analysis text until data
+                  exists.
+                </p>
+              </div>
+            </section>
+          ))}
+        </div>
+      ) : null}
+
+      {isJourneyMode && step === 'landscape' ? (
         <section className="lj-panel" aria-labelledby="lj-land-title">
           <header className="lj-panel__head">
             <p className="lj-eyebrow">Landscape Assessment</p>
@@ -370,7 +544,7 @@ export function LandscapeJourney() {
         </section>
       ) : null}
 
-      {step === 'category' ? (
+      {isJourneyMode && step === 'category' ? (
         <section className="lj-panel" aria-labelledby="lj-cat-title">
           <header className="lj-panel__head">
             <p className="lj-eyebrow">Bain Category · Discover analytics</p>
@@ -414,7 +588,7 @@ export function LandscapeJourney() {
         </section>
       ) : null}
 
-      {step === 'c-analysis' && activeC?.storyCId ? (
+      {isJourneyMode && step === 'c-analysis' && activeC?.storyCId ? (
         <section className="lj-analytic-view" aria-labelledby="lj-c-title">
           <header className="lj-analytic-view__bar">
             <div>
@@ -444,7 +618,7 @@ export function LandscapeJourney() {
         </section>
       ) : null}
 
-      {step === 'c-stub' && activeC ? (
+      {isJourneyMode && step === 'c-stub' && activeC ? (
         <section className="lj-panel" aria-labelledby="lj-stub-title">
           <header className="lj-panel__head">
             <p className="lj-eyebrow">Bain Landscape · {activeC.label}</p>
@@ -465,7 +639,7 @@ export function LandscapeJourney() {
         </section>
       ) : null}
 
-      {step === 'analytic' && analytic ? (
+      {isJourneyMode && step === 'analytic' && analytic ? (
         <section className="lj-analytic-view" aria-labelledby="lj-analytic-title">
           <header className="lj-analytic-view__bar">
             <div>

@@ -363,19 +363,21 @@ export function StoryWhoWinsAll() {
       {TB4L003_SEGMENTS.map((s) => {
         const rows = topSubBrandsForSegment(s.segment, 7);
         const maxShare = Math.max(...rows.map((r) => r.shareMatPct), 1);
+        const need = shortSegmentName(s.segment);
         return (
-          <article key={s.segment}>
+          <article key={s.segment} className="m360-tb4l-wins__group">
             <header className="m360-tb4l-wins__head">
+              <p className="m360-tb4l-wins__kicker">Need-state</p>
               <h4>
-                {shortSegmentName(s.segment)}
+                <span className="m360-tb4l-wins__need">{need}</span>
                 <span className="m360-tb4l-wins__head-meta">
                   <span className="m360-num is-key">{fmtM(s.valueMatM)}</span>
                   <span className={'m360-num ' + changeTone(s.growth1yPct)}>{fmtPct(s.growth1yPct)}</span>
                 </span>
               </h4>
               <div className="m360-tb4l-wins__cols" aria-hidden>
-                <span />
-                <span />
+                <span>Brand</span>
+                <span>Share of need-state</span>
                 <span>Share</span>
                 <span>Sales Δ</span>
                 <span>EVI</span>
@@ -398,7 +400,7 @@ export function StoryWhoWinsAll() {
                         color,
                         title: r.isBayer ? `${r.label} (Bayer)` : r.label,
                         lines: [
-                          shortSegmentName(s.segment),
+                          need,
                           `Share of need-state  ${fmtShare(r.shareMatPct)}`,
                           `Sales vs last year  ${fmtPct(r.growth1yPct)}`,
                           `Relative growth (EVI)  ${ei != null ? Math.round(ei) : 'N/A'} (100 = in line)`,

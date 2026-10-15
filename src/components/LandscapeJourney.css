@@ -8,6 +8,14 @@
   color: var(--text-primary);
 }
 
+.lj-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
 .lj-crumbs {
   display: flex;
   flex-wrap: wrap;
@@ -15,6 +23,121 @@
   gap: 8px 10px;
   font-size: 12px;
   color: var(--text-muted);
+}
+
+.lj-modes {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  gap: 2px;
+}
+
+.lj-mode {
+  margin: 0;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.lj-mode:hover {
+  color: var(--text-primary);
+}
+
+.lj-mode.is-on {
+  background: color-mix(in srgb, var(--lj-accent) 14%, var(--bg-main));
+  color: var(--lj-accent);
+  font-weight: 750;
+}
+
+.lj-jump {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  padding: 12px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg, 14px);
+  background: color-mix(in srgb, var(--bg-elevated) 88%, var(--bg-main));
+  backdrop-filter: blur(8px);
+}
+
+.lj-jump__lede {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.lj-jump__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lj-jump__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.lj-jump__tab:hover {
+  border-color: color-mix(in srgb, var(--lj-accent) 40%, var(--border-default));
+}
+
+.lj-jump__tab.is-active {
+  border-color: var(--lj-accent);
+  background: color-mix(in srgb, var(--lj-accent) 10%, var(--bg-main));
+  font-weight: 750;
+}
+
+.lj-jump__tab.is-stub:not(.is-active) {
+  opacity: 0.78;
+}
+
+.lj-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.lj-page__sec {
+  scroll-margin-top: 88px;
+  padding: 18px 18px 20px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg, 14px);
+  background: var(--bg-main);
+}
+
+.lj-page__head {
+  margin-bottom: 16px;
+}
+
+.lj-page__head h2 {
+  margin: 0 0 6px;
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  letter-spacing: -0.02em;
+}
+
+.lj-page__head p {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
 }
 
 .lj-crumbs button {
