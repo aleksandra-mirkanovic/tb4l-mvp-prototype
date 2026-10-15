@@ -5,6 +5,7 @@
  *   - AI Assistant v3 → false (Bain-logic story without Kirill blocks)
  *   - AI Assistant v4 → true (Kirill blocks; reading layout via includeTb4l003 split)
  *   - AI Assistant v5 → true on M360MarketStoryV5 (6Cs + Category analytics)
+ *   - AI Assistant v6 → LandscapeJourney; SSWS via analyticPack on M360MarketStoryV5
  *
  * Blocks: mekko, growth×share, scorecard, who-wins-all, KPI extras, candidates.
  * S1–S4 codes stay in Technical appendix / TB4L-003 tab.

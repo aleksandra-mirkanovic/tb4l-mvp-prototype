@@ -25,6 +25,10 @@ export function AppFooter() {
           <Link className="app-footer__link" to="/ai-assistant-v5/market">
             AI Assistant v5
           </Link>
+          {' · '}
+          <Link className="app-footer__link" to="/ai-assistant-v6/market">
+            AI Assistant v6
+          </Link>
           — Brand manager report
         </p>
         <div className="app-footer__meta">

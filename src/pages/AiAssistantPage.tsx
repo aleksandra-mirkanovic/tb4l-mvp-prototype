@@ -5,6 +5,7 @@ import { FinanceMcpAudit } from '../components/FinanceMcpAudit';
 import { M360MarketStory } from '../components/M360MarketStory';
 import { M360MarketStoryV3 } from '../components/M360MarketStoryV3';
 import { M360MarketStoryV4 } from '../components/M360MarketStoryV4';
+import { LandscapeJourney } from '../components/LandscapeJourney';
 import { M360MarketStoryV5 } from '../components/M360MarketStoryV5';
 import { M360Report } from '../components/M360Report';
 import { SiriusTip, type SiriusTable } from '../components/SiriusTip';
@@ -132,9 +133,10 @@ function PromptBlock({ prompt }: { prompt: ReplicationPrompt }) {
   );
 }
 
-export type AiAssistantVariant = 'classic' | 'v2' | 'v3' | 'v4' | 'v5';
+export type AiAssistantVariant = 'classic' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6';
 
 function assistantBase(variant: AiAssistantVariant): string {
+  if (variant === 'v6') return '/ai-assistant-v6';
   if (variant === 'v5') return '/ai-assistant-v5';
   if (variant === 'v4') return '/ai-assistant-v4';
   if (variant === 'v3') return '/ai-assistant-v3';
@@ -163,7 +165,8 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
   const isV3 = variant === 'v3';
   const isV4 = variant === 'v4';
   const isV5 = variant === 'v5';
-  const isV3Plus = isV3 || isV4 || isV5;
+  const isV6 = variant === 'v6';
+  const isV3Plus = isV3 || isV4 || isV5 || isV6;
   const isStory = isV2 || isV3Plus;
   const activeCGroup = focusCId ? M360_C_GROUPS.find((g) => g.cId === focusCId) ?? null : null;
   const activeCategoryAnalytic =
@@ -212,96 +215,102 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
 
   return (
     <div
-      className={`ai-assistant-page ai-assistant-page--tables${isV2 ? ' ai-assistant-page--v2' : ''}${isV3 ? ' ai-assistant-page--v3' : ''}${isV4 ? ' ai-assistant-page--v4' : ''}${isV5 ? ' ai-assistant-page--v5' : ''}`}
+      className={`ai-assistant-page ai-assistant-page--tables${isV2 ? ' ai-assistant-page--v2' : ''}${isV3 ? ' ai-assistant-page--v3' : ''}${isV4 ? ' ai-assistant-page--v4' : ''}${isV5 ? ' ai-assistant-page--v5' : ''}${isV6 ? ' ai-assistant-page--v6' : ''}`}
     >
-      <header className="ai-assistant-hero">
-        <div className="ai-assistant-hero__copy">
-          <p className="ai-assistant-hero__eyebrow">
-            {view === 'tb4l-003'
-              ? 'Discover analytic · TB4L-003 building block'
-              : isV3Plus || isV2
-                ? 'Brand manager report · story redesign'
-                : 'Brand manager report'}
-          </p>
-          <h1 className="page-title">
-            {isV5
-              ? 'AI Assistant v5'
-              : isV4
-                ? 'AI Assistant v4'
-                : isV3
-                  ? 'AI Assistant v3'
-                  : isV2
-                    ? 'AI Assistant v2'
-                    : 'AI Assistant'}
-          </h1>
-          <p className="page-subtitle">
-            {view === 'tb4l-003'
-              ? 'Segment Share and White Space — fixed layout from TB4L-003 v0.2. Same Sirius MAT extract as Market; scenario codes S1–S4 / U0; review only, not recommendations.'
-              : view === 'market'
-                ? isV5
-                  ? 'Market window · sell-out, latest 12 months. Bain Landscape 6Cs (Category, Customers, Competition, Consumers, Convincers, Culture).'
-                  : isV3Plus
-                    ? 'Market window · sell-out, latest 12 months. Bain-logic drill-down from category to brand and channel.'
+      {!isV6 ? (
+        <header className="ai-assistant-hero">
+          <div className="ai-assistant-hero__copy">
+            <p className="ai-assistant-hero__eyebrow">
+              {view === 'tb4l-003'
+                ? 'Discover analytic · TB4L-003 building block'
+                : isV3Plus || isV2
+                  ? 'Brand manager report · story redesign'
+                  : 'Brand manager report'}
+            </p>
+            <h1 className="page-title">
+              {isV5
+                ? 'AI Assistant v5'
+                : isV4
+                  ? 'AI Assistant v4'
+                  : isV3
+                    ? 'AI Assistant v3'
                     : isV2
-                      ? 'Same Sirius and COPA clocks as AI Assistant. Market follows a Bain-logic drill-down; finance is unchanged. Compare side by side with the classic tab.'
-                      : 'Two windows. Market is Sirius sell-out for the latest 12 months. Finance is internal COPA for calendar 2025 versus 2024. Prompt one window at a time — the clocks are different.'
-                : isStory
-                  ? 'Finance window · internal COPA, calendar 2025 versus 2024. Same finance pack as classic; compare side by side with the classic tab.'
-                  : 'Finance window · internal COPA for calendar 2025 versus 2024. Prompt this window separately from Market — the clocks are different.'}
-          </p>
-        </div>
-        <dl className="ai-assistant-params">
-          <div>
-            <dt>Country</dt>
-            <dd>{p.country}</dd>
+                      ? 'AI Assistant v2'
+                      : 'AI Assistant'}
+            </h1>
+            <p className="page-subtitle">
+              {view === 'tb4l-003'
+                ? 'Segment Share and White Space — fixed layout from TB4L-003 v0.2. Same Sirius MAT extract as Market; scenario codes S1–S4 / U0; review only, not recommendations.'
+                : view === 'market'
+                  ? isV5
+                    ? 'Market window · sell-out, latest 12 months. Bain Landscape 6Cs (Category, Customers, Competition, Consumers, Convincers, Culture).'
+                    : isV3Plus
+                      ? 'Market window · sell-out, latest 12 months. Bain-logic drill-down from category to brand and channel.'
+                      : isV2
+                        ? 'Same Sirius and COPA clocks as AI Assistant. Market follows a Bain-logic drill-down; finance is unchanged. Compare side by side with the classic tab.'
+                        : 'Two windows. Market is Sirius sell-out for the latest 12 months. Finance is internal COPA for calendar 2025 versus 2024. Prompt one window at a time — the clocks are different.'
+                  : isStory
+                    ? 'Finance window · internal COPA, calendar 2025 versus 2024. Same finance pack as classic; compare side by side with the classic tab.'
+                    : 'Finance window · internal COPA for calendar 2025 versus 2024. Prompt this window separately from Market — the clocks are different.'}
+            </p>
           </div>
-          <div>
-            <dt>Category</dt>
-            <dd>{p.category}</dd>
-          </div>
-          <div>
-            <dt>Competitive set</dt>
-            <dd>Iberogast</dd>
-          </div>
-          <div>
-            <dt>Currency</dt>
-            <dd>{p.currency}</dd>
-          </div>
-        </dl>
-      </header>
+          <dl className="ai-assistant-params">
+            <div>
+              <dt>Country</dt>
+              <dd>{p.country}</dd>
+            </div>
+            <div>
+              <dt>Category</dt>
+              <dd>{p.category}</dd>
+            </div>
+            <div>
+              <dt>Competitive set</dt>
+              <dd>Iberogast</dd>
+            </div>
+            <div>
+              <dt>Currency</dt>
+              <dd>{p.currency}</dd>
+            </div>
+          </dl>
+        </header>
+      ) : null}
 
-      <nav className="ai-windows" aria-label="Data windows">
-        <NavLink
-          to={`${base}/market`}
-          className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
-        >
-          Market window
-          <span>{isV3Plus ? 'Sell-out · latest 12 months' : 'Sirius · latest 12 months'}</span>
-        </NavLink>
-        <NavLink
-          to={`${base}/tb4l-003`}
-          className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
-        >
-          TB4L-003
-          <span>Segment share & white space</span>
-        </NavLink>
-        <NavLink
-          to={`${base}/finance`}
-          className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
-        >
-          Finance window
-          <span>COPA · calendar 2025 vs 2024</span>
-        </NavLink>
-      </nav>
+      {!isV6 ? (
+        <nav className="ai-windows" aria-label="Data windows">
+          <NavLink
+            to={`${base}/market`}
+            className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
+          >
+            Market window
+            <span>{isV3Plus ? 'Sell-out · latest 12 months' : 'Sirius · latest 12 months'}</span>
+          </NavLink>
+          <NavLink
+            to={`${base}/tb4l-003`}
+            className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
+          >
+            TB4L-003
+            <span>Segment share & white space</span>
+          </NavLink>
+          <NavLink
+            to={`${base}/finance`}
+            className={({ isActive }) => `ai-windows__tab${isActive ? ' is-active' : ''}`}
+          >
+            Finance window
+            <span>COPA · calendar 2025 vs 2024</span>
+          </NavLink>
+        </nav>
+      ) : null}
 
       {view === 'market' ? (
         <section className="ai-window" aria-label="Market window">
-          <header className="ai-window__bar">
-            <p className="ai-window__title">Market{isStory ? ' · story' : ''}</p>
-            <p className="ai-window__meta">
-              {p.country} {p.category} · Iberogast competitive set · MAT ending {m.latest_actual_month}
-            </p>
-          </header>
+          {!isV6 ? (
+            <header className="ai-window__bar">
+              <p className="ai-window__title">Market{isStory ? ' · story' : ''}</p>
+              <p className="ai-window__meta">
+                {p.country} {p.category} · Iberogast competitive set · MAT ending {m.latest_actual_month}
+              </p>
+            </header>
+          ) : null}
           {isV5 ? (
             <div className="ai-c-nav ai-c-nav--in-window" aria-label="Bain Landscape 6Cs">
               <p className="ai-c-nav__lede">
@@ -376,7 +385,9 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
             </div>
           ) : null}
           <div className="ai-window__body">
-            {isV5 && showKirillSegmentShare ? (
+            {isV6 ? (
+              <LandscapeJourney />
+            ) : isV5 && showKirillSegmentShare ? (
               <div className="ai-category-analytic" id="story-category">
                 <header className="ai-category-analytic__head">
                   <p className="ai-category-analytic__kicker">Category · TB4L-003</p>
@@ -450,7 +461,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
         </section>
       )}
 
-      {view === 'finance' ? (
+      {!isV6 && view === 'finance' ? (
       <details className="ai-raw">
         <summary>Technical appendix — finance</summary>
         <p className="ai-raw__lede">
@@ -570,7 +581,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
           </ul>
         </details>
       </details>
-      ) : view === 'market' ? (
+      ) : !isV6 && view === 'market' ? (
       <details className="ai-raw">
         <summary>Technical appendix — formulas, gaps, prompts, Sirius tables</summary>
         <p className="ai-raw__lede">
@@ -739,7 +750,7 @@ export function AiAssistantPage({ variant = 'classic' }: { variant?: AiAssistant
               <b>Channel grain still missing</b> — no customer / retailer grain; no drugstore or grocery for
               Germany. Pharmacies + E-commerce (Mail Order) totals, price/volume drivers, and top-brand dynamics
               are in the extract and shown in AI Assistant{' '}
-              {isV5 ? 'v5' : isV4 ? 'v4' : isV3 ? 'v3' : 'v2'} · Channel dynamics (see T-ch / T-ch-b below).
+              {isV6 ? 'v6' : isV5 ? 'v5' : isV4 ? 'v4' : isV3 ? 'v3' : 'v2'} · Channel dynamics (see T-ch / T-ch-b below).
             </li>
             <li>
               <b>Innovation bubble</b> — N/A

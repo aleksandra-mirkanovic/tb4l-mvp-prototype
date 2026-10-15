@@ -1215,14 +1215,28 @@ export function M360MarketStoryV5({
   includeTb4l003 = true,
   readingBeside = false,
   focusCId = null,
+  focusCIds = null,
+  analyticPack = null,
 }: {
   includeTb4l003?: boolean;
   /** When true, reading panel beside the chart; leave false for stacked under chart. */
   readingBeside?: boolean;
   /** Bain Landscape C id — when set, only that C’s analysis is shown. null = full story. */
   focusCId?: string | null;
+  /** Prefer over focusCId when several Cs belong to one analytic. */
+  focusCIds?: string[] | null;
+  /**
+   * Kirill Category pack under Bain Category → Segment Share & White Space.
+   * Mekko, growth × share, who wins, scorecard, candidates (POS proxy).
+   */
+  analyticPack?: 'segment-share-white-space' | null;
 } = {}) {
-  const showC = (cId: string) => focusCId == null || focusCId === cId;
+  const sswsPack = analyticPack === 'segment-share-white-space';
+  const showC = (cId: string) => {
+    if (sswsPack) return false;
+    if (focusCIds?.length) return focusCIds.includes(cId);
+    return focusCId == null || focusCId === cId;
+  };
   const cat = CALC_CATEGORY;
   const p = M360_RETRIEVAL_PARAMS;
   const m = M360_METADATA;
@@ -1640,6 +1654,77 @@ export function M360MarketStoryV5({
         {p.country} {p.category} · Iberogast competitive set · {fmtMatWindow(m.mat_start, m.mat_end)}
       </p>
       <ChartColorLegend />
+
+      {sswsPack ? (
+        <StorySection
+          id="story-ssws"
+          title="Category · Segment Share and White Space"
+          lede="Kirill TB4L-003 pack under Bain Category: how need-states are structured, where Bayer plays, who wins inside each, and white-space / share-loss candidates. v3-style interpretation under each chart — review only."
+        >
+          <StoryBand
+            viz={
+              <ChartCard
+                id="ch-structure-mekko"
+                wide
+                title="Market structure"
+                caption="Wider column = bigger need-state. Deeper slate in the column = Bayer’s share; lighter = competitors."
+              >
+                <StoryMekkoChart />
+              </ChartCard>
+            }
+            {...tb4lAx.structure}
+          />
+          <StoryBand
+            viz={
+              <ChartCard
+                id="ch-growth-share"
+                wide
+                title="Growth × Bayer share"
+                caption="Right = growing faster than the category; up = higher Bayer share. Bubble size = need-state sales. Soft amber lower-right = white space (fast growth, Bayer under 3%)."
+              >
+                <StoryGrowthShareBubble />
+              </ChartCard>
+            }
+            {...tb4lAx.growthShare}
+          />
+          <StoryBand
+            viz={
+              <ChartCard
+                id="ch-who-wins-all"
+                wide
+                title="Who wins inside each need-state"
+                caption="Kirill chart 3 (also lives under Competition). Longer bar = share of that need-state. Bayer = deeper slate."
+              >
+                <StoryWhoWinsAll />
+              </ChartCard>
+            }
+            {...tb4lAx.whoWinsAll}
+          />
+          <StoryBand
+            viz={
+              <ChartCard
+                id="ch-segment-scorecard"
+                wide
+                title="Segment scorecard"
+                caption="One row per need-state: size, growth, gap vs the category, Bayer stake, and the job in plain words."
+              >
+                <StorySegmentScorecard />
+              </ChartCard>
+            }
+            {...tb4lAx.scorecard}
+          />
+          <div id="story-candidates" className="m360-story-band is-stacked">
+            <div className="m360-story-band__viz">
+              <h3 className="m360-story-subhead">Preliminary opportunities · candidates</h3>
+              <p className="m360-rep__lede m360-rep__lede--nested">
+                POS proxy flags from structure (white space / near-miss / share loss in growth). Not sized consumer
+                briefs — full Consumer C needs panel / demand space.
+              </p>
+              <StoryCandidateOpportunities />
+            </div>
+          </div>
+        </StorySection>
+      ) : null}
 
       {showC('exec') ? (
         <div id="story-exec" className="m360-story-sec m360-story-sec--exec">
